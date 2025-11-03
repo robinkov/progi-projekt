@@ -1,7 +1,9 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+import os
+from dotenv import load_dotenv
 
-db = SQLAlchemy()
+load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
@@ -9,9 +11,9 @@ def create_app():
     
     app.config.from_object("config.Config")
 
-    db.init_app(app)
+    app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
     
-    from .routes.user import user
-    app.register_blueprint(user)
+    from .routes.auth import user_bp
+    app.register_blueprint(user_bp)
     
     return app
