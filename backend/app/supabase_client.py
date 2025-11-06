@@ -7,4 +7,7 @@ load_dotenv()
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
+if SUPABASE_URL is None or SUPABASE_KEY is None:
+  raise Exception("Some environment variables are missing")
+
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
