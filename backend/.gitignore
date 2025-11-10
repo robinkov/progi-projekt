@@ -1,0 +1,48 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secret files
+.env
+.env.*
+*.key
+*.pem
+
+# Flask instance / logs
+instance/
+*.log
+logs/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Type checkers / caches
+.mypy_cache/
+.pytype/
+.pyre/
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Databases
+*.db
+*.sqlite
