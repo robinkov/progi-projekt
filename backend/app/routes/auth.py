@@ -11,51 +11,43 @@ def register():
     first_name = data.get("first_name")
     last_name = data.get("last_name")
     email = data.get("email")
-    password = data.get("password")
+    password = data.get("password")  
     role = data.get("role")
 
-    if not email or not password:
-        return jsonify({"message": "Email and password are required", "valid" : False}), 400
-    
-    if not role:
-        return jsonify({"message": "Role is required", "valid": False}), 400
-    
+    if not email or not role:
+        return jsonify({"message": "Email and role are required", "valid": False}), 400
+
     if not first_name or not last_name:
         return jsonify({"message": "First name and last name are required", "valid": False}), 400
 
     try:
-
-        existing = supabase.table("users").select("*").eq("mail", email).execute()
-        if existing.data:
-            return jsonify({"message": "User already exists with this email", "valid" : False}), 400
         
-        auth_response = supabase.auth.sign_up({
-            "email": email,
-            "password": password
-        })
+        existing = supabase.table("users").select("*").eq("mail", email).execute()
 
-        supabase.table("users").insert({
-            "mail": email,
-            "first_name" : first_name,
-            "last_name" : last_name
-        }).execute()
+    
+        auth_response = supabase.auth.sign_up({"email": email, "password": password})
+         
 
-        user_response = supabase.from_("users").select("*").eq("mail", email).single().execute()
+        
+        if not existing.data:
+            supabase.table("users").insert({
+                "mail": email,
+                "first_name": first_name,
+                "last_name": last_name
+            }).execute()
+
+        user_response = supabase.table("users").select("*").eq("mail", email).single().execute()
         user_id = user_response.data["id"]
 
-        if role in ["organizer", "participant"]:
-            if role == "organizer":
-                supabase.table("organizers").insert({
-                    "user_id": user_id,
-                    "profile_name": f"{first_name} {last_name}",
-                    "approved_by_admin": False
-                }).execute()
-            
-            else:
-                supabase.table("participants").insert({
-                    "user_id": user_id
-                }).execute()
-
+       
+        if role == "organizer":
+            supabase.table("organizers").insert({
+                "user_id": user_id,
+                "profile_name": f"{first_name} {last_name}",
+                "approved_by_admin": False
+            }).execute()
+        elif role == "participant":
+            supabase.table("participants").insert({"user_id": user_id}).execute()
         else:
             return jsonify({"message": "Role is not valid", "valid": False})
 
@@ -65,13 +57,15 @@ def register():
                 "first_name": first_name,
                 "last_name": last_name,
                 "mail": email,
-                "access_token": auth_response.session.access_token
+                "access_token": auth_response.session.access_token if auth_response else None
             },
-            "valid" : True
+            "valid": True
         }), 201
 
     except Exception as e:
-        return jsonify({"message": "Failed to register user", "valid" : False}), 400
+        return jsonify({"message": f"Failed to register user: {str(e)}", "valid": False}), 400
+
+
 
 @user_bp.route("/login", methods=["POST"])
 def login():
@@ -200,16 +194,20 @@ def google_callback():
 
 
             if role == "organizer":
-                supabase.table("organizers").insert({
-                    "user_id": user_id,
-                    "profile_name": f"{user_response.data['first_name']} {user_response.data['last_name']}",
-                    "approved_by_admin": False
-                }).execute()
+                existing = supabase.table("organizers").select("*").eq("user_id", user_id).execute()
+                if not existing:
+                    supabase.table("organizers").insert({
+                        "user_id": user_id,
+                        "profile_name": f"{user_response.data['first_name']} {user_response.data['last_name']}",
+                        "approved_by_admin": False
+                    }).execute()
                 role_data = supabase.table("organizers").select("membership_plan_id, membership_expiry_date, profile_name, logo_photo_id, banner_photo_id, description, approved_by_admin").eq("user_id", user_id).execute()
             else:
-                supabase.table("participants").insert({
-                    "user_id": user_id
-                }).execute()
+                existing = supabase.table("participants").select("*").eq("user_id", user_id).execute()
+                if not existing:
+                    supabase.table("participants").insert({
+                        "user_id": user_id
+                    }).execute()
 
 
 
