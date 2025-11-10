@@ -14,6 +14,8 @@ def create_app():
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
     
     from .routes.auth import user_bp
+    from .routes.main_routes import main_bp
     app.register_blueprint(user_bp)
-    
+    app.register_blueprint(main_bp)
+
     return app
