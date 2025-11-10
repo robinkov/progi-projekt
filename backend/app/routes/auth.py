@@ -162,7 +162,7 @@ def google_login():
 @user_bp.route("/auth/google/callback")
 def google_callback():
     code = request.args.get("code")
-    
+    role = request.args.get("role")
     if not code:
         return jsonify({"message": "Missing authorization code", "valid": False}), 400
 
@@ -217,34 +217,12 @@ def google_callback():
             "access_token": session_response.session.access_token,
             "message": "Google login successful",
             "user": user_dict,
-            "valid": True,
-            "role_data": role_data if role_data else ""
+            "valid": True
         })
 
     except Exception as e:
         return jsonify({"message": str(e), "valid": False})
 
-
-@user_bp.route("/register/github")
-def register_github():
-
-    try:
-        role = request.args.get("role")
-
-        if not role:
-            return jsonify({"message": "Please choose a role (organizer or participant)", "valid": False}), 400
-
-        redirect_url = request.host_url.rstrip("/") + f"/auth/github/callback?role={role}"
-
-        url = supabase.auth.sign_in_with_oauth({
-            "provider": "github",
-            "options": {"redirect_to": redirect_url}
-        })
-
-        return redirect(url.url)
-
-    except Exception as e:
-        return jsonify({"message": str(e), "valid": False}), 400
 
 
 @user_bp.route("/login/github")
@@ -331,7 +309,6 @@ def github_callback():
             "user": {
                 "email": email,
             },
-            "role_data": role_data or {},
             "valid": True
         }), 200
 
