@@ -32,7 +32,8 @@ def register():
             supabase.table("users").insert({
                 "mail": email,
                 "first_name": first_name,
-                "last_name": last_name
+                "last_name": last_name,
+                "auth_id": auth_response.user.id
             }).execute()
 
         user_response = supabase.table("users").select("*").eq("mail", email).single().execute()
@@ -159,7 +160,8 @@ def google_callback():
             supabase.table("users").insert({
                 "mail": user.email,
                 "first_name": user.user_metadata.get("full_name", "").split(" ")[0] if user.user_metadata else "",
-                "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else ""
+                "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else "",
+                "auth_id": session_response.user.id
             }).execute()
 
 
@@ -218,7 +220,8 @@ def github_callback():
             supabase.table("users").insert({
                     "mail": user.email,
                     "first_name": user.user_metadata.get("full_name", "").split(" ")[0] if user.user_metadata else "",
-                    "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else ""
+                    "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else "",
+                    "auth_id": session_response.user.id
             }).execute()
 
 

@@ -3,7 +3,7 @@
 
 ## Rute AUTH
 
-### 🔹 1. `POST /register`
+### 1. `POST /register`
 
 **Opis:**  
 Registrira novog korisnika u Supabase Auth i upisuje podatke u tablicu `users`.
@@ -37,7 +37,7 @@ Registrira novog korisnika u Supabase Auth i upisuje podatke u tablicu `users`.
 `valid` - Govori nam jeli prosla registracija ako nije pise False obrnuto True
 
 
-### 🔹 2. `POST /login`
+### 2. `POST /login`
 
 **Tijelo zahtjeva (JSON):**
 ```json
@@ -65,7 +65,7 @@ Registrira novog korisnika u Supabase Auth i upisuje podatke u tablicu `users`.
 
 `valid` - Govori nam jeli prosla registracija ako nije pise False obrnuto True
 
-### 🔹 3. `POST /logout`
+### 3. `POST /logout`
 
 **Tijelo zahtjeva (JSON):**
 ```json
@@ -82,19 +82,19 @@ Registrira novog korisnika u Supabase Auth i upisuje podatke u tablicu `users`.
   "valid": true
 }
 ```
-### 4. 🔹 GET /login/google
+### 4. GET /login/google
 
 Opis: Pokreće prijavu putem Google OAuth — preusmjerava korisnika na Google auth stranicu.
 Napomena: Nema tijelo zahtjeva.
 Odgovor: HTTP redirect na Google login.
 
-### 5.🔹 GET /login/github
+### 5. GET /login/github
 
 Opis: Pokreće prijavu putem GitHub OAuth — preusmjerava korisnika na GitHub auth stranicu.
 Napomena: Nema tijelo zahtjeva.
 Odgovor: HTTP redirect na GitHub login.
 
-### 🔹 6. `GET /auth/google/callback`
+### 6. `GET /auth/google/callback`
 
 **Tijelo odgovora (JSON):**
 ```json

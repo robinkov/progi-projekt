@@ -15,7 +15,9 @@ def create_app():
     
     from .routes.auth import user_bp
     from .routes.main_routes import main_bp
+    from .routes.profile_management import profile_management_bp
     app.register_blueprint(user_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(profile_management_bp)
 
     return app
