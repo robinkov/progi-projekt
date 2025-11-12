@@ -1,237 +1,29 @@
-from flask import Blueprint, request, jsonify, redirect
-from ..supabase_client import supabase
-from dotenv import load_dotenv
+from flask import Blueprint, request, jsonify
+import os
+import requests
 
-load_dotenv()
 user_bp = Blueprint("user", __name__)
 
-@user_bp.route("/register", methods=["POST"])
-def register():
-    data = request.json
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
-    email = data.get("email")
-    password = data.get("password")  
+SUPA_VERIFY_URL = os.environ.get("SUPABASE_VERIFY_URL")
 
-    if not email or not password:
-        return jsonify({"message": "Email and password are required", "valid": False}), 400
+def verify_token(token):
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.get(SUPA_VERIFY_URL, headers=headers)
+    if res.status_code == 200:
+        return True, res.json() 
+    return False, None          
 
-    if not first_name or not last_name:
-        return jsonify({"message": "First name and last name are required", "valid": False}), 400
+@user_bp.route("/profile")
+def profile():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing token"}), 401
 
-    try:
-        
-        existing = supabase.table("users").select("*").eq("mail", email).execute()
+    token = auth_header.split(" ")[1]
+    valid, user_data = verify_token(token)
+    if not valid:
+        return jsonify({"error": "Unauthorized"}), 401
 
-    
-        auth_response = supabase.auth.sign_up({"email": email, "password": password})
-         
-
-        
-        if not existing.data:
-            supabase.table("users").insert({
-                "mail": email,
-                "first_name": first_name,
-                "last_name": last_name
-            }).execute()
-
-        user_response = supabase.table("users").select("*").eq("mail", email).single().execute()
-        user_id = user_response.data["id"]
+    return jsonify({"message": "Hello!", "user": user_data})
 
 
-        return jsonify({
-            "message": "User registered",
-            "user": {
-                "first_name": first_name,
-                "last_name": last_name,
-                "mail": email,
-                "access_token": auth_response.session.access_token if auth_response else None
-            },
-            "valid": True
-        }), 201
-
-    except Exception as e:
-        return jsonify({"message": f"Failed to register user: {str(e)}", "valid": False}), 400
-
-
-
-@user_bp.route("/login", methods=["POST"])
-def login():
-    data = request.json
-    email = data.get("email")
-    password = data.get("password")
-
-    if not email or not password:
-        return jsonify({"message": "Email and password are required", "valid" : False}), 400
-
-    try:
-        
-        auth_response = supabase.auth.sign_in_with_password({
-            "email": email,
-            "password": password
-        })
-
-        if auth_response.session is None:
-            return jsonify({"message": "Invalid credentials", "valid" : False}), 401
-
-        
-        user_data = supabase.table("users").select("first_name, last_name, mail").eq("mail", email).single().execute()
-        user = user_data.data
-
-
-        return jsonify({
-            "message": "Logged in successfully",
-            "user": {
-                "first_name": user["first_name"],
-                "last_name": user["last_name"],
-                "mail": user["mail"],
-                "access_token": auth_response.session.access_token,
-            },
-            "valid" : True
-        }), 200
-
-    except Exception as e:
-        return jsonify({"message": str(e), "valid" : False}), 400
-
-
-@user_bp.route("/logout", methods=["POST"])
-def logout():
-    data = request.json
-    access_token = data.get("access_token")
-
-    if not access_token:
-        return jsonify({"message": "Refresh token is required", "valid" : False}), 400
-
-    try:
-
-        supabase.auth.admin.sign_out(access_token)
-
-
-        return jsonify({"message": "Logged out successfully", "valid" : True}), 200
-    except Exception as e:
-        return jsonify({"message": str(e), "valid" : False}), 400
-    
-
-
-
-@user_bp.route("/login/google")
-def google_login():
-    try:
-        
-        redirect_url = request.host_url.rstrip("/") + ("/auth/google/callback")
-        
-        url = supabase.auth.sign_in_with_oauth({
-            "provider": "google",
-            "options": {
-                "redirect_to": redirect_url
-            }
-        })
-        return redirect(url.url)
-    except Exception as e:
-        return jsonify({"message": str(e), "valid": False}), 400
-
-
-
-
-@user_bp.route("/auth/google/callback")
-def google_callback():
-    code = request.args.get("code")
-    if not code:
-        return jsonify({"message": "Missing authorization code", "valid": False}), 400
-
-    try:
-        
-        params = {
-            "auth_code": code,
-        }
-
-        session_response = supabase.auth.exchange_code_for_session(params)
-        if not session_response.session:
-            return jsonify({"message": "Failed to exchange code", "valid": False}), 400
-
-
-        user = session_response.user
-
-        
-        existing = supabase.table("users").select("*").eq("mail", user.email).execute()
-        if not existing.data:
-            
-            supabase.table("users").insert({
-                "mail": user.email,
-                "first_name": user.user_metadata.get("full_name", "").split(" ")[0] if user.user_metadata else "",
-                "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else ""
-            }).execute()
-
-
-        return jsonify({
-            "message": "Google login successful",
-            "user": {
-                "mail": user.email,
-                "first_name": user.user_metadata.get("full_name", "").split(" ")[0] if user.user_metadata else "",
-                "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else "",
-                "access_token": session_response.session.access_token,
-            },
-            "valid": True
-        })
-
-    except Exception as e:
-        return jsonify({"message": str(e), "valid": False})
-
-
-
-@user_bp.route("/login/github")
-def login_github():
-    
-    try:
-        redirect_url = request.host_url.rstrip("/") + "/auth/github/callback"
-
-        url = supabase.auth.sign_in_with_oauth({
-            "provider": "github",
-            "options": {"redirect_to": redirect_url}
-        })
-
-        return redirect(url.url)
-
-    except Exception as e:
-        return jsonify({"message": str(e), "valid": False}), 400
-
-
-@user_bp.route("/auth/github/callback")
-def github_callback():
-    code = request.args.get("code")
-
-    if not code:
-        return jsonify({"message": "Missing authorization code", "valid": False}), 400
-
-    try:
-        session_response = supabase.auth.exchange_code_for_session({"auth_code": code})
-
-        if not session_response.session:
-            return jsonify({"message": "Failed to exchange authorization code", "valid": False}), 400
-
-        user = session_response.user
-        email = user.email
-
-        existing_user = supabase.table("users").select("*").eq("mail", email).execute()
-        if not existing_user.data:
-
-            supabase.table("users").insert({
-                    "mail": user.email,
-                    "first_name": user.user_metadata.get("full_name", "").split(" ")[0] if user.user_metadata else "",
-                    "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else ""
-            }).execute()
-
-
-        return jsonify({
-            "message": "Github login successful",
-            "user": {
-                "mail": user.email,
-                "first_name": user.user_metadata.get("full_name", "").split(" ")[0] if user.user_metadata else "",
-                "last_name": " ".join(user.user_metadata.get("full_name", "").split(" ")[1:]) if user.user_metadata else "",
-                "access_token": session_response.session.access_token,
-            },
-            "valid": True
-        })
-
-    except Exception as e:
-        return jsonify({"message": str(e), "valid": False}), 400

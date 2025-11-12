@@ -8,3 +8,4 @@ psycopg2-binary
 supabase
 requests
 gotrue
+CORS
