@@ -1,23 +1,13 @@
 import { Stack } from "expo-router";
-import { useEffect } from "react";
-import { StatusBar, useColorScheme } from "react-native";
-import { AuthProvider } from "@/components/context/AuthContext";
-import "./global.css";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import "react-native-reanimated";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
-  useEffect(() => {
-    StatusBar.setBarStyle('dark-content');
-  }, [colorScheme]);
-
   return (
-    <AuthProvider>
+    <SafeAreaProvider>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen
-          name="index"
-        />
+        <Stack.Screen name="index" />
       </Stack>
-    </AuthProvider>
+    </SafeAreaProvider>
   );
 }
