@@ -59,6 +59,15 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 > Sustav mora osigurati zaštitu podataka i kontrolu pristupa. <br />
 > Pristup određenim funkcionalnostima (npr. kreiranje radionica ili odobravanje korisnika) mora biti ograničen prema ulozi korisnika (korisnik, instruktor, administrator).<br />
 
+## ⚙️ Nefunkcijski zahtjevi
+> Sustav mora čuvati i osigurati sve podatke o korisnicima, instruktorima i administratorima. <br />
+> Aplikacija mora biti dostupna korisnicima 24 sata dnevno. <br />
+> Svi podaci o radionicama, izložbama, narudžbama i transakcijama moraju biti sigurno pohranjeni. <br />
+> Sustav mora omogućiti brz i pouzdan pristup informacijama bez dugog učitavanja. <br />
+> Korisničko sučelje mora biti jednostavno za korištenje i prilagođeno mobilnim uređajima. <br />
+> Aplikacija mora omogućiti jednostavno dodavanje novih funkcionalnosti bez potrebe za promjenom postojećih dijelova sustava. <br />
+> Svi osjetljivi podaci, poput lozinki i ključeva, moraju biti zaštićeni i pohranjeni izvan izvornog koda. <br />
+
 ## 🛠️Tehnologije
 | Sloj                    | Tehnologija                   |
 | ----------------------- | ----------------------------- |
