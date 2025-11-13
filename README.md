@@ -23,7 +23,7 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 > Prilikom registracije, korisnik mora unijeti ime, prezime, email adresu i lozinku. <br />
 > Nakon uspješne registracije, korisnik mora biti zapisan u bazu podataka te mu se mora omogućiti pristup sustavu. <br />
 > Aplikacija mora omogućiti prijavljenom korisniku pregled svih dostupnih radionica. <br />
-> Prilikom pregleda radionica, korisniku se moraju prikazati osnovne informacije o radionici, uključujući naslov, opis, vrijeme održavanja, trajanje, lokaciju, cijenu i broj > slobodnih mjesta. <br />
+> Prilikom pregleda radionica, korisniku se moraju prikazati osnovne informacije o radionici, uključujući naslov, opis, vrijeme održavanja, trajanje, lokaciju, cijenu i broj slobodnih mjesta. <br />
 > Korisnik mora moći pretraživati radionice po kriterijima poput naziva, lokacije, instruktora i datuma održavanja. <br />
 > Aplikacija mora omogućiti korisniku rezervaciju mjesta na odabranoj radionici. <br />
 > Prilikom rezervacije, aplikacija mora pohraniti poveznicu između korisnika i radionice u tablicu rezervacija. <br />
