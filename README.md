@@ -13,6 +13,23 @@ ClayPlay je mobilna i web aplikacija namijenjena svima koji se žele baviti kera
 Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetnosti keramike kroz pristupačno i intuitivno korisničko iskustvo. ClayPlay spaja funkcionalnost, estetiku i zajednicu – stvarajući prostor u kojem ljubitelji keramike mogu učiti, surađivati i inspirirati jedni druge.
 
 ## ⚡Funkcijski zahtjevi
+> 👤 Korisnik<br />
+> Aplikacija mora omogućiti korisniku registraciju i prijavu putem email adrese i lozinke. <br />
+> Prilikom registracije, korisnik mora unijeti ime, prezime, email adresu i lozinku. <br />
+> Nakon uspješne registracije, korisnik mora biti zapisan u bazu podataka te mu se mora omogućiti pristup sustavu. <br />
+> Aplikacija mora omogućiti prijavljenom korisniku pregled svih dostupnih radionica. <br />
+> Prilikom pregleda radionica, korisniku se moraju prikazati osnovne informacije o radionici, uključujući naslov, opis, vrijeme održavanja, trajanje, lokaciju, cijenu i broj > slobodnih mjesta. <br />
+> Korisnik mora moći pretraživati radionice po kriterijima poput naziva, lokacije, instruktora i datuma održavanja. <br />
+> Aplikacija mora omogućiti korisniku rezervaciju mjesta na odabranoj radionici. <br />
+> Prilikom rezervacije, aplikacija mora pohraniti poveznicu između korisnika i radionice u tablicu rezervacija. <br />
+> Korisnik mora moći pregledati sve svoje rezervacije te otkazati postojeću rezervaciju prije početka radionice. <br />
+> Aplikacija mora omogućiti korisniku pregled izložbi i proizvoda koji su dostupni za kupnju. <br />
+> Korisnik mora moći odabrati proizvod, dodati ga u narudžbu te izvršiti kupnju. <br />
+> Nakon potvrde narudžbe, transakcija mora biti pohranjena u bazu podataka zajedno s podacima o metodi plaćanja i vremenu kupnje. <br />
+> Aplikacija mora omogućiti korisniku ostavljanje recenzije za kupljeni proizvod. <br />
+> Recenzija mora sadržavati ocjenu (1–5) i tekstualni komentar te se mora povezati s proizvodom i korisnikom koji ju je napisao. <br />
+> Aplikacija mora omogućiti korisniku pretplatu na obavijesti. <br />
+> Sustav mora voditi evidenciju o pročitanim i nepročitanim obavijestima za svakog korisnika. <br />
 
 ## 🛠️Tehnologije
 
