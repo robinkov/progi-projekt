@@ -3,7 +3,7 @@
 
 ## Rute AUTH
 
-### 🔹 1. `GET /register`
+### 🔹 1. `GET /profile`
 
 **Opis:**  
 Verificira JWT token
