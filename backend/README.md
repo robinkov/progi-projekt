@@ -3,7 +3,7 @@
 
 ## Rute AUTH
 
-### 🔹 1. `GET /profile`
+### 🔹 1. `GET /api/profile`
 
 **Opis:**  
 Verificira JWT token
