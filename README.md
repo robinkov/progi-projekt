@@ -1,5 +1,10 @@
 # ClayPlay
 
+## 🧑‍💼 Administrator
+Administrator ima ovlasti nad upravljanjem korisnicima i instruktorima unutar sustava ClayPlay.
+Njegova uloga uključuje odobravanje novih instruktora prije nego što mogu objavljivati radionice ili izložbe te praćenje i održavanje pravilnog rada sustava. Administrator može pregledavati i nadzirati transakcije, članarine instruktora te slati obavijesti korisnicima.
+Uloga administratora ključna je za održavanje sigurnosti, pouzdanosti i urednosti sustava.
+
 ## 👤 Obični korisnik
 Obični korisnici aplikacije ClayPlay predstavljaju polaznike koji žele sudjelovati u keramičkim radionicama ili kupiti gotove proizvode. Oni imaju mogućnost pregleda i pretraživanja radionica prema lokaciji, terminu i instruktoru, te jednostavnog rezerviranja željenog termina.
 Osim sudjelovanja u radionicama, korisnici mogu pregledavati i naručivati keramičke proizvode izrađene od strane instruktora, ostavljati recenzije te pratiti vlastitu povijest rezervacija i kupnji.
