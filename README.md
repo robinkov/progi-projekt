@@ -30,6 +30,20 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 > Recenzija mora sadržavati ocjenu (1–5) i tekstualni komentar te se mora povezati s proizvodom i korisnikom koji ju je napisao. <br />
 > Aplikacija mora omogućiti korisniku pretplatu na obavijesti. <br />
 > Sustav mora voditi evidenciju o pročitanim i nepročitanim obavijestima za svakog korisnika. <br />
+> 🧑‍🏫 Instruktor<br />
+> Aplikacija mora omogućiti instruktoru registraciju kao organizatoru radionica. <br />
+> Nakon registracije, instruktor mora čekati odobrenje administratora prije nego što može objavljivati sadržaj. <br />
+> Aplikacija mora omogućiti instruktoru kreiranje, uređivanje i brisanje vlastitih radionica. <br />
+> Prilikom kreiranja radionice, instruktor mora moći unijeti naslov, opis, datum i vrijeme održavanja, trajanje, lokaciju, maksimalan broj sudionika i cijenu. <br />
+> Aplikacija mora osigurati da samo instruktor koji je kreirao radionicu može uređivati ili brisati vlastite radionice. <br />
+> Aplikacija mora omogućiti instruktoru pregled prijava na njegove radionice. <br />
+> Instruktor mora moći vidjeti podatke o polaznicima koji su rezervirali radionicu i upravljati dostupnim mjestima. <br />
+> Aplikacija mora omogućiti instruktoru kreiranje i uređivanje izložbi. <br />
+> Instruktor mora moći definirati naziv, opis, vrijeme i mjesto izložbe. <br />
+> Instruktor mora moći povezati proizvode s izložbom, ažurirati količinu i cijenu proizvoda te upravljati njihovim prikazom. <br />
+> Aplikacija mora omogućiti instruktoru pregled i ažuriranje vlastitog profila organizatora. <br />
+> Profil mora sadržavati osnovne podatke o organizatoru, opis, profilnu i naslovnu fotografiju te informacije o članstvu. <br />
+
 
 ## 🛠️Tehnologije
 
