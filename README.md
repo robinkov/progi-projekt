@@ -1,8 +1,17 @@
 # ClayPlay
 
+## 👤 Obični korisnik
+Obični korisnici aplikacije ClayPlay predstavljaju polaznike koji žele sudjelovati u keramičkim radionicama ili kupiti gotove proizvode. Oni imaju mogućnost pregleda i pretraživanja radionica prema lokaciji, terminu i instruktoru, te jednostavnog rezerviranja željenog termina.
+Osim sudjelovanja u radionicama, korisnici mogu pregledavati i naručivati keramičke proizvode izrađene od strane instruktora, ostavljati recenzije te pratiti vlastitu povijest rezervacija i kupnji.
+
+## 🧑‍🏫 Instruktori
+Instruktori su voditelji keramičkih radionica koji putem aplikacije imaju mogućnost promovirati svoje radionice i proizvode.
+Mogu izrađivati nove objave radionica s opisima, terminima i cijenama, pratiti prijave sudionika, profil na kojem mogu prikazati vlastite radove te nuditi gotove proizvode na prodaju. Aplikacija im omogućuje digitalnu prisutnost i jednostavno upravljanje svojim kreativnim sadržajem.
+
 ## 📃Opis projekta
 ClayPlay je mobilna i web aplikacija namijenjena svima koji se žele baviti keramikom – bilo kao instruktori koji organiziraju radionice ili kao korisnici koji žele učiti, stvarati i kupovati jedinstvene keramičke proizvode. Aplikacija omogućuje pregled dostupnih radionica, jednostavnu rezervaciju termina i izravnu komunikaciju između polaznika i instruktora. Instruktori mogu upravljati svojim radionicama, objavljivati nove događaje i prodavati vlastite radove.
 Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetnosti keramike kroz pristupačno i intuitivno korisničko iskustvo. ClayPlay spaja funkcionalnost, estetiku i zajednicu – stvarajući prostor u kojem ljubitelji keramike mogu učiti, surađivati i inspirirati jedni druge.
+
 ## ⚡Funkcijski zahtjevi
 
 ## 🛠️Tehnologije
