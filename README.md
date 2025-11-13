@@ -29,7 +29,6 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 > Aplikacija mora omogućiti korisniku ostavljanje recenzije za kupljeni proizvod. <br />
 > Recenzija mora sadržavati ocjenu (1–5) i tekstualni komentar te se mora povezati s proizvodom i korisnikom koji ju je napisao. <br />
 > Aplikacija mora omogućiti korisniku pretplatu na obavijesti. <br />
-> Sustav mora voditi evidenciju o pročitanim i nepročitanim obavijestima za svakog korisnika. <br />
 > 🧑‍🏫 Instruktor<br />
 > Aplikacija mora omogućiti instruktoru registraciju kao organizatoru radionica. <br />
 > Nakon registracije, instruktor mora čekati odobrenje administratora prije nego što može objavljivati sadržaj. <br />
@@ -43,7 +42,13 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 > Instruktor mora moći povezati proizvode s izložbom, ažurirati količinu i cijenu proizvoda te upravljati njihovim prikazom. <br />
 > Aplikacija mora omogućiti instruktoru pregled i ažuriranje vlastitog profila organizatora. <br />
 > Profil mora sadržavati osnovne podatke o organizatoru, opis, profilnu i naslovnu fotografiju te informacije o članstvu. <br />
-
+> 🧩 Administrator<br />
+> Aplikacija mora omogućiti administratoru pregled svih registriranih korisnika i instruktora. <br />
+> Administrator mora imati mogućnost odobriti ili odbiti zahtjeve instruktora za objavu sadržaja. <br />
+> Administrator mora imati mogućnost upravljanja planovima članstva i odobravanjem članarina instruktora. <br />
+> Administrator mora moći pregledati transakcije i evidenciju uplata te po potrebi ručno intervenirati u slučaju greške. <br />
+> Aplikacija mora omogućiti administratoru slanje obavijesti korisnicima i instruktorima. <br />
+> Administrator mora moći odabrati tip obavijesti, naslov i sadržaj te pregledati status pročitanih obavijesti. <br />
 
 ## 🛠️Tehnologije
 
