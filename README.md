@@ -60,6 +60,12 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 > Pristup određenim funkcionalnostima (npr. kreiranje radionica ili odobravanje korisnika) mora biti ograničen prema ulozi korisnika (korisnik, instruktor, administrator).<br />
 
 ## 🛠️Tehnologije
+| Sloj                    | Tehnologija                   |
+| ----------------------- | ----------------------------- |
+| **Dizajn**              | Figma                         |
+| **Backend**             | Flask (Python)                |
+| **Deployment**          | Render                        |
+| **Baza podataka**       | PostgreSQL                    |
 
 ## 👥Članovi tima
 
