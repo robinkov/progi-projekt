@@ -1,24 +1,10 @@
+# Upute za pokretanje Flask aplikacije
 
----
+Ovo su koraci za pokretanje backend Flask aplikacije.
 
-## Rute AUTH
+## Pokretanje
 
-### 🔹 1. `GET /api/profile`
-
-**Opis:**  
-Verificira JWT token
-
-**Glava zahtjeva (JSON):**
-```json
-{
-  "Authorization" : "<jwt_token>"
-}
-```
-
-**Tijelo odgovora (JSON):**
-```json
-{
-  "validToken": "True/False"
-}
-```
-
+```bash
+cd backend
+pip install -r requirements.txt
+python run.py
