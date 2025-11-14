@@ -6,3 +6,4 @@ SQLAlchemy
 python-dotenv
 psycopg2-binary
 supabase
+gunicorn
