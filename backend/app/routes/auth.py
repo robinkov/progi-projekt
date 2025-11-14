@@ -22,8 +22,10 @@ def profile():
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return jsonify({"error": "Missing token", "validToken": False}), 401
+    
+    token = auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else auth_header
 
-    valid, token_data = verify_token(auth_header)
+    valid, token_data = verify_token(token)
     if not valid:
         return jsonify({"validToken": False}), 401
 
