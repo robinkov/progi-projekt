@@ -1,5 +1,5 @@
 import { View, Text, Image } from "react-native";
-import React, { useEffect } from "react";
+import React, { use, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import LogoText from "@/assets/svgs/LogoText";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export default function index() {
   const router = useRouter();
+  const auth = useAuth();
 
   return (
     <ParallaxScrollView
@@ -60,12 +61,14 @@ export default function index() {
               backgroundColor: "white",
               borderWidth: 1,
               borderColor: theme.colors.muted.DEFAULT
-            }}>
+            }} onPress={auth.signInWithGoogle}>
               <GoogleLogo height={24} />
             </Button>
             <Button style={{
-              backgroundColor: "black",
-            }}>
+                backgroundColor: "black",
+              }}
+              onPress={auth.signInWithGitHub}
+            >
               <View style={{
                 flexDirection: "row",
                 gap: 8,

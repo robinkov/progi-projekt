@@ -11,7 +11,6 @@ if (!supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    storage: AsyncStorage, // Or custom storage (see below)
     autoRefreshToken: true, // Auto-refresh when app is foregrounded
     persistSession: true, // Save/restore session automatically
     detectSessionInUrl: false, // Not needed in native apps
