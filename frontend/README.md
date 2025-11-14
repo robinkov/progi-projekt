@@ -12,6 +12,12 @@ EXPO_PUBLIC_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 EXPO_PUBLIC_BACKEND_URL=https://progi-projekt-l6px.onrender.com
 ```
 
+## Usage
+
+**Important:** Make sure when using app on web that you use mobile view (Toggle Device Toolbar - Ctrl + Shift + M).
+
+App is designed for mobile devices but deployment on iOS/Android is not finished.
+
 ## Run the app
 ```bash
 npx expo start --clear
