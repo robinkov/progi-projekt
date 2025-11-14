@@ -6,4 +6,7 @@ SQLAlchemy
 python-dotenv
 psycopg2-binary
 supabase
+requests
+gotrue
+CORS
 gunicorn

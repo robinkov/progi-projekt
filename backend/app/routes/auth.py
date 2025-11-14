@@ -1,103 +1,61 @@
-from flask import Blueprint, request, jsonify, session
-from ..supabase_client import supabase
+import jwt
+from flask import Blueprint, request, jsonify
+import os
+from ..supabase_client import supabase, admin_supabase
 
-user_bp = Blueprint("user", __name__)
+user_bp = Blueprint("user_metadata", __name__)
 
-@user_bp.route("/register", methods=["POST"])
-def register():
-    data = request.json
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
-    email = data.get("email")
-    password = data.get("password")
+JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
+JWT_ALGORITHM = "HS256"
 
-    if not email or not password or not first_name or not last_name:
-        return jsonify({"error": "Email and password are required", "valid" : False}), 400
-
+def verify_token(token):
     try:
-        
-        auth_response = supabase.auth.sign_up({
-            "email": email,
-            "password": password
-        })
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM], options={"verify_aud": False})
+        return True, payload
+    except jwt.ExpiredSignatureError:
+        return False, {"error": "Token expired"}
+    except jwt.InvalidTokenError:
+        return False, {"error": "Invalid token"}
 
-        user_id = auth_response.user.id 
+@user_bp.route("/profile", methods=["GET"])
+def profile():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return jsonify({"error": "Missing token", "validToken": False}), 401
 
-        existing = supabase.table("users").select("*").eq("mail", email).execute()
-        if existing.data:
-            return jsonify({"error": "User already exists in database", "valid" : False}), 400
+    valid, token_data = verify_token(auth_header)
+    if not valid:
+        return jsonify({"validToken": False}), 401
 
-        supabase.table("users").insert({
-            "mail": email,
-            "first_name" : first_name,
-            "last_name" : last_name
+    auth_id = token_data["sub"]
+
+    
+    user_resp = admin_supabase.auth.admin.get_user_by_id(auth_id)
+    user = user_resp.user
+    user_metadata = user.user_metadata or {}
+
+    first_name = user_metadata.get("first_name")
+    last_name = user_metadata.get("last_name")
+    mail = user.email
+    role = user_metadata.get("role")
+    
+    existing_user = supabase.table("users").select("id").eq("auth_id", auth_id).execute()
+    if len(existing_user.data) == 0:
+        inserted_user = supabase.table("users").insert({
+            "auth_id": auth_id,
+            "mail": mail,
+            "first_name": first_name,
+            "last_name": last_name,
         }).execute()
-
-        return jsonify({
-            "message": "User registered",
-            "data": {
-                "id": user_id,
-                "email": email
-            },
-            "valid" : True
-        }), 201
-
-    except Exception as e:
-        return jsonify({"error": str(e), "valid" : False}), 400
-
-@user_bp.route("/login", methods=["POST"])
-def login():
-    data = request.json
-    email = data.get("email")
-    password = data.get("password")
-
-    if not email or not password:
-        return jsonify({"error": "Email and password are required", "valid" : False}), 400
-
-    try:
-        
-        auth_response = supabase.auth.sign_in_with_password({
-            "email": email,
-            "password": password
-        })
-
-        if auth_response.session is None:
-            return jsonify({"error": "Invalid credentials", "valid" : False}), 401
+        user_id = inserted_user.data[0]["id"]
 
         
-        user_data = supabase.table("users").select("*").eq("mail", email).single().execute()
+        if role == "organizer":
+            supabase.table("organizers").insert({"user_id": user_id, 
+                                                 "approved_by_admin": False}).execute()
+        elif role == "participant":
+            supabase.table("participants").insert({"user_id": user_id}).execute()
 
-        session["refresh_token"] = auth_response.session.refresh_token
-        session["access_token"] = auth_response.session.access_token
-        session["expires_at"] = auth_response.session.expires_at
-
-        return jsonify({
-            "message": "Logged in successfully",
-            "user": user_data.data,
-            "valid" : True
-        }), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e), "valid" : False}), 400
-
-
-@user_bp.route("/logout", methods=["POST"])
-def logout():
-    access_token = session.get("access_token")
-
-    if not access_token:
-        return jsonify({"error": "Refresh token is required", "valid" : False}), 400
-
-    try:
-
-        supabase.auth.admin.sign_out(access_token)
-
-
-        session.pop("access_token", None)
-        session.pop("refresh_token", None)
-        session.pop("expires_at", None)
-
-
-        return jsonify({"message": "Logged out successfully", "valid" : True}), 200
-    except Exception as e:
-        return jsonify({"error": str(e), "valid" : False}), 400
+    return jsonify({
+        "validToken": True
+    }), 200
