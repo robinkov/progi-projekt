@@ -11,7 +11,7 @@ def create_app():
 
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 
-    CORS(app)
+    CORS(app, origins="http://localhost:8081", supports_credentials=True)
 
     from .routes.auth import auth_bp
 
