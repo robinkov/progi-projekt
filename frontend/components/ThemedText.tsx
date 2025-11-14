@@ -2,7 +2,7 @@ import { Text, TextProps } from "react-native"
 import React from "react"
 import theme from "@/utils/theme";
 
-type ThemedTextProps = TextProps & {
+export type ThemedTextProps = TextProps & {
   weight?: keyof typeof theme.fontFamily
 };
 
