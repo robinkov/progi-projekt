@@ -13,13 +13,6 @@ import { useAuth } from "@/hooks/use-auth";
 
 export default function index() {
   const router = useRouter();
-  const auth = useAuth();
-
-  useEffect(() => {
-    if (auth.status === "authenticated") {
-      router.replace("/(tabs)");
-    }
-  }, [auth.status]);
 
   return (
     <ParallaxScrollView

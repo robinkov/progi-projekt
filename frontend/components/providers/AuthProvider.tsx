@@ -10,6 +10,7 @@ type AuthContextType = {
   user: User | null;
   registerUserWithEmailAndPassword: (createUserObj: CreateUser) => Promise<void>;
   loginUserWithEmailAndPassword: (loginUserObj: LoginUser) => Promise<void>;
+  userLogout: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -61,7 +62,14 @@ export default function AuthProvider({
     } else {
       setStatus("unauthenticated");
     }
-    console.log(session);
+  }
+
+  async function userLogout() {
+    await supabase.auth.signOut();
+
+    setStatus("unauthenticated");
+
+    return Promise.resolve();
   }
 
   useEffect(() => {
@@ -73,6 +81,7 @@ export default function AuthProvider({
     user,
     registerUserWithEmailAndPassword,
     loginUserWithEmailAndPassword,
+    userLogout,
   };
 
   return (
