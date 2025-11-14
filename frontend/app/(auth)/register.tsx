@@ -1,15 +1,15 @@
-import { View, Text, Platform } from 'react-native'
-import React, { useEffect } from 'react'
-import ParallaxScrollView from '@/components/ParallaxScrollView'
-import { Image, KeyboardAvoidingView } from 'react-native'
-import ThemedText from '@/components/ThemedText'
-import { ThemedTextInput } from '@/components/Input'
-import { TextButton } from '@/components/Button'
-import { registerUser } from '@/utils/auth'
-import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
-import { LoaderCircle } from 'lucide-react-native'
-import theme from '@/utils/theme'
-import { useRouter } from 'expo-router'
+import { View, Text, Platform } from "react-native"
+import React, { useEffect } from "react"
+import ParallaxScrollView from "@/components/ParallaxScrollView"
+import { Image, KeyboardAvoidingView } from "react-native"
+import ThemedText from "@/components/ThemedText"
+import { ThemedTextInput } from "@/components/Input"
+import { TextButton } from "@/components/Button"
+import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated"
+import { LoaderCircle } from "lucide-react-native"
+import theme from "@/utils/theme"
+import BackgroundDecorations from "@/assets/svgs/BackgroundDecorations"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function register() {
   const [firstName, setFirstName] = React.useState<string>("");
@@ -26,18 +26,19 @@ export default function register() {
     transform: [{ rotate: rotate.value + "deg" }]
   }));
 
-  const router = useRouter();
+  const auth = useAuth();
 
   async function handleRegister() {
     setLoading(true);
     try {
-      await registerUser(firstName, lastName, email, password, repeatPassword);
-      router.replace("/(tabs)/index");
-    } catch (error) {
+      await auth.registerUserWithEmailAndPassword({
+        firstName, lastName, email, password, repeatPassword
+      });
+      setError(null);
+    } catch(error) {
       setError((error as Error).message);
     } finally {
       setLoading(false);
-      setError(null);
     }
   }
 
@@ -67,11 +68,12 @@ export default function register() {
               height: "100%",
               bottom: 0,
               left: 0,
-              position: 'absolute',
+              position: "absolute",
             }}
           />
         }
       >
+        <BackgroundDecorations style={{ width: "100%", position: "absolute", bottom: 0 }} />
         <View style={{
           flex: 1,
           alignItems: "center",
@@ -97,7 +99,11 @@ export default function register() {
                 paddingTop: 70,
                 gap: 10,
               }}>
-                {error && <ThemedText style={{ textAlign: "center", color: theme.colors.destructive.DEFAULT }}>{error}</ThemedText>}
+                { error &&
+                  <ThemedText style={{ textAlign: "center", color: theme.colors.destructive.DEFAULT }}>
+                    { error }
+                  </ThemedText>
+                }
                 <ThemedTextInput
                   textContentType="givenName"
                   placeholder="First Name"

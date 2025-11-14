@@ -1,5 +1,5 @@
 import { View, Text, Image } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import LogoText from "@/assets/svgs/LogoText";
@@ -8,9 +8,18 @@ import Button, { TextButton } from "@/components/Button";
 import GoogleLogo from "@/assets/svgs/GoogleLogo";
 import GitHubLogoCat from "@/assets/svgs/GitHubLogoCat";
 import { useRouter } from "expo-router";
+import BackgroundDecorations from "@/assets/svgs/BackgroundDecorations";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function index() {
   const router = useRouter();
+  const auth = useAuth();
+
+  useEffect(() => {
+    if (auth.status === "authenticated") {
+      router.replace("/(tabs)");
+    }
+  }, [auth.status]);
 
   return (
     <ParallaxScrollView
@@ -27,6 +36,7 @@ export default function index() {
         />
       }
     >
+      <BackgroundDecorations style={{ width: "100%", position: "absolute", bottom: 0 }} />
       <View style={{
         flex: 1,
         alignItems: "center",

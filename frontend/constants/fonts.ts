@@ -8,5 +8,5 @@ export default {
   Montserrat_500Medium,
   Montserrat_600SemiBold,
   Montserrat_700Bold,
-  Montserrat_800ExtraBold
+  Montserrat_800ExtraBold,
 };
