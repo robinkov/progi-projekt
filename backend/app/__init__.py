@@ -15,6 +15,11 @@ def create_app():
 
     from .routes.auth import user_bp
 
+    from .routes.profileManagement import profile_bp
+
+    app.register_blueprint(profile_bp)
+
     app.register_blueprint(user_bp, url_prefix="/api")
 
     return app
+

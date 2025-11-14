@@ -1,5 +1,4 @@
-```
-mermaid
+```mermaid
 sequenceDiagram
     actor Kupac
     participant A as Aplikacija
@@ -9,19 +8,19 @@ sequenceDiagram
 
     Kupac->>A: Otvori online trgovinu
     A->>DB: Dohvati dostupne proizvode
-    DB-->>A: Vrati listu proizvoda
+    DB->>A: Vrati listu proizvoda
     A->>Kupac: Prikaže proizvode
     
     Kupac->>A: Primijeni filtere (kategorija, cijena)
     A->>DB: Dohvati filtrirane proizvode
-    DB-->>A: Vrati filtrirane proizvode
+    DB->>A: Vrati filtrirane proizvode
     A->>Kupac: Prikaže filtrirane proizvode
     
     Kupac->>A: Odabere proizvod + "Dodaj u košaricu"
     A->>DB: Provjeri stanje zaliha
 
     alt Proizvod nije dostupan
-        DB-->>A: out_of_stock
+        DB->>A: out_of_stock
         A->>Kupac: Prikaže "Proizvod nije na zalihi"
     else Proizvod dostupan
         DB-->>A: Podaci o proizvodu

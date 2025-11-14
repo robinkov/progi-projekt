@@ -9,8 +9,8 @@ Uloga administratora ključna je za održavanje sigurnosti, pouzdanosti i uredno
 Obični korisnici aplikacije ClayPlay predstavljaju polaznike koji žele sudjelovati u keramičkim radionicama ili kupiti gotove proizvode. Oni imaju mogućnost pregleda i pretraživanja radionica prema lokaciji, terminu i instruktoru, te jednostavnog rezerviranja željenog termina.
 Osim sudjelovanja u radionicama, korisnici mogu pregledavati i naručivati keramičke proizvode izrađene od strane instruktora, ostavljati recenzije te pratiti vlastitu povijest rezervacija i kupnji.
 
-## 🧑‍🏫 Instruktori
-Instruktori su voditelji keramičkih radionica koji putem aplikacije imaju mogućnost promovirati svoje radionice i proizvode.
+## 🧑‍🏫 Organizatori
+Organizatori su voditelji keramičkih radionica koji putem aplikacije imaju mogućnost promovirati svoje radionice i proizvode.
 Mogu izrađivati nove objave radionica s opisima, terminima i cijenama, pratiti prijave sudionika, profil na kojem mogu prikazati vlastite radove te nuditi gotove proizvode na prodaju. Aplikacija im omogućuje digitalnu prisutnost i jednostavno upravljanje svojim kreativnim sadržajem.
 
 ## 📃Opis projekta
@@ -52,6 +52,7 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 ## 🛠️Tehnologije
 | Sloj                    | Tehnologija                   |
 | ----------------------- | ----------------------------- |
+| **Frontend**            | React Native                  |
 | **Dizajn**              | Figma                         |
 | **Backend**             | Flask (Python)                |
 | **Deployment**          | Render                        |
