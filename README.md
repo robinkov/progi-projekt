@@ -52,6 +52,7 @@ Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetn
 ## 🛠️Tehnologije
 | Sloj                    | Tehnologija                   |
 | ----------------------- | ----------------------------- |
+| **Frontend**            | React Native                  |
 | **Dizajn**              | Figma                         |
 | **Backend**             | Flask (Python)                |
 | **Deployment**          | Render                        |
