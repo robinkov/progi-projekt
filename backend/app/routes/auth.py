@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 import os
 from ..supabase_client import supabase, admin_supabase
 
-user_bp = Blueprint("user_metadata", __name__)
+auth_bp = Blueprint("user_metadata", __name__)
 
 JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
 JWT_ALGORITHM = "HS256"
@@ -17,7 +17,7 @@ def verify_token(token):
     except jwt.InvalidTokenError:
         return False, {"error": "Invalid token"}
 
-@user_bp.route("/profile", methods=["GET"])
+@auth_bp.route("/profile", methods=["GET"])
 def profile():
     auth_header = request.headers.get("Authorization")
     if not auth_header:

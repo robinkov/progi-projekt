@@ -38,6 +38,16 @@ def update_profile():
         if field in data and data[field] is not None:
             update_payload[field] = data[field]
 
+    if "mail" in update_payload and update_payload["mail"] != user.get("mail"):
+        new_email = update_payload["mail"]
+        try:
+            admin_supabase.auth.admin.update_user(
+                user_id=auth_id,
+                attributes={"email": new_email}
+            )
+        except Exception as e:
+            return jsonify({"error": "Failed to update email in Auth", "details": str(e)}), 500
+
     # --- Obrada slike (ako je poslana kao base64) ---
     photo_base64 = data.get("profile_photo")
     if photo_base64:
