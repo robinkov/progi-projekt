@@ -25,3 +25,9 @@ npm run web
 App will be available at `http://localhost:8081`.
 
 Note: Bundling takes a little longer, so be patient on the first run.
+
+## Usage
+
+**Important:** Make sure when using app on web that you use mobile view (Toggle Device Toolbar - Ctrl + Shift + M).
+
+App is designed for mobile devices but deployment on iOS/Android is not finished.
