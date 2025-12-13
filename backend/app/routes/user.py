@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from ..supabase_client import supabase
-from .auth import verify_token
+from app.auth.auth import verify_token
 
 user_bp = Blueprint("user_routes", __name__)
 
@@ -13,7 +13,9 @@ def get_user():
         return jsonify({"error": "Missing token", "validToken": False}), 401
 
     token = auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else auth_header
+
     valid, token_data = verify_token(token)
+
     if not valid:
         return jsonify({"validToken": False, "error": token_data.get("error")}), 401
 
@@ -22,6 +24,7 @@ def get_user():
     try:
         # --- Dohvati korisnika ---
         user_resp = supabase.table("users").select("*").eq("auth_id", auth_id).execute()
+
         if not getattr(user_resp, "data", None) or len(user_resp.data) == 0:
             return jsonify({"error": "User not found"}), 404
 
@@ -31,21 +34,28 @@ def get_user():
         # --- Dohvati URL slike ako postoji ---
         photo_url = None
         if user.get("profile_photo_id"):
+
             photo_resp = supabase.table("photos").select("url").eq("id", user["profile_photo_id"]).execute()
+
             if getattr(photo_resp, "data", None) and len(photo_resp.data) > 0:
                 photo_url = photo_resp.data[0].get("url")
 
         # --- Provjeri ulogu korisnika ---
         role = None
         org_resp = supabase.table("organizers").select("id").eq("user_id", user_pk).execute()
+
         if getattr(org_resp, "data", None) and len(org_resp.data) > 0:
+
             role = "organizer"
         else:
+
             part_resp = supabase.table("participants").select("id").eq("user_id", user_pk).execute()
+
             if getattr(part_resp, "data", None) and len(part_resp.data) > 0:
                 role = "participant"
 
         # --- Sastavi odgovor ---
+        
         user_data = {
             "first_name": user.get("first_name"),
             "last_name": user.get("last_name"),

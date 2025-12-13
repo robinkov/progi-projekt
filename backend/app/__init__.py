@@ -13,7 +13,7 @@ def create_app():
 
     CORS(app, origins="*", supports_credentials=True)
 
-    from .routes.auth import auth_bp
+    from .routes.auth_routes import auth_bp
 
     from .routes.profileManagement import profile_bp
     from .routes.user import user_bp
