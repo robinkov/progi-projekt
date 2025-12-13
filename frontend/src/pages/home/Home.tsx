@@ -3,6 +3,9 @@ import { LoadingButton } from "@/components/ui/button";
 import AuthController from "@/controllers/authController";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import PageLayout from "@/components/layout/PageLayout"
+import Header from "@/components/layout/Header"
+
 
 export default function Home() {
   const auth = useAuth();
@@ -28,11 +31,12 @@ export default function Home() {
   }, [auth.status]);
 
   return (
-    <div className="flex flex-1 justify-center items-center">
-      <div>{ auth.user?.email }</div>
-      <LoadingButton loading={logoutLoading} onClick={handleLogout}>
-        Logout
-      </LoadingButton>
-    </div>
+    <Header
+      userEmail={auth.user?.email}
+      onLogout={handleLogout}
+      logoutLoading={logoutLoading}>
+
+    </Header>
   );
+
 }
