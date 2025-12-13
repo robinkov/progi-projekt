@@ -2,20 +2,20 @@
 
 import React from 'react';
 
-interface Workshop {
+interface Exhibition {
     id: number;
     date: string;
     time?: string;
     title: string;
-    instructor: string;
+    organizer: string;
     location?: string;
 }
 
-interface WorkshopCardProps {
-    workshop: Workshop;
+interface ExhibitionCardProps {
+    exhibition: Exhibition;
 }
 
-const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop }) => {
+const ExhibitionCard: React.FC<ExhibitionCardProps> = ({ exhibition }) => {
     return (
         <div className="
         border border-full border-gray-900 
@@ -29,20 +29,20 @@ const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop }) => {
             {/* Workshop Details */}
             <div className="workshop-info">
                 <p className="text-sm mb-1 font-bold text-gray-700">
-                    {workshop.date} {workshop.time && ` | ${workshop.time}`}
+                    {exhibition.date} {exhibition.time && ` | ${exhibition.time}`}
                 </p>
 
                 <h3 className="text-lg font-semibold my-1 text-gray-900">
-                    {workshop.title}
+                    {exhibition.title}
                 </h3>
 
                 <p className="text-sm mb-3 text-gray-700">
-                    {workshop.instructor}
+                    {exhibition.organizer}
                 </p>
 
-                {workshop.location && (
+                {exhibition.location && (
                     <p className="text-xs text-gray-500">
-                        {workshop.location}
+                        {exhibition.location}
                     </p>
                 )}
             </div>
@@ -58,4 +58,4 @@ const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop }) => {
     );
 };
 
-export default WorkshopCard;
+export default ExhibitionCard;

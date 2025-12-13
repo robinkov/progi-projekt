@@ -1,10 +1,12 @@
 import { useAuth } from "@/components/context/AuthProvider";
-import { LoadingButton } from "@/components/ui/button";
+//import { LoadingButton } from "@/components/ui/button";
 import AuthController from "@/controllers/authController";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import PageLayout from "@/components/layout/PageLayout"
+//import PageLayout from "@/components/layout/PageLayout"
 import Header from "@/components/layout/Header"
+import WorkshopsSection from "@/components/workshops/WorkshopsSection";
+import ExhibitionsSection from './../../components/exhibitions/ExhibitionsSection';
 
 
 export default function Home() {
@@ -31,12 +33,16 @@ export default function Home() {
   }, [auth.status]);
 
   return (
-    <Header
-      userEmail={auth.user?.email}
-      onLogout={handleLogout}
-      logoutLoading={logoutLoading}>
+    <div>
+      <Header
+        userEmail={auth.user?.email}
+        onLogout={handleLogout}
+        logoutLoading={logoutLoading}>
+      </Header>
+      <WorkshopsSection></WorkshopsSection>
+      <ExhibitionsSection></ExhibitionsSection>
+    </div>
 
-    </Header>
   );
 
 }
