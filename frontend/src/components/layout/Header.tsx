@@ -16,7 +16,7 @@ export default function Header({
             <div className="flex items-center justify-between h-16 px-6 border-b bg-white">
                 {/* Left: App + primary nav */}
                 <div className="flex items-center gap-6">
-                    <div>hamburger ovdje</div>
+                    <LoadingButton>&#9776;</LoadingButton>
                     <nav>
                         <a
                             href="/shop"
