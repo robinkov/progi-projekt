@@ -31,13 +31,13 @@ export default function Header({
                 </div>
 
                 <div>
-                    <span className="text-lg font-semibold">ClayPlay</span>
+                    <a href="/"><span className="text-lg font-semibold">ClayPlay</span></a>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <div>zvono</div>
                     {userEmail && (
-                        <span className="text-sm text-gray-600">{userEmail}</span>
+                        <a href="mypage"><span className="text-sm text-gray-600">{userEmail}</span></a>
                     )}
 
                     <LoadingButton loading={logoutLoading} onClick={onLogout}>

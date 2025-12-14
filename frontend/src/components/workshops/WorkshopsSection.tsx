@@ -69,7 +69,7 @@ const WorkshopsSection: React.FC = () => {
             text-center 
             flex items-center justify-center
         ">
-                    <a href="/radionice" className="
+                    <a href="/workshops" className="
             block 
             p-5 
             border border-full border-gray-900 

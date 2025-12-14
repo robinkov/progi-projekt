@@ -44,32 +44,24 @@ const DUMMY_EXHIBITIONS: Exhibition[] = [
 const ExhibitionsSection: React.FC = () => {
     return (
         <section className="py-5 border-b border-gray-300">
-
-            {/* 1. Section Header (Radionice (aktualne)) */}
             <SectionHeader title="Izložbe (aktualne)" />
-
-            {/* 2. exhibition List Container (Horizontal Scroll) */}
             <div className="
         flex 
         overflow-x-auto 
         py-4 
         items-stretch
-        -mx-2 md:mx-0  /* Optional: allows items to start/end flush with screen edges */
+        -mx-2 md:mx-0  
       ">
-
-                {/* Render exhibition Cards */}
                 {DUMMY_EXHIBITIONS.map(exhibition => (
                     <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
                 ))}
-
-                {/* 3. 'View More' Box (Pogledaj još radionica) */}
                 <div className="
             min-w-[150px] 
             ml-5 mr-3 
             text-center 
             flex items-center justify-center
         ">
-                    <a href="/radionice" className="
+                    <a href="/exhibitions" className="
             block 
             p-5 
             border border-full border-gray-900 

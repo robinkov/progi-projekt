@@ -1,13 +1,15 @@
 import { useAuth } from "@/components/context/AuthProvider";
-//import { LoadingButton } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/button";
 import AuthController from "@/controllers/authController";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-//import PageLayout from "@/components/layout/PageLayout"
 import Header from "@/components/layout/Header"
 import WorkshopsSection from "@/components/workshops/WorkshopsSection";
 import ExhibitionsSection from './../../components/exhibitions/ExhibitionsSection';
-
+import PageLayout from "@/components/layout/PageLayout";
+import MainColumn from "@/components/layout/MainColumn";
+import Sidebar from "@/components/layout/Sidebar";
+import ShopSection from "@/components/shop/shopSection"
 
 export default function Home() {
   const auth = useAuth();
@@ -33,16 +35,33 @@ export default function Home() {
   }, [auth.status]);
 
   return (
-    <div>
-      <Header
-        userEmail={auth.user?.email}
-        onLogout={handleLogout}
-        logoutLoading={logoutLoading}>
-      </Header>
-      <WorkshopsSection></WorkshopsSection>
-      <ExhibitionsSection></ExhibitionsSection>
-    </div>
+    <PageLayout
+      header={
+        <Header
+          userEmail={auth.user?.email}
+          onLogout={handleLogout}
+          logoutLoading={logoutLoading}
+        />
+      }
+    >
+      <MainColumn>
+        <div>
+          <WorkshopsSection></WorkshopsSection>
+        </div>
+        <div><ExhibitionsSection></ExhibitionsSection></div>
+        <div>
+          <ShopSection></ShopSection>
+        </div>
+      </MainColumn>
 
+      <Sidebar>
+        <div>
+          <LoadingButton><a href="mypage">My Reservations</a></LoadingButton>
+        </div>
+        <div>Notifications</div>
+        <div><LoadingButton>Newsletter</LoadingButton></div>
+      </Sidebar>
+    </PageLayout>
   );
 
 }
