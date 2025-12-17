@@ -2,22 +2,14 @@ import jwt
 from flask import Blueprint, request, jsonify
 import os
 from ..supabase_client import supabase, admin_supabase
+from app.auth.auth import verify_token
 
 auth_bp = Blueprint("user_metadata", __name__)
 
-JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
-JWT_ALGORITHM = "HS256"
+    
 
-def verify_token(token):
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM], options={"verify_aud": False})
-        return True, payload
-    except jwt.ExpiredSignatureError:
-        return False, {"error": "Token expired"}
-    except jwt.InvalidTokenError:
-        return False, {"error": "Invalid token"}
-
-@auth_bp.route("/profile", methods=["GET"])
+#function that checks token and puts user in user table
+@auth_bp.route("/user", methods=["GET"])
 def profile():
     auth_header = request.headers.get("Authorization")
     if not auth_header:
@@ -42,6 +34,7 @@ def profile():
     role = user_metadata.get("role")
     
     existing_user = supabase.table("users").select("id").eq("auth_id", auth_id).execute()
+    
     if len(existing_user.data) == 0:
         inserted_user = supabase.table("users").insert({
             "auth_id": auth_id,
@@ -59,5 +52,7 @@ def profile():
             supabase.table("participants").insert({"user_id": user_id}).execute()
 
     return jsonify({
-        "validToken": True
+        "validToken": True,
+        "user_existed": True if len(existing_user) > 0 else False
     }), 200
+

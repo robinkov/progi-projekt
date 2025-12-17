@@ -1,18 +1,21 @@
 import base64
 from flask import Blueprint, request, jsonify
 from ..supabase_client import supabase, admin_supabase
-from .auth import verify_token
+from app.auth.auth import verify_token
 
 profile_bp = Blueprint("profile_management", __name__)
 
 @profile_bp.route("/saveprofile", methods=["PUT"])
 def update_profile():
+
     auth_header = request.headers.get("Authorization")
+
     if not auth_header:
         return jsonify({"error": "Missing token", "validToken": False}), 401
 
     token = auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else auth_header
     valid, token_data = verify_token(token)
+
     if not valid:
         return jsonify({"validToken": False, "error": token_data.get("error")}), 401
 
@@ -40,16 +43,19 @@ def update_profile():
 
     if "mail" in update_payload and update_payload["mail"] != user.get("mail"):
         new_email = update_payload["mail"]
+
         try:
             admin_supabase.auth.admin.update_user(
                 user_id=auth_id,
                 attributes={"email": new_email}
             )
+
         except Exception as e:
             return jsonify({"error": "Failed to update email in Auth", "details": str(e)}), 500
 
     # --- Obrada slike (ako je poslana kao base64) ---
     photo_base64 = data.get("profile_photo")
+    
     if photo_base64:
         if "," in photo_base64:
             photo_base64 = photo_base64.split(",")[1]

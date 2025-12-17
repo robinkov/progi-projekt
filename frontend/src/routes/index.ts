@@ -3,6 +3,9 @@ import type { RouteObject } from "react-router";
 import ErrorPage from "@/pages/ErrorPage";
 import authRoutes from "@/routes/authRoutes";
 import homeRoutes from "@/routes/homeRoutes";
+import workshopRoutes from "@/routes/workshopRoutes"
+import exhibitionRoutes from "@/routes/exhibitionRoutes"
+import shopRoutes from "@/routes/shopRoutes"
 
 const routes: RouteObject = {
   path: "/",
@@ -10,6 +13,9 @@ const routes: RouteObject = {
   children: [
     homeRoutes,
     authRoutes,
+    workshopRoutes,
+    exhibitionRoutes,
+    shopRoutes
   ],
   errorElement: ErrorPage({ code: 404, message: "Page Not Found" }),
 };
