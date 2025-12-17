@@ -6,6 +6,7 @@ import homeRoutes from "@/routes/homeRoutes";
 import workshopRoutes from "@/routes/workshopRoutes"
 import exhibitionRoutes from "@/routes/exhibitionRoutes"
 import shopRoutes from "@/routes/shopRoutes"
+import roleChoose from "@/routes/roleChoose"
 
 const routes: RouteObject = {
   path: "/",
@@ -15,7 +16,8 @@ const routes: RouteObject = {
     authRoutes,
     workshopRoutes,
     exhibitionRoutes,
-    shopRoutes
+    shopRoutes,
+    roleChoose
   ],
   errorElement: ErrorPage({ code: 404, message: "Page Not Found" }),
 };

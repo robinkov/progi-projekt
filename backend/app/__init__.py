@@ -11,7 +11,7 @@ def create_app():
 
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 
-    CORS(app, origins="*", supports_credentials=True)
+    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
     from .routes.auth_routes import auth_bp
 
@@ -20,7 +20,7 @@ def create_app():
 
     app.register_blueprint(profile_bp)
     app.register_blueprint(user_bp)
-    app.register_blueprint(auth_bp, url_prefix="/api")
+    app.register_blueprint(auth_bp)
 
     return app
 

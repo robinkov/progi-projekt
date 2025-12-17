@@ -111,7 +111,7 @@ export default function Workshops() {
             header={
                 <Header
                     userEmail={auth.user?.email}
-                    onLogout={ }
+                    onLogout={() => {} }
                     logoutLoading={false /* pass logoutLoading */}
                 />
             }
