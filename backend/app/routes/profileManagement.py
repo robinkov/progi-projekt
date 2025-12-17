@@ -5,114 +5,94 @@ from app.auth.auth import verify_token
 
 profile_bp = Blueprint("profile_management", __name__)
 
-@profile_bp.route("/saveprofile", methods=["PUT"])
-def update_profile():
 
+@profile_bp.route("/profile", methods=["POST"])
+def get_profile():
     auth_header = request.headers.get("Authorization")
-
     if not auth_header:
-        return jsonify({"error": "Missing token", "validToken": False}), 401
+        return jsonify({"error": "Missing token"}), 401
 
     token = auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else auth_header
     valid, token_data = verify_token(token)
 
     if not valid:
-        return jsonify({"validToken": False, "error": token_data.get("error")}), 401
+        return jsonify({"error": "Invalid token"}), 401
 
     auth_id = token_data["sub"]
 
-    # --- Dohvati korisnika ---
-    try:
-        user_resp = supabase.table("users").select("*").eq("auth_id", auth_id).execute()
-    except Exception as e:
-        return jsonify({"error": "Failed to fetch user", "details": str(e)}), 500
+    user_resp = (
+        supabase
+        .table("users")
+        .select("first_name,last_name,mail,username,address,phone,profile_photo_id")
+        .eq("auth_id", auth_id)
+        .single()
+        .execute()
+    )
 
-    if not getattr(user_resp, "data", None):
+    if not user_resp.data:
         return jsonify({"error": "User not found"}), 404
 
-    user = user_resp.data[0]
-    update_payload = {}
-
-    allowed_fields = ["first_name", "last_name", "username", "address", "mail", "phone"]
-    data = request.json or {}
-
-    # Ažuriraj polja koja su poslana
-    for field in allowed_fields:
-        if field in data and data[field] is not None:
-            update_payload[field] = data[field]
-
-    if "mail" in update_payload and update_payload["mail"] != user.get("mail"):
-        new_email = update_payload["mail"]
-
-        try:
-            admin_supabase.auth.admin.update_user(
-                user_id=auth_id,
-                attributes={"email": new_email}
-            )
-
-        except Exception as e:
-            return jsonify({"error": "Failed to update email in Auth", "details": str(e)}), 500
-
-    # --- Obrada slike (ako je poslana kao base64) ---
-    photo_base64 = data.get("profile_photo")
+    user = user_resp.data
+    photo_url = None
     
-    if photo_base64:
-        if "," in photo_base64:
-            photo_base64 = photo_base64.split(",")[1]
+    if user.get("profile_photo_id"):
+    
+        photo_resp = supabase.table("photos").select("url").eq("id", user.get("profile_photo_id")).single().execute()
+    
+        photo_url = photo_resp.data.get("url") if photo_resp.data else None
 
-        try:
-            file_bytes = base64.b64decode(photo_base64)
-        except Exception:
-            return jsonify({"error": "Invalid base64 string for photo"}), 400
+    return jsonify({
+        "first_name": user.get("first_name"),
+        "last_name": user.get("last_name"),
+        "email": user.get("mail"),
+        "username": user.get("username"),
+        "phone": user.get("phone"),
+        "address":user.get("address"),
+        "avatar_url": photo_url,
+    }), 200
+    
+    
 
-        filename = f"{auth_id}.png"
-        storage_path = f"photos/{filename}"
+@profile_bp.route("/profile/update", methods=["POST"])
+def update_profile():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Unauthorized"}), 401
 
-        # upload u Supabase Storage
-        try:
-            # upload photo using admin client
-            upload_resp = admin_supabase.storage.from_("photos").upload(
-                path=storage_path,
-                file=file_bytes,
-                file_options={"contentType": "image/png", "upsert": "true"}
-            )
+    token = auth_header.split(" ")[1]
 
-
-        except Exception as e:
-            return jsonify({"error": "Failed to upload photo", "details": str(e)}), 500
-
-       # get public URL
-        try:
-            photo_url_resp = supabase.storage.from_("photos").get_public_url(storage_path)
-            
-            # If it's a dict (older version), get the URL from the dict, otherwise just use the string
-            if isinstance(photo_url_resp, dict):
-                photo_url = photo_url_resp.get("publicUrl") or photo_url_resp.get("public_url")
-            else:
-                photo_url = photo_url_resp  # it's already a string
-        except Exception as e:
-            return jsonify({"error": "Failed to get photo URL", "details": str(e)}), 500
-
-
-        # spremi zapis u photos (admin client zbog RLS)
-        try:
-            insert_photo = admin_supabase.table("photos").insert({"url": photo_url}).execute()
-        except Exception as e:
-            return jsonify({"error": "Failed to save photo record", "details": str(e)}), 500
-
-        if not getattr(insert_photo, "data", None):
-            return jsonify({"error": "Failed to save photo record", "details": "No data returned"}), 500
-
-        photo_id = insert_photo.data[0]["id"]
-        update_payload["profile_photo_id"] = photo_id
-    else:
-        # ako nema nove slike, zadrži stari ID
-        update_payload["profile_photo_id"] = user.get("profile_photo_id")
-
-    # --- Update korisnika ---
     try:
-        supabase.table("users").update(update_payload).eq("auth_id", auth_id).execute()
-    except Exception as e:
-        return jsonify({"error": "Failed to update user profile", "details": str(e)}), 500
+        # Get user info from Supabase Auth
+        user_resp = admin_supabase.auth.get_user(token)
+        user_id = user_resp.user.id
 
-    return jsonify({"validToken": True, "updated_fields": update_payload}), 200
+        data = request.json
+        first_name = data.get("first_name")
+        last_name = data.get("last_name")
+        username = data.get("username")
+        phone = data.get("phone")
+        address = data.get("address")
+        avatar_url = data.get("avatar_url")
+
+        # Update users table (without touching profile_photo_id yet)
+        supabase.table("users").update({
+            "first_name": first_name,
+            "last_name": last_name,
+            "username": username,
+            "phone": phone,
+            "address": address,
+        }).eq("auth_id", user_id).execute()
+
+        if avatar_url:
+            # Insert a new row in photos table for the new avatar
+            photo_resp = supabase.table("photos").insert({"url": avatar_url}).execute()
+            new_photo_id = photo_resp.data[0]["id"] if photo_resp.data else None
+
+            # Update the user to point to the new photo
+            if new_photo_id:
+                supabase.table("users").update({"profile_photo_id": new_photo_id}).eq("auth_id", user_id).execute()
+
+        return jsonify({"message": "Profile updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

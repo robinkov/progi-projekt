@@ -81,7 +81,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => navigate("/")}
             >
               Home
             </Button>
@@ -90,7 +90,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => navigate("/profile")}
             >
               Profile
             </Button>

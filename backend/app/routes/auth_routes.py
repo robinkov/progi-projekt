@@ -2,7 +2,9 @@ import jwt
 from flask import Blueprint, request, jsonify
 import os
 from ..supabase_client import supabase, admin_supabase
+from supabase import create_client
 from app.auth.auth import verify_token
+import requests
 
 auth_bp = Blueprint("user_metadata", __name__)
 
@@ -39,16 +41,49 @@ def profile():
     existing_user = supabase.table("users").select("id").eq("auth_id", auth_id).execute()
     existing_user_data = existing_user.data
     
+    # get avatar URL from metadata
+    avatar_url = user_metadata.get("avatar_url") or user_metadata.get("picture") or None
+    photo_id = None
+            
+    
+    
     if not existing_user_data:
+        if avatar_url:
+            response = requests.get(avatar_url)
+            if response.status_code == 200:
+                file_bytes = response.content
+                file_name = f"{auth_id}_avatar.png"
+                bucket_name = "photos"
+
+                # Upload to Supabase storage with admin client and upsert
+                admin_supabase.storage.from_(bucket_name).upload(
+                    file_name,
+                    file_bytes,
+                    {"upsert": "true", "contentType": "image/png"}  # contentType is optional but recommended
+                )
+
+
+                # Get public URL
+                public_url = admin_supabase.storage.from_(bucket_name).get_public_url(file_name)
+
+                # Save in photos table with user_id
+                photo_resp = supabase.table("photos").insert({
+                    "url": public_url
+                }).execute()
+                
+                photo_id = photo_resp.data[0]["id"] if photo_resp.data else None
+                
+                
         user_response = supabase.table("users").upsert({
             "auth_id": auth_id,
             "mail": mail,
             "first_name": first_name,
-            "last_name": last_name
+            "last_name": last_name,
+            "profile_photo_id": photo_id
         }, on_conflict="auth_id").execute()
         
         user_id = user_response.data[0]["id"]
-
+        
     else:
         user_id = existing_user_data[0]["id"]
     
