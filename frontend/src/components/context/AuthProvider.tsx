@@ -38,10 +38,6 @@ export default function AuthProvider({
     user
   };
 
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
-
   return (
     <AuthContext.Provider value={value}>
       { children }

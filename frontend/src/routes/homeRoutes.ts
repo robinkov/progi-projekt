@@ -1,11 +1,16 @@
 import { type RouteObject } from "react-router";
-import Home from "@/pages/home/Home";
-import { Spinner } from "@/components/ui/spinner";
+import Home from "@/pages/app/Home";
+import HomeLayout from "@/pages/app/_Layout";
 
 const routes: RouteObject = {
   path: "",
-  loader: Spinner,
-  Component: Home,
+  Component: HomeLayout,
+  children: [
+    {
+      path: "",
+      Component: Home
+    }
+  ]
 };
 
 export default routes;
