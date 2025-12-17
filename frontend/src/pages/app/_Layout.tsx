@@ -4,17 +4,15 @@ import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/config/supabase";
 import AuthController from "@/controllers/authController";
 import { fetchPost } from "@/utils/fetchUtils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router";
 
-type HomeLayoutProps = {
-};
-
-
+type HomeLayoutProps = {};
 
 export default function HomeLayout({}: HomeLayoutProps) {
   const auth = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true); // <-- local loading state
 
   useEffect(() => {
     async function guard() {
@@ -28,7 +26,7 @@ export default function HomeLayout({}: HomeLayoutProps) {
       const token = sessionData.session.access_token;
 
       try {
-        const res = await fetchPost<{user_existed: boolean }>(
+        const res = await fetchPost<{ user_existed: boolean }>(
           "/user",
           {},
           { Authorization: `Bearer ${token}` },
@@ -36,25 +34,31 @@ export default function HomeLayout({}: HomeLayoutProps) {
 
         if (!res.user_existed && window.location.pathname !== "/rolechoose") {
           navigate("/rolechoose", { replace: true });
+          return;
         }
       } catch (err) {
         console.error(err);
-        AuthController.logoutUser()
+        AuthController.logoutUser();
+      } finally {
+        setLoading(false); // <-- stop spinner once done
       }
-
     }
 
-    guard()
+    guard();
+  }, [auth, navigate]);
 
-  },[auth, navigate]);
+  if (loading || auth.status === "loading") {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col">
       <Navbar />
-      { auth.status === "loading" ?
-        <Spinner /> :
-        <Outlet />
-      }
+      <Outlet />
     </div>
   );
 }
