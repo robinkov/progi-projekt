@@ -40,19 +40,36 @@ def profile():
     existing_user_data = existing_user.data
     
     if not existing_user_data:
-        supabase.table("users").upsert({
+        user_response = supabase.table("users").upsert({
             "auth_id": auth_id,
             "mail": mail,
             "first_name": first_name,
             "last_name": last_name
         }, on_conflict="auth_id").execute()
-
         
+        user_id = user_response.data[0]["id"]
+
+    else:
+        user_id = existing_user_data[0]["id"]
+    
+    organizer_data = supabase.table("organizers").select("*").eq("user_id", user_id).execute()
+
+    if organizer_data.data and len(organizer_data.data) > 0:
+        role = "organizer"
+    else:
+
+        participant_data = supabase.table("participants").select("*").eq("user_id", user_id).execute()
+        
+        if participant_data.data and len(participant_data.data) > 0:
+            role = "participant"
+        else:
+            role = "none"  
+
 
 
     return jsonify({
         "validToken": True,
-        "user_existed": True if existing_user_data else False
+        "user_role": role
     }), 200
 
 

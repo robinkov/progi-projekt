@@ -26,13 +26,13 @@ export default function HomeLayout({}: HomeLayoutProps) {
       const token = sessionData.session.access_token;
 
       try {
-        const res = await fetchPost<{ user_existed: boolean }>(
+        const res = await fetchPost<{ user_role: string }>(
           "/user",
           {},
           { Authorization: `Bearer ${token}` },
         );
 
-        if (!res.user_existed && window.location.pathname !== "/rolechoose") {
+        if (res.user_role == "none" && window.location.pathname !== "/rolechoose") {
           navigate("/rolechoose", { replace: true });
           return;
         }
