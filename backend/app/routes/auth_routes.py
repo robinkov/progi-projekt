@@ -28,9 +28,12 @@ def profile():
     user = user_resp.user
     user_metadata = user.user_metadata or {}
 
-    full_name = user_metadata.get("full_name")
-    first_name = full_name.split()[0]
-    last_name = full_name.split()[1]
+    full_name = user_metadata.get("full_name") or ""
+    name_parts = full_name.split()
+
+    first_name = name_parts[0] if len(name_parts) > 0 else ""
+    last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+
     mail = user.email
     
     existing_user = supabase.table("users").select("id").eq("auth_id", auth_id).execute()
