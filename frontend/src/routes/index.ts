@@ -9,6 +9,7 @@ import shopRoutes from "@/routes/shopRoutes"
 import roleChoose from "@/routes/roleChoose"
 import profileRoutes from "./profileRoutes";
 import organizerProfileRoutes from "./organizerProfileRoutes"
+import reservationsRoutes from "@/routes/reservationsRoutes";
 
 const routes: RouteObject = {
   path: "/",
@@ -19,6 +20,7 @@ const routes: RouteObject = {
     workshopRoutes,
     exhibitionRoutes,
     shopRoutes,
+    reservationsRoutes,
     roleChoose,
     profileRoutes,
     organizerProfileRoutes,

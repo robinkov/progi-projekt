@@ -1,4 +1,4 @@
-import Navbar from "@/components/app/Navbar";
+import PageLayout from "@/components/layout/PageLayout";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/config/supabase";
@@ -56,9 +56,8 @@ export default function HomeLayout({}: HomeLayoutProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <Navbar />
+    <PageLayout>
       <Outlet />
-    </div>
+    </PageLayout>
   );
 }

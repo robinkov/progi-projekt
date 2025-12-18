@@ -1,8 +1,6 @@
-import Header from "@/components/layout/Header";
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import WorkshopCard from "@/components/workshops/WorkshopCard";
-import { useAuth } from "@/components/context/AuthProvider";
 
 // Temporary hardcoded data (correct at this stage)
 const workshops = [
@@ -105,17 +103,8 @@ const workshops = [
 ];
 
 export default function Workshops() {
-    const auth = useAuth();
     return (
-        <PageLayout
-            header={
-                <Header
-                    userEmail={auth.user?.email}
-                    onLogout={() => {} }
-                    logoutLoading={false /* pass logoutLoading */}
-                />
-            }
-        >
+        <PageLayout>
             <MainColumn>
                 {/* Page title */}
                 <h1 className="text-2xl font-semibold mb-6">

@@ -1,7 +1,5 @@
-import Header from "@/components/layout/Header";
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
-import { useAuth } from "@/components/context/AuthProvider";
 import ProductCard from './../../components/shop/ProductCard';
 
 
@@ -108,17 +106,8 @@ const products = [
 
 
 export default function Products() {
-    const auth = useAuth();
     return (
-        <PageLayout
-            header={
-                <Header
-                    userEmail={auth.user?.email}
-                    onLogout={() => { } /* pass handleLogout */}
-                    logoutLoading={false /* pass logoutLoading */}
-                />
-            }
-        >
+        <PageLayout>
             <MainColumn>
                 {/* Page title */}
                 <h1 className="text-2xl font-semibold mb-6">
