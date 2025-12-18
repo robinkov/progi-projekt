@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/config/supabase";
 import { fetchPost } from "@/utils/fetchUtils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/components/context/AuthProvider"; // adjust path
+
 
 type ProfileForm = {
   first_name: string;
@@ -27,6 +29,8 @@ export default function Profile() {
     address: "",
     avatar_url: null,
   });
+
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -139,6 +143,13 @@ export default function Profile() {
         <CardContent className="p-6 space-y-8">
           <h1 className="text-2xl font-semibold">Profile</h1>
 
+          {/* Role */}
+            <div>
+                <Label>Role</Label>
+                <Input value={user?.role ?? "Not assigned"} disabled />
+            </div>
+
+
           {/* Avatar */}
             <div className="flex items-center gap-6">
                 <Avatar className="h-20 w-20">
@@ -228,6 +239,9 @@ export default function Profile() {
           </LoadingButton>
         </CardContent>
       </Card>
+    
+    
+      
     </div>
   );
 }

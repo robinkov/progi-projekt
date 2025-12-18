@@ -17,28 +17,25 @@ export default function RoleChooseLayout() {
   }, [auth.status]);
 
   const handleSelect = async (role: UserRole) => {
+        try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData?.session) return;
 
-    try {
-        const { data: sessionData } = await supabase.auth.getSession();
+            const token = sessionData.session.access_token;
 
-        if (!sessionData?.session) {
-        console.error("User is not authenticated");
-        return;
-        }
-
-        const token = sessionData.session.access_token;
-
-        await fetchPost("/setrole", { role }, {
+            await fetchPost("/setrole", { role }, {
             Authorization: `Bearer ${token}`
-        });
+            });
 
+            // Update AuthContext immediately
+            auth.setUser(prev => prev ? { ...prev, role } : null);
 
-        navigate("/", { replace: true });
-    } 
-    catch (error) {
-        console.error("Failed to save role", error);
-    }
-  };
+            navigate("/", { replace: true });
+        } catch (error) {
+            console.error("Failed to save role", error);
+        }
+    };
+
 
   return (
     <div className="flex flex-1 items-center justify-center">
