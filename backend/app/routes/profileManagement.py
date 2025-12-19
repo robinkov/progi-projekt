@@ -1,4 +1,4 @@
-import base64
+
 from flask import Blueprint, request, jsonify
 from ..supabase_client import supabase, admin_supabase
 from app.auth.auth import verify_token

@@ -8,6 +8,7 @@ import exhibitionRoutes from "@/routes/exhibitionRoutes"
 import shopRoutes from "@/routes/shopRoutes"
 import roleChoose from "@/routes/roleChoose"
 import profileRoutes from "./profileRoutes";
+import organizerProfileRoutes from "./organizerProfileRoutes"
 
 const routes: RouteObject = {
   path: "/",
@@ -19,7 +20,8 @@ const routes: RouteObject = {
     exhibitionRoutes,
     shopRoutes,
     roleChoose,
-    profileRoutes
+    profileRoutes,
+    organizerProfileRoutes,
   ],
   errorElement: ErrorPage({ code: 404, message: "Page Not Found" }),
 };

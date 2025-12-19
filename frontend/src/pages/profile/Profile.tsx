@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/config/supabase";
 import { fetchPost } from "@/utils/fetchUtils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/components/context/AuthProvider"; // adjust path
+import { useAuth } from "@/components/context/AuthProvider";
+import { Spinner } from "@/components/ui/spinner";
+
 
 
 type ProfileForm = {
@@ -132,7 +134,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        Loading profile...
+        loading profile...
       </div>
     );
   }

@@ -95,6 +95,17 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
               Profile
             </Button>
           </li>
+          {auth.user?.role === "organizator" && (
+            <li>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => navigate("/organizerprofile")}
+              >
+                Profile Organizacije
+              </Button>
+            </li>
+          )}
           <li>
             <Button
               variant="ghost"

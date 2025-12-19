@@ -11,16 +11,18 @@ def create_app():
 
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 
-    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+    CORS(app, origins=["*"], supports_credentials=True)
 
     from .routes.auth_routes import auth_bp
 
     from .routes.profileManagement import profile_bp
     from .routes.user import user_bp
+    from .routes.organizerProfileManagement import organizerProfile_bp
 
     app.register_blueprint(profile_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(organizerProfile_bp)
 
     return app
 
