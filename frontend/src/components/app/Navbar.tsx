@@ -125,15 +125,17 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
               <hr className="my-4 border-t border-muted-foreground" />
             </li>
             
+          {auth.user?.role === "polaznik" && (
             <li>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => navigate("/profile")}
-            >
-              Profile
-            </Button>
-          </li>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => navigate("/profile")}
+              >
+                Profile
+              </Button>
+            </li>
+          )}
           {auth.user?.role === "organizator" && (
             <li>
               <Button
@@ -145,41 +147,43 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
               </Button>
             </li>
           )}
-          <li>
-            <div>
-              <Button
-                variant="ghost"
-                className="w-full justify-start items-center"
-                onClick={() => setReservationsOpen((s) => !s)}
-                aria-expanded={reservationsOpen}
-              >
-                <span className="text-left">Moje rezervacije</span>
-                <ChevronDown className={cn("ml-auto size-4 transition-transform", reservationsOpen ? "rotate-180" : "")} />
-              </Button>
+          {auth.user?.role === "polaznik" && (
+            <li>
+              <div>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start items-center"
+                  onClick={() => setReservationsOpen((s) => !s)}
+                  aria-expanded={reservationsOpen}
+                >
+                  <span className="text-left">Moje rezervacije</span>
+                  <ChevronDown className={cn("ml-auto size-4 transition-transform", reservationsOpen ? "rotate-180" : "")} />
+                </Button>
 
-              {/* Submenu */}
-              <ul className={cn("mt-2 pl-4 space-y-2", reservationsOpen ? "block" : "hidden")}>
-                <li>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => closeAndNavigate("/reservations/workshops")}
-                  >
-                    Rezervirane radionice
-                  </Button>
-                </li>
-                <li>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => closeAndNavigate("/reservations/exhibitions")}
-                  >
-                    Prijavljene izložbe
-                  </Button>
-                </li>
-              </ul>
-            </div>
-          </li>
+                {/* Submenu */}
+                <ul className={cn("mt-2 pl-4 space-y-2", reservationsOpen ? "block" : "hidden")}>
+                  <li>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => closeAndNavigate("/reservations/workshops")}
+                    >
+                      Rezervirane radionice
+                    </Button>
+                  </li>
+                  <li>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => closeAndNavigate("/reservations/exhibitions")}
+                    >
+                      Prijavljene izložbe
+                    </Button>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          )}
         </ul>
       </aside>
 
