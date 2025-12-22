@@ -15,19 +15,19 @@ export default function AuthLanding() {
       </div>
       <h1 className="text-xl font-semibold text-center">Choose your authentication method:</h1>
       <div className="flex flex-col w-[200px] gap-4">
-        <Button variant="outline" onClick={() => navigate("login")} className="font-semibold cursor-pointer">
+        <Button variant="outline" onClick={() => navigate("login")} className="font-semibold">
           Login
         </Button>
-        <Button variant="outline" onClick={() => navigate("register")} className="font-semibold  cursor-pointer">
+        <Button variant="outline" onClick={() => navigate("register")} className="font-semibold">
           Register
         </Button>
-        <Button className="cursor-pointer"
+        <Button
           variant="outline"
           onClick={() => AuthController.signInWithGoogle()}
         >
           <GoogleLogo className="size-[none] h-5" />
         </Button>
-        <Button className="cursor-pointer" variant="outline" onClick={() => AuthController.signInWithGitHub()}>
+        <Button variant="outline" onClick={() => AuthController.signInWithGitHub()}>
           <GitHubLogo className="h-5" />
         </Button>
       </div>

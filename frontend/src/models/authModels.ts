@@ -4,17 +4,15 @@ import z from "zod"
 export const userModel = z.object({
   email: z.email(),
   fullName: z.string(),
-  role: z.string().nullable()
 });
 
 export type User = z.infer<typeof userModel>;
 
-export const userToViewModel = (model: AuthUser, role: string | null = null): User => {
+export const userToViewModel = (model: AuthUser): User => {
   const viewModel = {
     email: model?.email,
-    fullName: model.user_metadata?.full_name,
-    role
+    fullName: model.user_metadata?.full_name
   };
 
   return userModel.parse(viewModel);
-};
+}
