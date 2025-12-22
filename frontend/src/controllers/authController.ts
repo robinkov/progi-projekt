@@ -1,4 +1,5 @@
 import { supabase } from "@/config/supabase";
+import type { User } from "@/models/userModel";
 import type { Session } from "@supabase/supabase-js";
 
 export default class AuthController {
@@ -81,5 +82,15 @@ export default class AuthController {
     }
 
     return Promise.resolve();
+  }
+
+  static async getUserByEmail(email: string): Promise<User> {
+    const { data, error } = await supabase.from("users").select("*").eq("mail", email).maybeSingle();
+
+    if (error || !data) {
+      return Promise.reject(error ? error.message : `User with email ${email} not found`);
+    }
+
+    return data;
   }
 }

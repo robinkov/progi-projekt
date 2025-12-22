@@ -5,7 +5,7 @@ import AuthController from "@/controllers/authController";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Menu, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router";
-import { SidebarTrigger, useSidebar } from "../ui/sidebar";
+import { useSidebar } from "../ui/sidebar";
 
 type NavbarProps = React.ComponentPropsWithRef<'nav'> & {
 
@@ -70,7 +70,7 @@ function WebshopButton() {
   const navigate = useNavigate();
 
   function handleClick() {
-    navigate("/webshop");
+    navigate("/kosarica");
   }
 
   return (

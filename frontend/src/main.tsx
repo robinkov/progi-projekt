@@ -9,7 +9,7 @@ const router = createBrowserRouter([routes]);
 
 createRoot(document.getElementById("root")!).render(
   <AuthProvider>
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <RouterProvider router={router} />
     </SidebarProvider>
   </AuthProvider>

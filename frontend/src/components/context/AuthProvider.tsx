@@ -1,5 +1,6 @@
 import { supabase } from "@/config/supabase";
-import { userToViewModel, type User } from "@/models/authModels";
+import AuthController from "@/controllers/authController";
+import { userToViewModel, type User } from "@/models/userModel";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type AuthContextStatus = "authenticated" | "unauthenticated" | "loading";
@@ -17,11 +18,23 @@ export default function AuthProvider({
   const [status, setStatus] = useState<AuthContextStatus>("loading");
   const [user, setUser] = useState<null | User>(null);
 
+  const getDbUser = async (email: string) => {
+    try {
+      const dbUser = await AuthController.getUserByEmail(email);
+      setUser(userToViewModel(dbUser));
+      setStatus("authenticated");
+    } catch (err) {
+      console.error(err);
+      setStatus("unauthenticated");
+      setUser(null);
+    }
+  }
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(userToViewModel(session.user));
-        setStatus("authenticated");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user?.email) {
+        getDbUser(session.user.email);
+        setStatus("loading");
       } else {
         setStatus("unauthenticated");
         setUser(null);

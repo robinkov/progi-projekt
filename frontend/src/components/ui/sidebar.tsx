@@ -291,7 +291,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex",
+        "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
         "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
         "hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full",
@@ -502,6 +502,7 @@ function SidebarMenuButton({
   size = "default",
   tooltip,
   className,
+  onClick,
   ...props
 }: React.ComponentProps<"button"> & {
   asChild?: boolean
@@ -509,7 +510,7 @@ function SidebarMenuButton({
   tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button"
-  const { isMobile, state } = useSidebar()
+  const { isMobile, state, toggleSidebar } = useSidebar()
 
   const button = (
     <Comp
@@ -517,6 +518,12 @@ function SidebarMenuButton({
       data-sidebar="menu-button"
       data-size={size}
       data-active={isActive}
+      onClick={(e) => {
+        toggleSidebar();
+        if (onClick !== undefined) {
+          onClick(e);
+        }
+      }}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
       {...props}
     />
