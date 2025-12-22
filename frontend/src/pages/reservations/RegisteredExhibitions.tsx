@@ -1,7 +1,15 @@
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import { Button } from "@/components/ui/button";
-import ColumnsHeader from "@/components/reservations/ColumnsHeader";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Exhibition = {
   id: number;
@@ -24,40 +32,37 @@ export default function RegisteredExhibitions() {
       <MainColumn>
         <h1 className="text-2xl font-semibold mb-6">Prijavljene izložbe</h1>
 
-        <div className="w-full">
-          {/* Header row (visual labels) aligned to row column widths */}
-          <ColumnsHeader col4Label="Organizator" col5Label="Lokacija" />
-
-          {/* Rows as rounded cards with stylized separators */}
-          <div className="space-y-3">
+        <Table>
+          <TableCaption>Popis prijavljenih izložbi.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Datum</TableHead>
+              <TableHead>Vrijeme</TableHead>
+              <TableHead>Naziv</TableHead>
+              <TableHead>Organizator</TableHead>
+              <TableHead>Lokacija</TableHead>
+              <TableHead className="text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {mockRegistered.map((e) => (
-              <div key={e.id} className="flex items-center px-4 py-3 hover:bg-gray-50 rounded-lg border">
-                <div className="flex items-center text-sm text-gray-700 flex-1 min-w-0">
-                  <div className="w-24 flex-shrink-0">{e.date}</div>
-                  <div className="mx-2 w-[1px] h-5 bg-gray-200" />
-
-                  <div className="w-36 flex-shrink-0">{e.time ?? "-"}</div>
-                  <div className="mx-2 w-[1px] h-5 bg-gray-200" />
-
-                  <div className="flex-1 min-w-0 pr-2">
-                    <div className="truncate font-medium text-gray-900">{e.title}</div>
-                  </div>
-                  <div className="mx-2 w-[1px] h-5 bg-gray-200" />
-
-                  <div className="w-36 flex-shrink-0 text-gray-700">{e.organizer}</div>
-                  <div className="mx-2 w-[1px] h-5 bg-gray-200" />
-
-                  <div className="w-36 truncate text-gray-500">{e.location}</div>
-                </div>
-                <div className="ml-4 w-28 flex-shrink-0">
+              <TableRow key={e.id}>
+                <TableCell className="font-medium">{e.date}</TableCell>
+                <TableCell>{e.time ?? "-"}</TableCell>
+                <TableCell>
+                  <span className="truncate inline-block max-w-[300px] align-middle">{e.title}</span>
+                </TableCell>
+                <TableCell>{e.organizer}</TableCell>
+                <TableCell className="text-muted-foreground">{e.location}</TableCell>
+                <TableCell className="text-right">
                   <Button variant="ghost" size="sm" disabled>
                     PRIJAVLJENO
                   </Button>
-                </div>
-              </div>
+                </TableCell>
+              </TableRow>
             ))}
-          </div>
-        </div>
+          </TableBody>
+        </Table>
       </MainColumn>
     </PageLayout>
   );
