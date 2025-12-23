@@ -5,102 +5,117 @@ import { supabase } from "@/config/supabase";
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import ExhibitionCard from './../../components/exhibitions/ExhibitionCard';
+import BriefCard from "@/components/app/BriefCard";
 
-
-// Temporary hardcoded data (correct at this stage)
 const exhibitions = [
     {
         id: 1,
         date: "14.12",
-        time: "18:00",
+        timeFrom: "18:00",
+        timeTo: "20:00",
         title: "Keramika u pokretu",
-        organizer: "ClayPlay",
-        location: "Zagreb, Centar",
+        name: "ClayPlay",
+        place: "Zagreb, Centar",
     },
     {
         id: 2,
         date: "18.12",
-        time: "19:30",
+        timeFrom: "19:30",
+        timeTo: "21:30",
         title: "Suvremena glina",
-        organizer: "Galerija Forma",
-        location: "Split",
+        name: "Galerija Forma",
+        place: "Split",
     },
     {
         id: 3,
         date: "22.12",
+        timeFrom: "17:00",
+        timeTo: "19:00",
         title: "Minimalističke forme",
-        organizer: "Studio Terra",
-        location: "Online",
+        name: "Studio Terra",
+        place: "Online",
     },
     {
         id: 4,
         date: "28.12",
-        time: "17:00",
+        timeFrom: "17:00",
+        timeTo: "19:00",
         title: "Tradicionalna keramika Dalmacije",
-        organizer: "Muzej obrtništva",
-        location: "Šibenik",
+        name: "Muzej obrtništva",
+        place: "Šibenik",
     },
     {
         id: 5,
         date: "5.1",
-        time: "18:30",
+        timeFrom: "18:30",
+        timeTo: "20:30",
         title: "Glazura kao izraz",
-        organizer: "Atelier Modra",
-        location: "Rijeka",
+        name: "Atelier Modra",
+        place: "Rijeka",
     },
     {
         id: 6,
         date: "9.1",
+        timeFrom: "16:00",
+        timeTo: "18:00",
         title: "Keramika i prostor",
-        organizer: "Galerija K2",
-        location: "Zadar",
+        name: "Galerija K2",
+        place: "Zadar",
     },
     {
         id: 7,
         date: "13.1",
-        time: "20:00",
+        timeFrom: "20:00",
+        timeTo: "22:00",
         title: "Eksperimentalne tehnike pečenja",
-        organizer: "ClayLab",
-        location: "Zagreb, Istok",
+        name: "ClayLab",
+        place: "Zagreb, Istok",
     },
     {
         id: 8,
         date: "17.1",
-        time: "18:00",
+        timeFrom: "18:00",
+        timeTo: "20:00",
         title: "Forma i tekstura",
-        organizer: "Umjetnička udruga Krug",
-        location: "Varaždin",
+        name: "Umjetnička udruga Krug",
+        place: "Varaždin",
     },
     {
         id: 9,
         date: "21.1",
+        timeFrom: "17:30",
+        timeTo: "19:30",
         title: "Keramika u digitalnom dobu",
-        organizer: "Design Hub",
-        location: "Online",
+        name: "Design Hub",
+        place: "Online",
     },
     {
         id: 10,
         date: "26.1",
-        time: "19:00",
+        timeFrom: "19:00",
+        timeTo: "21:00",
         title: "Između funkcije i skulpture",
-        organizer: "Galerija Linija",
-        location: "Osijek",
+        name: "Galerija Linija",
+        place: "Osijek",
     },
     {
         id: 11,
         date: "30.1",
+        timeFrom: "18:00",
+        timeTo: "20:00",
         title: "Mladi keramičari",
-        organizer: "Akademija primijenjenih umjetnosti",
-        location: "Zagreb, Centar",
+        name: "Akademija primijenjenih umjetnosti",
+        place: "Zagreb, Centar",
     },
     {
         id: 12,
         date: "3.2",
-        time: "18:00",
+        timeFrom: "18:00",
+        timeTo: "20:00",
         title: "Keramika velikog formata",
-        organizer: "Studio Glina",
-        location: "Pula",
-    },
+        name: "Studio Glina",
+        place: "Pula",
+    }
 ];
 
 
@@ -141,10 +156,11 @@ export default function Exhibitions() {
                 {/* Exhibitions grid */}
                 <div className="grid grid-cols-4 gap-6">
                     {exhibitions.map((exhibition) => (
-                        <a href={"/exhibitions/" + exhibition.id}><ExhibitionCard
-                            key={exhibition.id}
-                            exhibition={exhibition}
-                        /></a>
+                        <a href={"/exhibitions/" + exhibition.id}>
+                            <BriefCard
+                                key={exhibition.id}
+                                {...exhibition}
+                            /></a>
                     ))}
                 </div>
             </MainColumn>

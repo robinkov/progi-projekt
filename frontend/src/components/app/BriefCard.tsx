@@ -15,15 +15,15 @@ export default function BriefCard({
   return (
     <Card className="gap-3 min-w-[300px] w-[300px] duration-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5">
       <CardHeader>
-        <h2 className="font-semibold">{ timeFrom } - { timeTo }</h2>
-        <p className="text-xs">{ date }</p>
+        <h2 className="font-semibold">{timeFrom} - {timeTo}</h2>
+        <p className="text-xs">{date}</p>
       </CardHeader>
       <CardContent>
-        <h1 className="text-lg font-semibold">{ title }</h1>
-        <p className="text-xs">{ name }</p>
+        <h1 className="text-lg font-semibold">{title}</h1>
+        <p className="text-xs">{name}</p>
       </CardContent>
       <CardFooter>
-        <p className="text-xs text-muted-foreground">{ place }</p>
+        <p className="text-xs text-muted-foreground">{place}</p>
       </CardFooter>
     </Card>
   );
