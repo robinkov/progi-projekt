@@ -5,7 +5,6 @@ import AuthController from "@/controllers/authController";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Menu, ShoppingCart, X, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router";
-import { set } from "zod";
 
 type NavbarProps = React.ComponentPropsWithRef<"nav">;
 
@@ -84,7 +83,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
             size="icon"
             onClick={() => {setSidebarOpen(false); setMyEventsOpen(false);}}
           >
-            ✕
+            <X></X>
           </Button>
         </div>
 

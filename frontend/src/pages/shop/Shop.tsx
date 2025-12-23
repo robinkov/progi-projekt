@@ -2,10 +2,6 @@ import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import ProductCard from './../../components/shop/ProductCard';
 
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
-import { supabase } from "@/config/supabase";
-
 // Temporary hardcoded data (correct at this stage)
 const products = [
     {

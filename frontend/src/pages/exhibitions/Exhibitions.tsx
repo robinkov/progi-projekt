@@ -1,7 +1,3 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
-import { supabase } from "@/config/supabase";
-
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import BriefCard from "@/components/app/BriefCard";
