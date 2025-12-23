@@ -143,7 +143,7 @@ export default function Products() {
                 </h1>
 
                 {/* Products grid */}
-                <div className="grid grid-cols-4 gap-6">
+                <div className="flex flex-wrap gap-4 pt-4">
                     {products.map((product) => (
                         <a href={"/products/" + product.id}><ProductCard
                             key={product.id}

@@ -4,7 +4,6 @@ import { supabase } from "@/config/supabase";
 
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
-import ExhibitionCard from './../../components/exhibitions/ExhibitionCard';
 import BriefCard from "@/components/app/BriefCard";
 
 const exhibitions = [
@@ -154,7 +153,7 @@ export default function Exhibitions() {
                 </h1>
 
                 {/* Exhibitions grid */}
-                <div className="grid grid-cols-4 gap-6">
+                <div className="flex flex-wrap gap-4 pt-4">
                     {exhibitions.map((exhibition) => (
                         <a href={"/exhibitions/" + exhibition.id}>
                             <BriefCard

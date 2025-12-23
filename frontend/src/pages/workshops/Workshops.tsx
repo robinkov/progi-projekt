@@ -4,7 +4,6 @@ import { supabase } from "@/config/supabase";
 
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
-import WorkshopCard from "@/components/workshops/WorkshopCard";
 import BriefCard from "@/components/app/BriefCard";
 
 const workshops = [
@@ -151,7 +150,7 @@ export default function Workshops() {
             <MainColumn>
                 <h1 className="text-2xl font-semibold mb-6">Radionice</h1>
 
-                <div className="grid grid-cols-4 gap-6">
+                <div className="flex flex-wrap gap-4 pt-4">
                     {workshops.map((workshop) => (
                         <a key={workshop.id} href={`/workshops/${workshop.id}`}>
                             <BriefCard key={workshop.id} {...workshop} />
