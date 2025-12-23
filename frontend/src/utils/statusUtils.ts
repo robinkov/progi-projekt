@@ -1,11 +1,20 @@
-
 function parseDate(dateStr: string): Date | null {
-  const [dayStr, monthStr] = dateStr.split(".");
-  const day = Number(dayStr);
-  const month = Number(monthStr);
-  if (!day || !month) return null;
-  // Pretpostavljamo trenutnu godinu. Za datume u prošlosti/budućnosti možda treba bolja logika.
-  const year = new Date().getFullYear();
+  const parts = dateStr.split(".");
+  if (parts.length < 2) return null;
+
+  const day = Number(parts[0]);
+  const month = Number(parts[1]);
+  if (isNaN(day) || isNaN(month)) return null;
+
+  let year;
+  if (parts.length === 3 && parts[2]) {
+    const yearPart = Number(parts[2]);
+    if (isNaN(yearPart)) return null;
+    year = yearPart < 100 ? 2000 + yearPart : yearPart;
+  } else {
+    year = new Date().getFullYear();
+  }
+
   return new Date(year, month - 1, day);
 }
 
@@ -49,4 +58,18 @@ export function computeEventStatus(dateStr: string, time?: string): string {
   }
 
   return "ZAKAZANO";
+}
+
+export function isCancellationAllowed(dateStr: string, time?: string): boolean {
+  const now = new Date();
+  const date = parseDate(dateStr);
+  if (!date) return false;
+
+  const { start } = parseTimeRange(time);
+  
+  const startDt = start ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), start.h, start.m) : new Date(date);
+
+  const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
+  
+  return startDt.getTime() - now.getTime() > fortyEightHoursInMs;
 }

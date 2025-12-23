@@ -21,9 +21,9 @@ type Exhibition = {
 };
 
 const mockRegistered: Exhibition[] = [
-  { id: 1, date: "14.12", time: "18:00", title: "Keramika u pokretu", organizer: "ClayPlay", location: "Zagreb, Centar" },
-  { id: 2, date: "18.12", time: "19:30", title: "Suvremena glina", organizer: "Galerija Forma", location: "Split" },
-  { id: 3, date: "22.12", title: "Minimalističke forme", organizer: "Studio Terra", location: "Online" },
+  { id: 1, date: "14.12.25", time: "18:00", title: "Keramika u pokretu", organizer: "ClayPlay", location: "Zagreb, Centar" },
+  { id: 2, date: "18.12.25", time: "19:30", title: "Suvremena glina", organizer: "Galerija Forma", location: "Split" },
+  { id: 3, date: "22.12.25", title: "Minimalističke forme", organizer: "Studio Terra", location: "Online" },
 ];
 
 export default function RegisteredExhibitions() {
@@ -47,7 +47,7 @@ export default function RegisteredExhibitions() {
           <TableBody>
             {mockRegistered.map((e) => (
               <TableRow key={e.id}>
-                <TableCell className="font-medium">{e.date}</TableCell>
+                <TableCell className="font-medium">{e.date.substring(0, 5)}</TableCell>
                 <TableCell>{e.time ?? "-"}</TableCell>
                 <TableCell>
                   <span className="truncate inline-block max-w-[300px] align-middle">{e.title}</span>
