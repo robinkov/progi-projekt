@@ -10,6 +10,7 @@ import roleChoose from "@/routes/roleChoose"
 import profileRoutes from "./profileRoutes";
 import organizerProfileRoutes from "./organizerProfileRoutes"
 import reservationsRoutes from "@/routes/reservationsRoutes";
+import organizedEventsRoutes from "@/routes/organizedEventsRoutes";
 
 const routes: RouteObject = {
   path: "/",
@@ -24,6 +25,7 @@ const routes: RouteObject = {
     roleChoose,
     profileRoutes,
     organizerProfileRoutes,
+    organizedEventsRoutes,
   ],
   errorElement: ErrorPage({ code: 404, message: "Page Not Found" }),
 };

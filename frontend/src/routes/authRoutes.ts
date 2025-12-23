@@ -1,4 +1,4 @@
-import AuthLayout from "@/pages/auth/_Layout"
+import AuthLayout from "@/pages/auth/_layout"
 import AuthLanding from "@/pages/auth/AuthLanding";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
