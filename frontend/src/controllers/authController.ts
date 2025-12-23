@@ -2,7 +2,7 @@ import { supabase } from "@/config/supabase";
 import type { Session } from "@supabase/supabase-js";
 
 export default class AuthController {
-  static async loginWithEmailAndPassword(email: string, password: string): Promise<void> {    
+  static async loginWithEmailAndPassword(email: string, password: string): Promise<void> {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -65,7 +65,7 @@ export default class AuthController {
 
   static async getCurrentSession(): Promise<Session> {
     const { data: { session }, error } = await supabase.auth.getSession();
-    
+
     if (!session || error) {
       return Promise.reject(new Error(error?.message || "No active session."));
     }
@@ -75,7 +75,9 @@ export default class AuthController {
 
   static async logoutUser(): Promise<void> {
     const { error } = await supabase.auth.signOut();
-    
+
+
+
     if (error) {
       return Promise.reject(new Error(error.message));
     }

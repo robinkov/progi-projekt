@@ -1,3 +1,7 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { supabase } from "@/config/supabase";
+
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import WorkshopCard from "@/components/workshops/WorkshopCard";
@@ -103,21 +107,42 @@ const workshops = [
 ];
 
 export default function Workshops() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data } = await supabase.auth.getSession();
+
+            if (!data.session) {
+                navigate("/auth", { replace: true });
+            }
+        };
+
+        checkSession();
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!session) {
+                navigate("/auth", { replace: true });
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [navigate]);
+
     return (
         <PageLayout>
             <MainColumn>
-                {/* Page title */}
-                <h1 className="text-2xl font-semibold mb-6">
-                    Radionice
-                </h1>
+                <h1 className="text-2xl font-semibold mb-6">Radionice</h1>
 
-                {/* Workshops grid */}
                 <div className="grid grid-cols-4 gap-6">
                     {workshops.map((workshop) => (
-                        <a href={"/workshops/" + workshop.id}><WorkshopCard
-                            key={workshop.id}
-                            workshop={workshop}
-                        /></a>
+                        <a key={workshop.id} href={`/workshops/${workshop.id}`}>
+                            <WorkshopCard workshop={workshop} />
+                        </a>
                     ))}
                 </div>
             </MainColumn>

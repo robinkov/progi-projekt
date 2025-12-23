@@ -1,3 +1,7 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { supabase } from "@/config/supabase";
+
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import ExhibitionCard from './../../components/exhibitions/ExhibitionCard';
@@ -101,6 +105,31 @@ const exhibitions = [
 
 
 export default function Exhibitions() {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data } = await supabase.auth.getSession();
+
+            if (!data.session) {
+                navigate("/auth", { replace: true });
+            }
+        };
+
+        checkSession();
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!session) {
+                navigate("/auth", { replace: true });
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [navigate]);
     return (
         <PageLayout>
             <MainColumn>
