@@ -1,6 +1,8 @@
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { computeEventStatus } from "@/utils/statusUtils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +14,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -60,6 +61,7 @@ export default function ReservedWorkshops() {
               <TableHead>Naziv</TableHead>
               <TableHead>Instruktor</TableHead>
               <TableHead>Lokacija</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Akcija</TableHead>
             </TableRow>
           </TableHeader>
@@ -73,6 +75,7 @@ export default function ReservedWorkshops() {
                 </TableCell>
                 <TableCell>{w.instructor}</TableCell>
                 <TableCell className="text-muted-foreground">{w.location}</TableCell>
+                <TableCell>{computeEventStatus(w.date, w.time)}</TableCell>
                 <TableCell className="text-right">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

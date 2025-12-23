@@ -5,6 +5,7 @@ import AuthController from "@/controllers/authController";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Menu, ShoppingCart, X, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router";
+import { set } from "zod";
 
 type NavbarProps = React.ComponentPropsWithRef<"nav">;
 
@@ -14,13 +15,18 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
 
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [reservationsOpen, setReservationsOpen] = useState(false);
+  const [myEventsOpen, setMyEventsOpen] = useState(false);
 
   async function handleLogout() {
     setLogoutLoading(true);
-    AuthController.logoutUser()
-      .catch((error: Error) => alert(error.message))
-      .finally(() => setLogoutLoading(false));
+    try {
+      await AuthController.logoutUser();
+      navigate("/auth", { replace: true });
+    } catch (error: any) {
+      alert(error?.message || "Logout failed");
+    } finally {
+      setLogoutLoading(false);
+    }
   }
 
   function closeAndNavigate(path: string) {
@@ -76,7 +82,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => {setSidebarOpen(false); setMyEventsOpen(false);}}
           >
             ✕
           </Button>
@@ -153,15 +159,15 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start items-center"
-                  onClick={() => setReservationsOpen((s) => !s)}
-                  aria-expanded={reservationsOpen}
+                  onClick={() => setMyEventsOpen((s) => !s)}
+                  aria-expanded={myEventsOpen}
                 >
                   <span className="text-left">Moje rezervacije</span>
-                  <ChevronDown className={cn("ml-auto size-4 transition-transform", reservationsOpen ? "rotate-180" : "")} />
+                  <ChevronDown className={cn("ml-auto size-4 transition-transform", myEventsOpen ? "rotate-180" : "")} />
                 </Button>
 
                 {/* Submenu */}
-                <ul className={cn("mt-2 pl-4 space-y-2", reservationsOpen ? "block" : "hidden")}>
+                <ul className={cn("mt-2 pl-4 space-y-2", myEventsOpen ? "block" : "hidden")}>
                   <li>
                     <Button
                       variant="ghost"
@@ -178,6 +184,43 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                       onClick={() => closeAndNavigate("/reservations/exhibitions")}
                     >
                       Prijavljene izložbe
+                    </Button>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          )}
+          {auth.user?.role === "organizator" && (
+            <li>
+              <div>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start items-center"
+                  onClick={() => setMyEventsOpen((s) => !s)}
+                  aria-expanded={myEventsOpen}
+                >
+                  <span className="text-left">Organizirani događaji</span>
+                  <ChevronDown className={cn("ml-auto size-4 transition-transform", myEventsOpen ? "rotate-180" : "")} />
+                </Button>
+
+                {/* Submenu */}
+                <ul className={cn("mt-2 pl-4 space-y-2", myEventsOpen ? "block" : "hidden")}>
+                  <li>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => closeAndNavigate("/organizedEvents/workshops")}
+                    >
+                      Moje radionice
+                    </Button>
+                  </li>
+                  <li>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => closeAndNavigate("/organizedEvents/exhibitions")}
+                    >
+                      Moje izložbe
                     </Button>
                   </li>
                 </ul>

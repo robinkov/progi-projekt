@@ -1,5 +1,5 @@
 import { type RouteObject } from "react-router";
-import Shop from "@/pages/shop/shop";
+import Shop from "@/pages/shop/Shop";
 import { Spinner } from "@/components/ui/spinner";
 
 const routes: RouteObject = {

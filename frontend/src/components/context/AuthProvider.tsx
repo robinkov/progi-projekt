@@ -23,8 +23,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       if (session?.user) {
         try {
           const token = session.access_token;
-          const userData = await fetchPost<{ role: string | null }>("/getrole", {},
-            { Authorization: `Bearer ${token}` },
+          const userData = await fetchPost<{ role: string | null }>(
+            "/getrole", // url
+            {}, // body
+            { Authorization: `Bearer ${token}` }, //headers
           );
 
           setUser(

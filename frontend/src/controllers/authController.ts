@@ -76,8 +76,6 @@ export default class AuthController {
   static async logoutUser(): Promise<void> {
     const { error } = await supabase.auth.signOut();
 
-
-
     if (error) {
       return Promise.reject(new Error(error.message));
     }
