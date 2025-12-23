@@ -15,6 +15,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [myEventsOpen, setMyEventsOpen] = useState(false);
+  const [createEventsOpen, setCreateEventsOpen] = useState(false);
 
   async function handleLogout() {
     setLogoutLoading(true);
@@ -63,175 +64,213 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
       </nav>
 
       {/* Sidebar + overlay */}
-    <div
-      className={cn(
-        "fixed inset-0 z-50 flex transition-opacity duration-300",
-        sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      )}
-    >
-      {/* Sidebar (LEFT) */}
-      <aside
+      <div
         className={cn(
-          "w-64 bg-card h-full p-4 shadow-lg transform transition-transform duration-300 ease-in-out border-r-1",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-0 z-50 flex transition-opacity duration-300",
+          sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold">Menu</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {setSidebarOpen(false); setMyEventsOpen(false);}}
-          >
-            <X></X>
-          </Button>
-        </div>
-
-        <ul className="space-y-3">
-          <li>
+        {/* Sidebar (LEFT) */}
+        <aside
+          className={cn(
+            "w-64 bg-card h-full p-4 shadow-lg transform transition-transform duration-300 ease-in-out border-r-1",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-semibold">Menu</h2>
             <Button
               variant="ghost"
-              className="w-full justify-start"
-              onClick={() => navigate("/")}
+              size="icon"
+              onClick={() => {
+                setSidebarOpen(false);
+                setMyEventsOpen(false);
+                setCreateEventsOpen(false);
+              }}
             >
-              Home
+              <X></X>
             </Button>
-          </li>
-          <li>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => { navigate("/shop"); setSidebarOpen(false); }}
-            >
-              Webshop
-            </Button>
-          </li>
-          <li>
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => { navigate("/workshops"); setSidebarOpen(false); }}
-              >
-                Radionice
-              </Button>
-            </li>
-            <li>
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => { navigate("/exhibitions"); setSidebarOpen(false); }}
-              >
-                Izložbe
-              </Button>
-            </li>
+          </div>
 
-            {/* Separator */}
-            <li>
-              <hr className="my-4 border-t border-muted-foreground" />
-            </li>
-            
-          {auth.user?.role === "polaznik" && (
+          <ul className="space-y-3">
             <li>
               <Button
                 variant="ghost"
                 className="w-full justify-start"
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/")}
               >
-                Profile
+                Home
               </Button>
             </li>
-          )}
-          {auth.user?.role === "organizator" && (
             <li>
               <Button
                 variant="ghost"
                 className="w-full justify-start"
-                onClick={() => navigate("/organizerprofile")}
+                onClick={() => { navigate("/shop"); setSidebarOpen(false); }}
               >
-                Profile Organizacije
+                Webshop
               </Button>
             </li>
-          )}
-          {auth.user?.role === "polaznik" && (
             <li>
-              <div>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start items-center"
-                  onClick={() => setMyEventsOpen((s) => !s)}
-                  aria-expanded={myEventsOpen}
+                  className="w-full justify-start"
+                  onClick={() => { navigate("/workshops"); setSidebarOpen(false); }}
                 >
-                  <span className="text-left">Moje rezervacije</span>
-                  <ChevronDown className={cn("ml-auto size-4 transition-transform", myEventsOpen ? "rotate-180" : "")} />
+                  Radionice
                 </Button>
-
-                {/* Submenu */}
-                <ul className={cn("mt-2 pl-4 space-y-2", myEventsOpen ? "block" : "hidden")}>
-                  <li>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => closeAndNavigate("/reservations/workshops")}
-                    >
-                      Rezervirane radionice
-                    </Button>
-                  </li>
-                  <li>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => closeAndNavigate("/reservations/exhibitions")}
-                    >
-                      Prijavljene izložbe
-                    </Button>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          )}
-          {auth.user?.role === "organizator" && (
-            <li>
-              <div>
+              </li>
+              <li>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start items-center"
-                  onClick={() => setMyEventsOpen((s) => !s)}
-                  aria-expanded={myEventsOpen}
+                  className="w-full justify-start"
+                  onClick={() => { navigate("/exhibitions"); setSidebarOpen(false); }}
                 >
-                  <span className="text-left">Organizirani događaji</span>
-                  <ChevronDown className={cn("ml-auto size-4 transition-transform", myEventsOpen ? "rotate-180" : "")} />
+                  Izložbe
                 </Button>
+              </li>
 
-                {/* Submenu */}
-                <ul className={cn("mt-2 pl-4 space-y-2", myEventsOpen ? "block" : "hidden")}>
-                  <li>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => closeAndNavigate("/organizedEvents/workshops")}
-                    >
-                      Moje radionice
-                    </Button>
-                  </li>
-                  <li>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => closeAndNavigate("/organizedEvents/exhibitions")}
-                    >
-                      Moje izložbe
-                    </Button>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          )}
-        </ul>
-      </aside>
+              {/* Separator */}
+              <li>
+                <hr className="my-4 border-t border-muted-foreground" />
+              </li>
+              
+            {auth.user?.role === "polaznik" && (
+              <li>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => navigate("/profile")}
+                >
+                  Profile
+                </Button>
+              </li>
+            )}
+            {auth.user?.role === "organizator" && (
+              <li>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => navigate("/organizerprofile")}
+                >
+                  Profile Organizacije
+                </Button>
+              </li>
+            )}
+            {auth.user?.role === "polaznik" && (
+              <li>
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start items-center"
+                    onClick={() => setMyEventsOpen((s) => !s)}
+                    aria-expanded={myEventsOpen}
+                  >
+                    <span className="text-left">Moje rezervacije</span>
+                    <ChevronDown className={cn("ml-auto size-4 transition-transform", myEventsOpen ? "rotate-180" : "")} />
+                  </Button>
 
-    </div>
+                  {/* Submenu */}
+                  <ul className={cn("mt-2 pl-4 space-y-2", myEventsOpen ? "block" : "hidden")}>
+                    <li>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => closeAndNavigate("/reservations/workshops")}
+                      >
+                        Rezervirane radionice
+                      </Button>
+                    </li>
+                    <li>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => closeAndNavigate("/reservations/exhibitions")}
+                      >
+                        Prijavljene izložbe
+                      </Button>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            )}
+            {auth.user?.role === "organizator" && (
+              <li>
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start items-center"
+                    onClick={() => setMyEventsOpen((s) => !s)}
+                    aria-expanded={myEventsOpen}
+                  >
+                    <span className="text-left">Organizirani događaji</span>
+                    <ChevronDown className={cn("ml-auto size-4 transition-transform", myEventsOpen ? "rotate-180" : "")} />
+                  </Button>
 
+                  {/* Submenu */}
+                  <ul className={cn("mt-2 pl-4 space-y-2", myEventsOpen ? "block" : "hidden")}>
+                    <li>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => closeAndNavigate("/organizedEvents/workshops")}
+                      >
+                        Moje radionice
+                      </Button>
+                    </li>
+                    <li>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => closeAndNavigate("/organizedEvents/exhibitions")}
+                      >
+                        Moje izložbe
+                      </Button>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            )}
+            {auth.user?.role === "organizator" && (
+              <li>
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start items-center"
+                    onClick={() => setCreateEventsOpen((s) => !s)}
+                    aria-expanded={createEventsOpen}
+                  >
+                    <span className="text-left">Kreiraj događaj</span>
+                    <ChevronDown className={cn("ml-auto size-4 transition-transform", createEventsOpen ? "rotate-180" : "")} />
+                  </Button>
 
+                  {/* Submenu */}
+                  <ul className={cn("mt-2 pl-4 space-y-2", createEventsOpen ? "block" : "hidden")}>
+                    <li>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => closeAndNavigate("/create-event/workshop")}
+                      >
+                        Kreiraj radionicu
+                      </Button>
+                    </li>
+                    <li>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => closeAndNavigate("/create-event/exhibition")}
+                      >
+                        Kreiraj izložbu
+                      </Button>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            )}
+          </ul>
+        </aside>
+      </div>
     </>
   );
 }
