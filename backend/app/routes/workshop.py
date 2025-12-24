@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, Blueprint
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
+from datetime import datetime, timedelta
 
 workshop_bp = Blueprint("workshop_bp", __name__)
 
@@ -277,3 +278,67 @@ def make_reservation(workshop_id):
         ),
         201,
     )
+    
+
+@workshop_bp.route("/getworkshops", methods=["GET"])
+def get_workshops():
+    workshops_resp = (
+        supabase.table("workshops")
+        .select("*")
+        .order("date_time")
+        .execute()
+    )
+
+    workshops = workshops_resp.data or []
+
+    if not workshops:
+        return jsonify({"success": True, "workshops": []}), 200
+
+
+    organizer_ids = list({w["organizer_id"] for w in workshops if w.get("organizer_id")})
+
+    organizers_resp = (
+        supabase.table("organizers")
+        .select("id, user_id")
+        .in_("id", organizer_ids)
+        .execute()
+    )
+
+    organizer_map = {o["id"]: o["user_id"] for o in organizers_resp.data or []}
+
+    users_resp = (
+        supabase.table("users")
+        .select("id, first_name, last_name")
+        .in_("id", list(organizer_map.values()))
+        .execute()
+    )
+
+    user_map = {
+        u["id"]: f"{u['first_name']} {u['last_name']}"
+        for u in users_resp.data or []
+    }
+
+    for w in workshops:
+
+        user_id = organizer_map.get(w.get("organizer_id"))
+        w["organizer_name"] = user_map.get(user_id, "Organizator")
+
+
+        start_dt = datetime.fromisoformat(w["date_time"])
+
+
+        h, m, s = map(int, w["duration"].split(":"))
+        duration_delta = timedelta(hours=h, minutes=m, seconds=s)
+
+        end_dt = start_dt + duration_delta
+
+        w["date"] = start_dt.strftime("%d.%m")
+        w["timeFrom"] = start_dt.strftime("%H:%M")
+        w["timeTo"] = end_dt.strftime("%H:%M")
+
+    return jsonify(
+        {
+            "success": True,
+            "workshops": workshops
+        }
+    ), 200
