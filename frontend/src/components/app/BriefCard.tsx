@@ -15,7 +15,8 @@ export default function BriefCard({
   return (
     <Card className="gap-3 min-w-[300px] w-[300px] duration-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5">
       <CardHeader>
-        <h2 className="font-semibold">{timeFrom} - {timeTo}</h2>
+        { timeTo ? <h2 className="font-semibold">{timeFrom} - {timeTo}</h2>
+        : <h2 className="font-semibold">{timeFrom}</h2>}
         <p className="text-xs">{date}</p>
       </CardHeader>
       <CardContent>

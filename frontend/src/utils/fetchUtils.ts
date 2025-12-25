@@ -23,7 +23,7 @@ export async function fetchPost<T>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...headers, // merge your custom headers here
+      ...headers,
     },
     body: JSON.stringify(body),
   });
@@ -37,4 +37,25 @@ export async function fetchPost<T>(
   } catch (error) {
     return Promise.reject(new Error("Invalid JSON response."));
   }
+}
+
+
+export async function fetchDelete<T>(
+  url: string,
+  headers: Record<string, string> = {}
+): Promise<T> {
+  const response = await fetch(backend_url + url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
+  }
+
+  return response.json();
 }

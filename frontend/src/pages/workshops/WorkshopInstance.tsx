@@ -171,11 +171,12 @@ const WorkshopPage = () => {
         {/* ---------- Organizer Card ---------- */}
         {organizer && (
           <Card className="flex-1 rounded-3xl shadow-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <Banner className="h-48 md:h-56">
-              {organizer.banner_url ? <BannerImage src={organizer.banner_url} /> : <BannerFallback>No banner</BannerFallback>}
-            </Banner>
 
             <CardContent className="p-8 space-y-6">
+                <h1 className="text-3xl font-bold">Organizer Profile</h1>
+                <Banner className="h-48 md:h-56">
+                    {organizer.banner_url ? <BannerImage src={organizer.banner_url} /> : <BannerFallback>No banner</BannerFallback>}
+                </Banner>
               <div className="flex items-center gap-5">
                 <Logo className="w-24 h-24 md:w-28 md:h-28">
                   {organizer.logo_url ? <LogoImage src={organizer.logo_url} /> : <LogoFallback>{organizer.profile_name?.[0] ?? "O"}</LogoFallback>}

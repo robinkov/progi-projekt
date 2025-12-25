@@ -10,18 +10,15 @@ workshop_bp = Blueprint("workshop_bp", __name__)
 def create_workshop():
 
     auth_header = request.headers.get("Authorization")
-
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({"success": False, "error": "Missing token"}), 401
 
     token = auth_header.split(" ")[1]
     valid, payload = verify_token(token)
-
     if not valid:
         return jsonify({"success": False, "error": "Invalid token"}), 401
 
     auth_id = payload["sub"]
-
     data = request.json
 
     required_fields = [
@@ -38,54 +35,45 @@ def create_workshop():
         if field not in data:
             return jsonify({"success": False, "error": f"Missing field: {field}"}), 400
 
-    user_resp = (
-        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
-    )
+    # Validate date_time
+    try:
+        workshop_datetime = datetime.fromisoformat(data["date_time"])
+    except ValueError:
+        return jsonify({"success": False, "error": "Invalid date_time format"}), 400
 
+    if workshop_datetime < datetime.now():
+        return jsonify({"success": False, "error": "Workshop date and time cannot be in the past"}), 400
+
+    # Get user and organizer
+    user_resp = supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
     user_id = user_resp.data.get("id")
 
-    organizer_resp = (
-        supabase.table("organizers")
-        .select("*")
-        .eq("user_id", user_id)
-        .single()
-        .execute()
-    )
-
+    organizer_resp = supabase.table("organizers").select("*").eq("user_id", user_id).single().execute()
     organizer_id = organizer_resp.data.get("id")
 
-    result = (
-        supabase.table("workshops")
-        .insert(
-            {
-                "organizer_id": organizer_id,
-                "title": data["title"],
-                "duration": data["duration"],
-                "date_time": data["date_time"],
-                "location": data["location"],
-                "capacity": data["capacity"],
-                "price": data["price"],
-                "description": data["description"],
-            }
-        )
-        .execute()
-    )
+    # Insert workshop
+    result = supabase.table("workshops").insert(
+        {
+            "organizer_id": organizer_id,
+            "title": data["title"],
+            "duration": data["duration"],
+            "date_time": data["date_time"],
+            "location": data["location"],
+            "capacity": data["capacity"],
+            "price": data["price"],
+            "description": data["description"],
+        }
+    ).execute()
 
     if not result.data:
         return jsonify({"success": False}), 500
 
-    return (
-        jsonify(
-            {
-                "success": True,
-                "workshop": result.data[0],
-            }
-        ),
-        201,
-    )
+    return jsonify({"success": True, "workshop": result.data[0]}), 201
 
 
-@workshop_bp.route("/workshops/my", methods=["GET"])
+
+
+@workshop_bp.route("/workshops/my", methods=["POST"])
 def get_my_workshops():
 
     auth_header = request.headers.get("Authorization")
@@ -98,30 +86,27 @@ def get_my_workshops():
     if not valid:
         return jsonify({"success": False, "error": "Invalid token"}), 401
 
-    auth_id = payload["sub"]
+    auth_id = payload.get("sub")
     if not auth_id:
         return jsonify({"success": False, "error": "Token missing user ID"}), 401
 
+    # Get user
     user_resp = (
         supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
     )
     if not user_resp.data:
         return jsonify({"success": False, "error": "User not found"}), 404
-
     user_id = user_resp.data["id"]
 
+    # Get organizer
     organizer_resp = (
-        supabase.table("organizers")
-        .select("*")
-        .eq("user_id", user_id)
-        .single()
-        .execute()
+        supabase.table("organizers").select("*").eq("user_id", user_id).single().execute()
     )
     if not organizer_resp.data:
         return jsonify({"success": False, "error": "Organizer not found"}), 403
-
     organizer_id = organizer_resp.data["id"]
 
+    # Get workshops
     workshops_resp = (
         supabase.table("workshops")
         .select("*")
@@ -130,6 +115,17 @@ def get_my_workshops():
         .execute()
     )
     workshops = workshops_resp.data or []
+
+    # Add date and time fields
+    for w in workshops:
+        dt = w.get("date_time")
+        if dt:
+            start_dt = datetime.fromisoformat(dt)
+            w["date"] = start_dt.strftime("%d.%m.%y")
+            w["time"] = start_dt.strftime("%H:%M")
+        else:
+            w["date"] = None
+            w["time"] = None
 
     return jsonify({"success": True, "workshops": workshops}), 200
 
@@ -393,3 +389,14 @@ def get_organizer(organizer_id: int):
         "membership_plan_id": organizer.get("membership_plan_id"),
         "membership_expiry_date": organizer.get("membership_expiry_date"),
     }), 200
+    
+@workshop_bp.route("/workshops/delete/<int:workshop_id>", methods=["DELETE"])
+def delete_workshop(workshop_id):
+    try:
+        delete_resp = supabase.table("workshops").delete().eq("id", workshop_id).execute()
+        if delete_resp.data is None:
+            return jsonify({"success": False, "error": "Workshop not found or could not be deleted"}), 404
+
+        return jsonify({"success": True, "message": f"Workshop {workshop_id} deleted"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500

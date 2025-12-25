@@ -74,7 +74,7 @@ export default function CreateWorkshop() {
         description: "",
       });
     } catch (err: any) {
-      setError(err.message || "Failed to create workshop");
+      setError(err.error || "Failed to create workshop");
     } finally {
       setSaving(false);
     }

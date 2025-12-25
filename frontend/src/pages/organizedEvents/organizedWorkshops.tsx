@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import { computeEventStatus } from "@/utils/statusUtils";
@@ -11,6 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { fetchPost, fetchDelete } from "@/utils/fetchUtils";
+import { supabase } from "@/config/supabase";
+import ConfirmCard from "@/components/ui/cardConfirm";
 
 type Workshop = {
   id: number;
@@ -21,50 +25,133 @@ type Workshop = {
   location?: string;
 };
 
-const mockWorkshops: Workshop[] = [
-  { id: 1, date: "14.12.25", time: "18:00-19:00", title: "Keramika u pokretu", organizer: "ClayPlay", location: "Zagreb, Centar" },
-  { id: 2, date: "23.12.25", time: "19:30-21:00", title: "Suvremena glina", organizer: "Galerija Forma", location: "Split" },
-  { id: 3, date: "28.12.25", title: "Minimalističke forme", organizer: "Studio Terra", location: "Online" },
-];
+export default function MyWorkshops() {
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmWorkshop, setConfirmWorkshop] = useState<Workshop | null>(null);
 
-export default function OrganizedWorkshops() {
+  useEffect(() => {
+    async function loadWorkshops() {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          console.error("Not logged in");
+          setLoading(false);
+          return;
+        }
+
+        const token = sessionData.session.access_token;
+
+        const res = await fetchPost<{ success: boolean; workshops: Workshop[] }>(
+          "/workshops/my",
+          {},
+          { Authorization: `Bearer ${token}` }
+        );
+
+        if (res.success) setWorkshops(res.workshops);
+      } catch (err) {
+        console.error("Failed to fetch workshops", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadWorkshops();
+  }, []);
+
+  const handleDelete = async () => {
+    if (!confirmWorkshop) return;
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) return;
+
+    const token = sessionData.session.access_token;
+
+    try {
+      setDeletingId(confirmWorkshop.id);
+      await fetchDelete(`/workshops/delete/${confirmWorkshop.id}`, {
+        Authorization: `Bearer ${token}`,
+      });
+      setWorkshops((prev) => prev.filter((w) => w.id !== confirmWorkshop.id));
+      setConfirmWorkshop(null);
+    } catch (err) {
+      console.error("Failed to delete workshop", err);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <PageLayout>
       <MainColumn>
-        <h1 className="text-2xl font-semibold mb-6">Organizirane radionice</h1>
-        <Table>
-          <TableCaption>Popis organiziranih radionica</TableCaption>
+        <h1 className="text-2xl font-semibold mb-6">Moje radionice</h1>
 
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Datum</TableHead>
-              <TableHead>Vrijeme</TableHead>
-              <TableHead>Naziv</TableHead>
-              <TableHead>Organizator</TableHead>
-              <TableHead>Lokacija</TableHead>
-              <TableHead className="text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mockWorkshops.map((e) => (
-              <TableRow key={e.id}>
-                <TableCell className="font-medium">{e.date.substring(0, 5)}</TableCell>
-                <TableCell>{e.time ?? "-"}</TableCell>
-                <TableCell>
-                  <span className="truncate inline-block max-w-[300px] align-middle">{e.title}</span>
-                </TableCell>
-                <TableCell>{e.organizer}</TableCell>
-                <TableCell className="text-muted-foreground">{e.location}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" disabled>
-                    {computeEventStatus(e.date, e.time)}
-                  </Button>
-                </TableCell>
+        {loading ? (
+          <p>Učitavanje...</p>
+        ) : (
+          <Table>
+            <TableCaption>Popis mojih radionica</TableCaption>
+
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Datum</TableHead>
+                <TableHead>Vrijeme</TableHead>
+                <TableHead>Naziv</TableHead>
+                <TableHead>Lokacija</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Akcija</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody>
+              {workshops.map((w) => {
+                const status = computeEventStatus(w.date, w.time);
+                const canCancel = status !== "u tijeku..." && status !== "završeno";
+
+                return (
+                  <TableRow key={w.id}>
+                    <TableCell className="font-medium">{w.date.substring(0, 5)}</TableCell>
+                    <TableCell>{w.time ?? "-"}</TableCell>
+                    <TableCell>
+                      <span className="truncate inline-block max-w-[300px] align-middle">{w.title}</span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{w.location ?? "-"}</TableCell>
+                    <TableCell>{status}</TableCell>
+                    <TableCell className="text-right">
+                      {canCancel ? (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setConfirmWorkshop(w)}
+                        >
+                          Otkaži
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" disabled>
+                          -
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
       </MainColumn>
+
+      {confirmWorkshop && (
+      <ConfirmCard
+        title="Potvrdi brisanje radionice"
+        message={`Za brisanje radionice morate upisati naziv radionice: "${confirmWorkshop.title}"`}
+        confirmText={deletingId === confirmWorkshop.id ? "Brisanje..." : "Obriši"}
+        expectedText={confirmWorkshop.title} // <-- workshop name here
+        onCancel={() => setConfirmWorkshop(null)}
+        onConfirm={handleDelete}
+      />
+    )}
+
     </PageLayout>
   );
 }
