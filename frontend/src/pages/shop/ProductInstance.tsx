@@ -51,7 +51,7 @@ export default function ProductPage() {
         setProduct(productRes.product);
 
         const sellerRes = await fetchGet<Organizer>(
-          `/sellers/${productRes.product.seller_id}`
+          `/organizers/${productRes.product.seller_id}`
         );
         setSeller(sellerRes);
 
