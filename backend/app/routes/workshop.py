@@ -338,59 +338,7 @@ def get_workshops():
         w["timeFrom"] = start_dt.strftime("%H:%M")
         w["timeTo"] = end_dt.strftime("%H:%M")
 
-    return jsonify({"success": True, "workshops": workshops}), 200
-
-
-@workshop_bp.route("/organizers/<int:organizer_id>", methods=["GET"])
-def get_organizer(organizer_id: int):
-    """
-    Fetch organizer info by ID
-    """
-    # Get organizer row
-    organizer_resp = (
-        supabase.table("organizers")
-        .select("*")
-        .eq("id", organizer_id)
-        .single()
-        .execute()
-    )
-
-    if not organizer_resp.data:
-        return jsonify({"success": False, "error": "Organizer not found"}), 404
-
-    organizer = organizer_resp.data
-
-    logo_id = organizer["logo_photo_id"]
-
-    banner_id = organizer["banner_photo_id"]
-
-    logo_resp = (
-        supabase.table("photos").select("*").eq("id", logo_id).single().execute()
-    )
-
-    logo_url = logo_resp.data.get("url")
-
-    banner_resp = (
-        supabase.table("photos").select("*").eq("id", banner_id).single().execute()
-    )
-
-    banner_url = banner_resp.data.get("url")
-
-    return (
-        jsonify(
-            {
-                "success": True,
-                "profile_name": organizer.get("profile_name"),
-                "description": organizer.get("description"),
-                "logo_url": logo_url,
-                "banner_url": banner_url,
-                "approved_by_admin": organizer.get("approved_by_admin"),
-                "membership_plan_id": organizer.get("membership_plan_id"),
-                "membership_expiry_date": organizer.get("membership_expiry_date"),
-            }
-        ),
-        200,
-    )
+    return jsonify({"success": True, "workshops": workshops}), 200 
 
 
 @workshop_bp.route("/workshops/delete/<int:workshop_id>", methods=["DELETE"])

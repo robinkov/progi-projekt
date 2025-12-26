@@ -20,9 +20,13 @@ def create_app():
     from .routes.organizerProfileManagement import organizerProfile_bp
     from .routes.workshop import workshop_bp
     from .routes.exhibitions import exhibition_bp
+    from .routes.product import product_bp
+    from .routes.organizers import organizers_bp
 
     app.register_blueprint(exhibition_bp)
     app.register_blueprint(workshop_bp)
+    app.register_blueprint(product_bp)
+    app.register_blueprint(organizers_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(auth_bp)
