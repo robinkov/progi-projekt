@@ -1,7 +1,17 @@
 const backend_url = import.meta.env.VITE_BACKEND_URL
 
-export async function fetchGet<T>(url: string): Promise<T> {
-  const response = await fetch(backend_url + url, { method: "GET" });
+export async function fetchGet<T>(
+  url: string,
+  headers?: Record<string, string>): Promise<T> {
+
+  if (!headers) headers = {}
+  const response = await fetch(backend_url + url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+  });
 
   try {
     const data = await response.json();

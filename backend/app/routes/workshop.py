@@ -42,35 +42,53 @@ def create_workshop():
         return jsonify({"success": False, "error": "Invalid date_time format"}), 400
 
     if workshop_datetime < datetime.now():
-        return jsonify({"success": False, "error": "Workshop date and time cannot be in the past"}), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Workshop date and time cannot be in the past",
+                }
+            ),
+            400,
+        )
 
     # Get user and organizer
-    user_resp = supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
     user_id = user_resp.data.get("id")
 
-    organizer_resp = supabase.table("organizers").select("*").eq("user_id", user_id).single().execute()
+    organizer_resp = (
+        supabase.table("organizers")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
     organizer_id = organizer_resp.data.get("id")
 
     # Insert workshop
-    result = supabase.table("workshops").insert(
-        {
-            "organizer_id": organizer_id,
-            "title": data["title"],
-            "duration": data["duration"],
-            "date_time": data["date_time"],
-            "location": data["location"],
-            "capacity": data["capacity"],
-            "price": data["price"],
-            "description": data["description"],
-        }
-    ).execute()
+    result = (
+        supabase.table("workshops")
+        .insert(
+            {
+                "organizer_id": organizer_id,
+                "title": data["title"],
+                "duration": data["duration"],
+                "date_time": data["date_time"],
+                "location": data["location"],
+                "capacity": data["capacity"],
+                "price": data["price"],
+                "description": data["description"],
+            }
+        )
+        .execute()
+    )
 
     if not result.data:
         return jsonify({"success": False}), 500
 
     return jsonify({"success": True, "workshop": result.data[0]}), 201
-
-
 
 
 @workshop_bp.route("/workshops/my", methods=["POST"])
@@ -100,7 +118,11 @@ def get_my_workshops():
 
     # Get organizer
     organizer_resp = (
-        supabase.table("organizers").select("*").eq("user_id", user_id).single().execute()
+        supabase.table("organizers")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
     )
     if not organizer_resp.data:
         return jsonify({"success": False, "error": "Organizer not found"}), 403
@@ -274,15 +296,12 @@ def make_reservation(workshop_id):
         ),
         201,
     )
-    
+
 
 @workshop_bp.route("/getworkshops", methods=["GET"])
 def get_workshops():
     workshops_resp = (
-        supabase.table("workshops")
-        .select("*")
-        .order("date_time")
-        .execute()
+        supabase.table("workshops").select("*").order("date_time").execute()
     )
 
     workshops = workshops_resp.data or []
@@ -290,38 +309,25 @@ def get_workshops():
     if not workshops:
         return jsonify({"success": True, "workshops": []}), 200
 
-
-    organizer_ids = list({w["organizer_id"] for w in workshops if w.get("organizer_id")})
+    organizer_ids = list(
+        {w["organizer_id"] for w in workshops if w.get("organizer_id")}
+    )
 
     organizers_resp = (
         supabase.table("organizers")
-        .select("id, user_id")
+        .select("id, profile_name")
         .in_("id", organizer_ids)
         .execute()
     )
 
-    organizer_map = {o["id"]: o["user_id"] for o in organizers_resp.data or []}
-
-    users_resp = (
-        supabase.table("users")
-        .select("id, first_name, last_name")
-        .in_("id", list(organizer_map.values()))
-        .execute()
-    )
-
-    user_map = {
-        u["id"]: f"{u['first_name']} {u['last_name']}"
-        for u in users_resp.data or []
-    }
+    organizer_map = {o["id"]: o["profile_name"] for o in organizers_resp.data or []}
 
     for w in workshops:
 
-        user_id = organizer_map.get(w.get("organizer_id"))
-        w["organizer_name"] = user_map.get(user_id, "Organizator")
-
+        profile_name = organizer_map.get(w.get("organizer_id"))
+        w["organizer_name"] = profile_name
 
         start_dt = datetime.fromisoformat(w["date_time"])
-
 
         h, m, s = map(int, w["duration"].split(":"))
         duration_delta = timedelta(hours=h, minutes=m, seconds=s)
@@ -332,13 +338,7 @@ def get_workshops():
         w["timeFrom"] = start_dt.strftime("%H:%M")
         w["timeTo"] = end_dt.strftime("%H:%M")
 
-    return jsonify(
-        {
-            "success": True,
-            "workshops": workshops
-        }
-    ), 200
-
+    return jsonify({"success": True, "workshops": workshops}), 200
 
 
 @workshop_bp.route("/organizers/<int:organizer_id>", methods=["GET"])
@@ -347,56 +347,155 @@ def get_organizer(organizer_id: int):
     Fetch organizer info by ID
     """
     # Get organizer row
-    organizer_resp = (supabase.table("organizers")
+    organizer_resp = (
+        supabase.table("organizers")
         .select("*")
         .eq("id", organizer_id)
         .single()
-        .execute())
+        .execute()
+    )
 
     if not organizer_resp.data:
         return jsonify({"success": False, "error": "Organizer not found"}), 404
 
     organizer = organizer_resp.data
-    
+
     logo_id = organizer["logo_photo_id"]
 
     banner_id = organizer["banner_photo_id"]
-    
-    logo_resp = (supabase.table("photos")
-        .select("*")
-        .eq("id", logo_id)
-        .single()
-        .execute())
-    
+
+    logo_resp = (
+        supabase.table("photos").select("*").eq("id", logo_id).single().execute()
+    )
+
     logo_url = logo_resp.data.get("url")
-    
-    
-    banner_resp = (supabase.table("photos")
-        .select("*")
-        .eq("id", banner_id)
-        .single()
-        .execute())
-    
+
+    banner_resp = (
+        supabase.table("photos").select("*").eq("id", banner_id).single().execute()
+    )
+
     banner_url = banner_resp.data.get("url")
 
-    return jsonify({
-        "success": True,
-        "profile_name": organizer.get("profile_name"),
-        "description": organizer.get("description"),
-        "logo_url": logo_url,
-        "banner_url": banner_url,
-        "approved_by_admin": organizer.get("approved_by_admin"),
-        "membership_plan_id": organizer.get("membership_plan_id"),
-        "membership_expiry_date": organizer.get("membership_expiry_date"),
-    }), 200
-    
+    return (
+        jsonify(
+            {
+                "success": True,
+                "profile_name": organizer.get("profile_name"),
+                "description": organizer.get("description"),
+                "logo_url": logo_url,
+                "banner_url": banner_url,
+                "approved_by_admin": organizer.get("approved_by_admin"),
+                "membership_plan_id": organizer.get("membership_plan_id"),
+                "membership_expiry_date": organizer.get("membership_expiry_date"),
+            }
+        ),
+        200,
+    )
+
+
 @workshop_bp.route("/workshops/delete/<int:workshop_id>", methods=["DELETE"])
 def delete_workshop(workshop_id):
     try:
-        delete_resp = supabase.table("workshops").delete().eq("id", workshop_id).execute()
+        delete_resp = (
+            supabase.table("workshops").delete().eq("id", workshop_id).execute()
+        )
         if delete_resp.data is None:
-            return jsonify({"success": False, "error": "Workshop not found or could not be deleted"}), 404
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Workshop not found or could not be deleted",
+                    }
+                ),
+                404,
+            )
 
-        return jsonify({"success": True, "message": f"Workshop {workshop_id} deleted"}), 200
+        return (
+            jsonify({"success": True, "message": f"Workshop {workshop_id} deleted"}),
+            200,
+        )
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@workshop_bp.route("/getreservations", methods=["GET"])
+def get_reservations():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    valid, payload = verify_token(token)
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Token missing user ID"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+    user_id = user_resp.data["id"]
+
+    participant_resp = (
+        supabase.table("participants")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+
+    if not participant_resp.data:
+        return jsonify({"success": False, "error": "Participant not found"}), 404
+    participant_id = participant_resp.data["id"]
+
+    reservations_resp = (
+        supabase.table("workshop_reservations")
+        .select("*")
+        .eq("participant_id", participant_id)
+        .execute()
+    )
+
+    reservations = reservations_resp.data or []
+    workshop_ids = [r["workshop_id"] for r in reservations]
+
+    if not workshop_ids:
+        return jsonify({"success": True, "workshops": []}), 200
+
+    workshops_resp = (
+        supabase.table("workshops")
+        .select("*")
+        .in_("id", workshop_ids)
+        .order("date_time")
+        .execute()
+    )
+
+    workshops = workshops_resp.data or []
+
+    organizer_ids = list(
+        {w["organizer_id"] for w in workshops if w.get("organizer_id")}
+    )
+
+    if not organizer_ids:
+        return jsonify({"success": True, "workshops": workshops}), 200
+
+    organizers_resp = (
+        supabase.table("organizers")
+        .select("id, profile_name")
+        .in_("id", organizer_ids)
+        .execute()
+    )
+
+    organizer_map = {o["id"]: o["profile_name"] for o in organizers_resp.data or []}
+    for w in workshops:
+        w["organizer"] = organizer_map.get(w.get("organizer_id"))
+        if w.get("date_time"):
+            dt = datetime.fromisoformat(w["date_time"])
+            w["date"] = dt.strftime("%d.%m")
+            w["time"] = dt.strftime("%H:%M")
+    return jsonify({"success": True, "workshops": workshops}), 200

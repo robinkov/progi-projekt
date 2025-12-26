@@ -45,7 +45,7 @@ const WorkshopPage = () => {
   const [loading, setLoading] = useState(true);
   const [reserving, setReserving] = useState(false);
   const [success, setSuccess] = useState(false);
-
+  const [already_reserved, setStatus] = useState(false)
   const remainingSpots =
     workshop ? workshop.capacity - reservationCount : 0;
 
@@ -55,7 +55,7 @@ const WorkshopPage = () => {
       if (!id) return;
 
       try {
-        const workshopRes = await fetchGet<{ success: boolean; workshop: Workshop }>(
+        const workshopRes = await fetchGet<{ success: boolean; workshop: Workshop; already_reserved: boolean }>(
           `/workshops/${id}`
         );
 
@@ -70,6 +70,7 @@ const WorkshopPage = () => {
         setWorkshop(workshopRes.workshop);
         setReservationCount(reservationRes.count);
         setOrganizer(organizerRes);
+        setStatus(already_reserved)
       } catch (err) {
         console.error("Failed to load workshop or organizer", err);
       } finally {
@@ -86,10 +87,10 @@ const WorkshopPage = () => {
 
     const { data } = await supabase.auth.getSession();
     if (!data.session) return;
-
+    var response
     try {
       setReserving(true);
-      await fetchPost(
+      response = await fetchPost(
         `/workshops/${workshop.id}/reservations`,
         {},
         {
@@ -99,7 +100,7 @@ const WorkshopPage = () => {
       setReservationCount(prev => prev + 1);
       setSuccess(true);
     } catch (err) {
-      console.error("Reservation failed", err);
+      setStatus(true)
     } finally {
       setReserving(false);
     }
@@ -153,15 +154,29 @@ const WorkshopPage = () => {
             </div>
 
             <div className="pt-6">
-              {success ? (
-                <p className="text-green-600 font-medium text-lg">Rezervacija uspješna</p>
+              {already_reserved ? (
+                /* 1. Check if user already has a reservation in the database */
+                <p className="text-red-600 font-medium text-lg">
+                  Greška: provjerite jeste li već rezervirali ovu radionicu.
+                </p>
+              ) : success ? (
+                /* 2. Check if the user JUST successfully clicked the button */
+                <p className="text-green-600 font-medium text-lg">
+                  Rezervacija uspješna
+                </p>
               ) : (
+                /* 3. If neither, show the reservation button */
                 <Button
                   onClick={handleReserve}
                   disabled={reserving || remainingSpots <= 0}
                   className="w-full"
                 >
-                  {remainingSpots <= 0 ? "Workshop Full" : reserving ? "Rezerviranje..." : "Rezerviraj"}
+                  {remainingSpots <= 0
+                    ? "Popunjeno"
+                    : reserving
+                      ? "Rezerviranje..."
+                      : "Rezerviraj"
+                  }
                 </Button>
               )}
             </div>
@@ -173,10 +188,10 @@ const WorkshopPage = () => {
           <Card className="flex-1 rounded-3xl shadow-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
 
             <CardContent className="p-8 space-y-6">
-                <h1 className="text-3xl font-bold">Organizer Profile</h1>
-                <Banner className="h-48 md:h-56">
-                    {organizer.banner_url ? <BannerImage src={organizer.banner_url} /> : <BannerFallback>No banner</BannerFallback>}
-                </Banner>
+              <h1 className="text-3xl font-bold">Organizer Profile</h1>
+              <Banner className="h-48 md:h-56">
+                {organizer.banner_url ? <BannerImage src={organizer.banner_url} /> : <BannerFallback>No banner</BannerFallback>}
+              </Banner>
               <div className="flex items-center gap-5">
                 <Logo className="w-24 h-24 md:w-28 md:h-28">
                   {organizer.logo_url ? <LogoImage src={organizer.logo_url} /> : <LogoFallback>{organizer.profile_name?.[0] ?? "O"}</LogoFallback>}

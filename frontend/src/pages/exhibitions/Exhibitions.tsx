@@ -60,7 +60,6 @@ export default function Exhibitions() {
                 href={`/exhibitions/${exhibition.id}`}
               >
                 <BriefCard
-                  id={exhibition.id}
                   title={exhibition.title}
                   name={exhibition.organizer_name}
                   place={exhibition.location}

@@ -54,7 +54,6 @@ export default function Workshops() {
             {workshops.map((workshop) => (
               <a key={workshop.id} href={`/workshops/${workshop.id}`}>
                 <BriefCard
-                  id={workshop.id}
                   title={workshop.title}
                   name={workshop.organizer_name}
                   place={workshop.location}
