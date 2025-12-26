@@ -6,6 +6,8 @@ import homeRoutes from "@/routes/homeRoutes";
 import workshopRoutes from "@/routes/workshopRoutes"
 import exhibitionRoutes from "@/routes/exhibitionRoutes"
 import shopRoutes from "@/routes/shopRoutes"
+import productRoutes from "@/routes/productRoutes"
+import sellerProductsRoutes from "@/routes/sellerProductsRoutes"
 import roleChoose from "@/routes/roleChoose"
 import profileRoutes from "./profileRoutes";
 import organizerProfileRoutes from "./organizerProfileRoutes"
@@ -22,6 +24,8 @@ const routes: RouteObject = {
     workshopRoutes,
     exhibitionRoutes,
     shopRoutes,
+    productRoutes,
+    sellerProductsRoutes,
     reservationsRoutes,
     roleChoose,
     profileRoutes,
