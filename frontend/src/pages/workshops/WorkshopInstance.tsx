@@ -91,10 +91,9 @@ const WorkshopPage = () => {
 
     const { data } = await supabase.auth.getSession();
     if (!data.session) return;
-    var response
     try {
       setReserving(true);
-      response = await fetchPost(
+      await fetchPost(
         `/workshops/${workshop.id}/reservations`,
         {},
         {
