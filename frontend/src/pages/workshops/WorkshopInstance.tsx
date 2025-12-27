@@ -7,6 +7,7 @@ import PageLayout from "@/components/layout/PageLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Logo, LogoImage, LogoFallback } from "@/components/ui/logo";
 import { Banner, BannerImage, BannerFallback } from "@/components/ui/banner";
+import { useAuth } from "@/components/context/AuthProvider";
 
 /* ---------------- Types ---------------- */
 type Workshop = {
@@ -48,11 +49,14 @@ const WorkshopPage = () => {
   const [already_reserved, setStatus] = useState(false)
   const remainingSpots =
     workshop ? workshop.capacity - reservationCount : 0;
+  const user = useAuth().user;
 
   /* ---------------- Load data ---------------- */
   useEffect(() => {
     async function loadWorkshop() {
       if (!id) return;
+      if (!user) return;
+
 
       try {
         const workshopRes = await fetchGet<{ success: boolean; workshop: Workshop; already_reserved: boolean }>(
@@ -115,6 +119,8 @@ const WorkshopPage = () => {
     return <div className="p-12 text-center text-red-600 text-lg">Workshop not found.</div>;
   }
 
+
+  if (!user) return;
   /* ---------------- Render page ---------------- */
   return (
     <PageLayout>
@@ -154,31 +160,39 @@ const WorkshopPage = () => {
             </div>
 
             <div className="pt-6">
-              {already_reserved ? (
-                /* 1. Check if user already has a reservation in the database */
-                <p className="text-red-600 font-medium text-lg">
-                  Greška: provjerite jeste li već rezervirali ovu radionicu.
-                </p>
-              ) : success ? (
-                /* 2. Check if the user JUST successfully clicked the button */
-                <p className="text-green-600 font-medium text-lg">
-                  Rezervacija uspješna
-                </p>
-              ) : (
-                /* 3. If neither, show the reservation button */
-                <Button
-                  onClick={handleReserve}
-                  disabled={reserving || remainingSpots <= 0}
-                  className="w-full"
-                >
-                  {remainingSpots <= 0
-                    ? "Popunjeno"
-                    : reserving
-                      ? "Rezerviranje..."
-                      : "Rezerviraj"
-                  }
-                </Button>
-              )}
+
+
+              {
+                user.role == "organizator" ? (
+                  <p className="text-red-600 font-medium text-lg">
+                    Greška: organizatori ne mogu rezervirati radionice
+                  </p>
+                ) :
+
+                  already_reserved ? (
+                    <p className="text-red-600 font-medium text-lg">
+                      Greška: provjerite jeste li već rezervirali ovu radionicu.
+                    </p>
+                  ) : success ? (
+                    /* 2. Check if the user JUST successfully clicked the button */
+                    <p className="text-green-600 font-medium text-lg">
+                      Rezervacija uspješna
+                    </p>
+                  ) : (
+                    /* 3. If neither, show the reservation button */
+                    <Button
+                      onClick={handleReserve}
+                      disabled={reserving || remainingSpots <= 0}
+                      className="w-full"
+                    >
+                      {remainingSpots <= 0
+                        ? "Popunjeno"
+                        : reserving
+                          ? "Rezerviranje..."
+                          : "Rezerviraj"
+                      }
+                    </Button>
+                  )}
             </div>
           </CardContent>
         </Card>

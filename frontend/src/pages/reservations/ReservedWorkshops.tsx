@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/table";
 import { fetchGet } from "@/utils/fetchUtils";
 import { supabase } from "@/config/supabase";
+import { fetchDelete } from "@/utils/fetchUtils";
 
 // ==================== end of imports ====================
 
@@ -53,16 +54,30 @@ type GetReservationsResponse = {
   workshops: Workshop[]
 }
 
+type DeleteReservationsResponse = {
+  success: boolean
+}
+
 export default function ReservedWorkshops() {
   const [rows, setRows] = useState<Workshop[]>(mockReserved);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [loading, setLoading] = useState(true);
 
 
-  const cancelReservation = (id: number) => {
+  const cancelReservation = async (id: number) => {
     setRows((prev) => prev.filter((w) => w.id !== id));
     setShowConfirmation(true);
-    // TODO: Pozvati backend za stvarno otkazivanje rezervacije
+
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return;
+    const response = await fetchDelete<DeleteReservationsResponse>("/reservations/delete/" + id, {
+      Authorization: `Bearer ${data.session.access_token}`,
+    })
+
+    if (response.success) {
+      return //info da se izbrisalo sta ja znam
+    }
+
   };
 
   useEffect(() => {

@@ -338,7 +338,7 @@ def get_workshops():
         w["timeFrom"] = start_dt.strftime("%H:%M")
         w["timeTo"] = end_dt.strftime("%H:%M")
 
-    return jsonify({"success": True, "workshops": workshops}), 200 
+    return jsonify({"success": True, "workshops": workshops}), 200
 
 
 @workshop_bp.route("/workshops/delete/<int:workshop_id>", methods=["DELETE"])
@@ -442,8 +442,88 @@ def get_reservations():
     organizer_map = {o["id"]: o["profile_name"] for o in organizers_resp.data or []}
     for w in workshops:
         w["organizer"] = organizer_map.get(w.get("organizer_id"))
+
         if w.get("date_time"):
-            dt = datetime.fromisoformat(w["date_time"])
-            w["date"] = dt.strftime("%d.%m")
-            w["time"] = dt.strftime("%H:%M")
+            start_dt = datetime.fromisoformat(w["date_time"])
+
+            w["date"] = start_dt.strftime("%d.%m.%y")
+
+            duration_raw = w.get("duration")
+
+            if duration_raw:
+                try:
+                    h, m, s = map(int, duration_raw.split(":"))
+                    duration_delta = timedelta(hours=h, minutes=m, seconds=s)
+
+                    end_dt = start_dt + duration_delta
+
+                    w["time"] = (
+                        f"{start_dt.strftime('%H:%M')} - {end_dt.strftime('%H:%M')}"
+                    )
+                except Exception:
+                    w["time"] = None
+            else:
+                w["time"] = None
     return jsonify({"success": True, "workshops": workshops}), 200
+
+
+@workshop_bp.route("/reservations/delete/<int:workshop_id>", methods=["DELETE"])
+def delete_reservation(workshop_id):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    valid, payload = verify_token(token)
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Token missing user ID"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+    user_id = user_resp.data["id"]
+
+    participant_resp = (
+        supabase.table("participants")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+
+    if not participant_resp.data:
+        return jsonify({"success": False, "error": "Participant not found"}), 404
+    participant_id = participant_resp.data["id"]
+    try:
+        delete_resp = (
+            supabase.table("workshop_reservations")
+            .delete()
+            .eq("workshop_id", workshop_id)
+            .eq("participant_id", participant_id)
+            .execute()
+        )
+        if delete_resp.data is None:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Workshop not found or could not be deleted",
+                    }
+                ),
+                404,
+            )
+
+        return (
+            jsonify({"success": True, "message": f"Workshop {workshop_id} deleted"}),
+            200,
+        )
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
