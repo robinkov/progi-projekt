@@ -232,7 +232,7 @@ def make_registration(exhibition_id):
     )
 
     if not exhibition_resp.data:
-        return jsonify({"success": False, "error": "Workshop not found"}), 404
+        return jsonify({"success": False, "error": "Exhibition not found"}), 404
 
     # Check existing registration (prevent duplicates)
     existing_registration = (
@@ -268,7 +268,7 @@ def make_registration(exhibition_id):
     )
 
     if not registration_resp.data:
-        return jsonify({"success": False, "error": "Reservation failed"}), 500
+        return jsonify({"success": False, "error": "Registration failed"}), 500
 
     return (
         jsonify(
@@ -279,3 +279,97 @@ def make_registration(exhibition_id):
         ),
         201,
     )
+
+
+@exhibition_bp.route("/getregistrations", methods=["GET"])
+def get_registrations():
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Invalid token payload"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("id").eq("auth_id", auth_id).single().execute()
+    )
+
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_id = user_resp.data["id"]
+
+    participant_resp = (
+        supabase.table("participants")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+
+    participant_id = participant_resp.data["id"]
+
+    registrations_resp = (
+        supabase.table("exhibition_registrations")
+        .select("*")
+        .eq("participant_id", participant_id)
+        .execute()
+    )
+
+    registrations = registrations_resp.data or []
+    exhibition_ids = [r["exhibition_id"] for r in registrations]
+
+    if not exhibition_ids:
+        return jsonify({"success": True, "exhibitions": []}), 200
+
+    registration_map = {r["exhibition_id"]: r["approved"] for r in registrations}
+
+    exhibitions_resp = (
+        supabase.table("exhibitions")
+        .select("*")
+        .in_("id", exhibition_ids)
+        .order("date_time")
+        .execute()
+    )
+
+    exhibitions = exhibitions_resp.data or []
+
+    organizer_ids = list(
+        {w["organizer_id"] for w in exhibitions if w.get("organizer_id")}
+    )
+
+    if not organizer_ids:
+        return jsonify({"success": True, "exhibitions": exhibitions}), 200
+
+    organizers_resp = (
+        supabase.table("organizers")
+        .select("id, profile_name")
+        .in_("id", organizer_ids)
+        .execute()
+    )
+
+    organizer_map = {o["id"]: o["profile_name"] for o in organizers_resp.data or []}
+    for e in exhibitions:
+        e["organizer"] = organizer_map.get(e.get("organizer_id"))
+
+        if e.get("date_time"):
+            start_dt = datetime.fromisoformat(e["date_time"])
+
+            e["date"] = start_dt.strftime("%d.%m.%y")
+            e["time"] = str(start_dt.time().isoformat("minutes"))
+
+        if registration_map.get(e.get("id")):
+            e["status"] = "ODOBRENO"
+        else:
+            e["status"] = "PRIJAVLJENO"
+
+    return jsonify({"success": True, "exhibitions": exhibitions}), 200

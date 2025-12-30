@@ -1,6 +1,9 @@
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { fetchGet } from "@/utils/fetchUtils";
+import { supabase } from "@/config/supabase";
 import {
   Table,
   TableBody,
@@ -18,51 +21,88 @@ type Exhibition = {
   title: string;
   organizer: string;
   location?: string;
+  status: string
 };
 
-const mockRegistered: Exhibition[] = [
-  { id: 1, date: "14.12.25", time: "18:00", title: "Keramika u pokretu", organizer: "ClayPlay", location: "Zagreb, Centar" },
-  { id: 2, date: "18.12.25", time: "19:30", title: "Suvremena glina", organizer: "Galerija Forma", location: "Split" },
-  { id: 3, date: "22.12.25", title: "Minimalističke forme", organizer: "Studio Terra", location: "Online" },
-];
+type GetRegistrationsResponse = {
+  success: boolean
+  exhibitions: Exhibition[]
+}
+
 
 export default function RegisteredExhibitions() {
+  const [rows, setRows] = useState<Exhibition[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadRegistrations() {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+
+      try {
+        const res = await fetchGet<GetRegistrationsResponse>("/getregistrations", {
+          Authorization: `Bearer ${data.session.access_token}`,
+        })
+        if (res.success) {
+          setRows(res.exhibitions)
+          console.log(res.exhibitions)
+        }
+
+      }
+      catch (err) {
+        console.error("Failed to load exhibitions", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadRegistrations()
+  })
+
   return (
     <PageLayout>
       <MainColumn>
         <h1 className="text-2xl font-semibold mb-6">Prijavljene izložbe</h1>
-
-        <Table>
-          <TableCaption>Popis prijavljenih izložbi.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Datum</TableHead>
-              <TableHead>Vrijeme</TableHead>
-              <TableHead>Naziv</TableHead>
-              <TableHead>Organizator</TableHead>
-              <TableHead>Lokacija</TableHead>
-              <TableHead className="text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mockRegistered.map((e) => (
-              <TableRow key={e.id}>
-                <TableCell className="font-medium">{e.date.substring(0, 5)}</TableCell>
-                <TableCell>{e.time ?? "-"}</TableCell>
-                <TableCell>
-                  <span className="truncate inline-block max-w-[300px] align-middle">{e.title}</span>
-                </TableCell>
-                <TableCell>{e.organizer}</TableCell>
-                <TableCell className="text-muted-foreground">{e.location}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" disabled>
-                    PRIJAVLJENO
-                  </Button>
-                </TableCell>
+        {loading ? (
+          <div>Učitavanje radionica...</div>
+        ) : (
+          <Table>
+            <TableCaption>Popis prijavljenih izložbi.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Datum</TableHead>
+                <TableHead>Vrijeme</TableHead>
+                <TableHead>Naziv</TableHead>
+                <TableHead>Organizator</TableHead>
+                <TableHead>Lokacija</TableHead>
+                <TableHead className="text-right">Status</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {rows.map((e) => (
+                <TableRow key={e.id}>
+                  <TableCell className="font-medium">{e.date.substring(0, 5)}</TableCell>
+                  <TableCell>{e.time ?? "-"}</TableCell>
+                  <TableCell>
+                    <span className="truncate inline-block max-w-[300px] align-middle">{e.title}</span>
+                  </TableCell>
+                  <TableCell>{e.organizer}</TableCell>
+                  <TableCell className="text-muted-foreground">{e.location}</TableCell>
+                  {e.status == "ODOBRENO" ?
+                    (
+                      <TableCell className="text-right  text-green-600">
+                        {e.status}
+                      </TableCell>) :
+                    (
+                      <TableCell className="text-right">
+                        {e.status}
+                      </TableCell>
+                    )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </MainColumn>
     </PageLayout>
   );
