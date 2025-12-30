@@ -14,6 +14,7 @@ import organizerProfileRoutes from "./organizerProfileRoutes"
 import reservationsRoutes from "@/routes/reservationsRoutes";
 import organizedEventsRoutes from "@/routes/organizedEventsRoutes";
 import createEventRoutes from "@/routes/createEventRoutes";
+import forumRoutes from "@/routes/forumRoutes"
 
 const routes: RouteObject = {
   path: "/",
@@ -32,6 +33,7 @@ const routes: RouteObject = {
     organizerProfileRoutes,
     organizedEventsRoutes,
     createEventRoutes,
+    forumRoutes,
   ],
   errorElement: ErrorPage({ code: 404, message: "Page Not Found" }),
 };

@@ -1,6 +1,5 @@
 import PageLayout from "@/components/layout/PageLayout";
 import MainColumn from "@/components/layout/MainColumn";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { fetchGet } from "@/utils/fetchUtils";
 import { supabase } from "@/config/supabase";

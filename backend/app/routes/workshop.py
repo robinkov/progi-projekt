@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, Blueprint
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 workshop_bp = Blueprint("workshop_bp", __name__)
 
@@ -301,7 +301,11 @@ def make_reservation(workshop_id):
 @workshop_bp.route("/getworkshops", methods=["GET"])
 def get_workshops():
     workshops_resp = (
-        supabase.table("workshops").select("*").order("date_time").execute()
+        supabase.table("workshops")
+        .select("*")
+        .gte("date_time", datetime.now(timezone.utc).isoformat())
+        .order("date_time")
+        .execute()
     )
 
     workshops = workshops_resp.data or []
@@ -419,6 +423,7 @@ def get_reservations():
         supabase.table("workshops")
         .select("*")
         .in_("id", workshop_ids)
+        .gte("date_time", datetime.now(timezone.utc).isoformat())
         .order("date_time")
         .execute()
     )

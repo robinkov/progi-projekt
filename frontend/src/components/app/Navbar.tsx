@@ -112,29 +112,37 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
               </Button>
             </li>
             <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => { navigate("/workshops"); setSidebarOpen(false); }}
-                >
-                  Radionice
-                </Button>
-              </li>
-              <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => { navigate("/exhibitions"); setSidebarOpen(false); }}
-                >
-                  Izložbe
-                </Button>
-              </li>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => { navigate("/workshops"); setSidebarOpen(false); }}
+              >
+                Radionice
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => { navigate("/exhibitions"); setSidebarOpen(false); }}
+              >
+                Izložbe
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => { navigate("/forum"); setSidebarOpen(false); }}>
+                Forum
+              </Button>
+            </li>
 
-              {/* Separator */}
-              <li>
-                <hr className="my-4 border-t border-muted-foreground" />
-              </li>
-              
+            {/* Separator */}
+            <li>
+              <hr className="my-4 border-t border-muted-foreground" />
+            </li>
+
             {auth.user?.role === "polaznik" && (
               <li>
                 <Button
