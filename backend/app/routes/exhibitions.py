@@ -341,6 +341,7 @@ def get_registrations():
         supabase.table("exhibitions")
         .select("*")
         .in_("id", exhibition_ids)
+        .gte("date_time", datetime.now(timezone.utc).isoformat())
         .order("date_time")
         .execute()
     )

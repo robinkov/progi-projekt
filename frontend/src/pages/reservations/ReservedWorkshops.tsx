@@ -128,7 +128,7 @@ export default function ReservedWorkshops() {
             <TableBody>
               {rows.map((w) => (
                 <TableRow key={w.id}>
-                  <TableCell className="font-medium">{w.date.substring(0, 5)}</TableCell>
+                  <TableCell className="font-medium">{w.date.substring(0, 9)}</TableCell>
                   <TableCell>{w.time}</TableCell>
                   <TableCell>
                     <span className="truncate inline-block max-w-[300px] align-middle">{w.title}</span>

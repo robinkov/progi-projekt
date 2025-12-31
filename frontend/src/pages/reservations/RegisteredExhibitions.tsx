@@ -80,7 +80,7 @@ export default function RegisteredExhibitions() {
             <TableBody>
               {rows.map((e) => (
                 <TableRow key={e.id}>
-                  <TableCell className="font-medium">{e.date.substring(0, 5)}</TableCell>
+                  <TableCell className="font-medium">{e.date.substring(0, 9)}</TableCell>
                   <TableCell>{e.time ?? "-"}</TableCell>
                   <TableCell>
                     <span className="truncate inline-block max-w-[300px] align-middle">{e.title}</span>
