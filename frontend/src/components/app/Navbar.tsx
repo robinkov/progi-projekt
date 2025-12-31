@@ -161,10 +161,22 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                   className="w-full justify-start"
                   onClick={() => navigate("/organizerprofile")}
                 >
-                  Profile Organizacije
+                  Profil Organizacije
                 </Button>
               </li>
             )}
+            {auth.user?.role === "organizator" && (
+              <li>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => navigate("/organizerprofile/pending")}
+                >
+                  Upravljanje prijavama
+                </Button>
+              </li>
+            )}
+
             {auth.user?.role === "polaznik" && (
               <li>
                 <div>

@@ -475,7 +475,7 @@ def forum():
         e["timeFrom"] = start_dt.strftime("%H:%M")
         e["timeTo"] = None
 
-        if e["id"] in exhibition_ids or registration_map.get(e.get("id")):
+        if e["id"] in exhibition_ids and registration_map.get(e.get("id")):
             e["filter_out"] = False
         else:
             e["filter_out"] = True
