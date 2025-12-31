@@ -481,3 +481,61 @@ def forum():
             e["filter_out"] = True
 
     return jsonify({"success": True, "exhibitions": exhibitions}), 200
+
+
+@exhibition_bp.route("/exhibitions/my", methods=["GET"])
+def get_my_exhibitions():
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Invalid token payload"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("id").eq("auth_id", auth_id).single().execute()
+    )
+
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_id = user_resp.data["id"]
+
+    organizer_resp = (
+        supabase.table("organizers")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+
+    organizer_id = organizer_resp.data["id"]
+
+    exhibition_resp = (
+        supabase.table("exhibitions")
+        .select("*")
+        .eq("organizer_id", organizer_id)
+        .execute()
+    )
+
+    exhibitions = exhibition_resp.data
+    for w in exhibitions:
+        dt = w.get("date_time")
+        if dt:
+            start_dt = datetime.fromisoformat(dt)
+            w["date"] = start_dt.strftime("%d.%m.%y")
+            w["time"] = start_dt.strftime("%H:%M")
+        else:
+            w["date"] = None
+            w["time"] = None
+
+    return jsonify({"success": True, "exhibitions": exhibitions}), 200

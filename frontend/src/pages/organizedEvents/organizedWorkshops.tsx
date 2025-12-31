@@ -111,7 +111,7 @@ export default function MyWorkshops() {
 
                 return (
                   <TableRow key={w.id}>
-                    <TableCell className="font-medium">{w.date.substring(0, 5)}</TableCell>
+                    <TableCell className="font-medium">{w.date.substring(0, 9)}</TableCell>
                     <TableCell>{w.time ?? "-"}</TableCell>
                     <TableCell>
                       <span className="truncate inline-block max-w-[300px] align-middle">{w.title}</span>
@@ -142,15 +142,15 @@ export default function MyWorkshops() {
       </MainColumn>
 
       {confirmWorkshop && (
-      <ConfirmCard
-        title="Potvrdi brisanje radionice"
-        message={`Za brisanje radionice morate upisati naziv radionice: "${confirmWorkshop.title}"`}
-        confirmText={deletingId === confirmWorkshop.id ? "Brisanje..." : "Obriši"}
-        expectedText={confirmWorkshop.title} // <-- workshop name here
-        onCancel={() => setConfirmWorkshop(null)}
-        onConfirm={handleDelete}
-      />
-    )}
+        <ConfirmCard
+          title="Potvrdi brisanje radionice"
+          message={`Za brisanje radionice morate upisati naziv radionice: "${confirmWorkshop.title}"`}
+          confirmText={deletingId === confirmWorkshop.id ? "Brisanje..." : "Obriši"}
+          expectedText={confirmWorkshop.title} // <-- workshop name here
+          onCancel={() => setConfirmWorkshop(null)}
+          onConfirm={handleDelete}
+        />
+      )}
 
     </PageLayout>
   );
