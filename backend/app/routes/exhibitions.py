@@ -408,27 +408,6 @@ def forum():
 
     user_id = user_resp.data["id"]
 
-    participant_resp = (
-        supabase.table("participants")
-        .select("id")
-        .eq("user_id", user_id)
-        .single()
-        .execute()
-    )
-
-    participant_id = participant_resp.data["id"]
-
-    registrations_resp = (
-        supabase.table("exhibition_registrations")
-        .select("*")
-        .eq("participant_id", participant_id)
-        .execute()
-    )
-
-    registrations = registrations_resp.data or []
-    exhibition_ids = [r["exhibition_id"] for r in registrations]
-    registration_map = {r["exhibition_id"]: r["approved"] for r in registrations}
-
     exhibitions_resp = (
         supabase.table("exhibitions")
         .select("*")
@@ -466,22 +445,67 @@ def forum():
         u["id"]: f"{u['first_name']} {u['last_name']}" for u in users_resp.data or []
     }
 
-    for e in exhibitions:
-        user_id = organizer_map.get(e.get("organizer_id"))
-        e["organizer_name"] = user_map.get(user_id, "Organizator")
+    participant_resp = (
+        supabase.table("participants").select("id").eq("user_id", user_id).execute()
+    )
 
-        start_dt = datetime.fromisoformat(e["date_time"])
+    if participant_resp.data and len(participant_resp.data) == 1:
 
-        e["date"] = start_dt.strftime("%d.%m")
-        e["timeFrom"] = start_dt.strftime("%H:%M")
-        e["timeTo"] = None
+        participant_id = participant_resp.data[0]["id"]
 
-        if e["id"] in exhibition_ids and registration_map.get(e.get("id")):
-            e["filter_out"] = False
-        else:
-            e["filter_out"] = True
+        registrations_resp = (
+            supabase.table("exhibition_registrations")
+            .select("*")
+            .eq("participant_id", participant_id)
+            .execute()
+        )
 
-    return jsonify({"success": True, "exhibitions": exhibitions}), 200
+        registrations = registrations_resp.data or []
+        exhibition_ids = [r["exhibition_id"] for r in registrations]
+        registration_map = {r["exhibition_id"]: r["approved"] for r in registrations}
+
+        for e in exhibitions:
+            user_id = organizer_map.get(e.get("organizer_id"))
+            e["organizer_name"] = user_map.get(user_id, "Organizator")
+
+            start_dt = datetime.fromisoformat(e["date_time"])
+
+            e["date"] = start_dt.strftime("%d.%m")
+            e["timeFrom"] = start_dt.strftime("%H:%M")
+            e["timeTo"] = None
+
+            if e["id"] in exhibition_ids and registration_map.get(e.get("id")):
+                e["filter_out"] = False
+            else:
+                e["filter_out"] = True
+
+        return jsonify({"success": True, "exhibitions": exhibitions}), 200
+    else:
+        organizer_resp = (
+            supabase.table("organizers")
+            .select("id")
+            .eq("user_id", user_id)
+            .single()
+            .execute()
+        )
+
+        organizer_id = organizer_resp.data["id"]
+        for e in exhibitions:
+            user_id = organizer_map.get(e.get("organizer_id"))
+            e["organizer_name"] = user_map.get(user_id, "Organizator")
+
+            start_dt = datetime.fromisoformat(e["date_time"])
+
+            e["date"] = start_dt.strftime("%d.%m")
+            e["timeFrom"] = start_dt.strftime("%H:%M")
+            e["timeTo"] = None
+
+            if organizer_id == e["organizer_id"]:
+                e["filter_out"] = False
+            else:
+                e["filter_out"] = True
+
+        return jsonify({"success": True, "exhibitions": exhibitions}), 200
 
 
 @exhibition_bp.route("/exhibitions/my", methods=["GET"])
@@ -544,6 +568,7 @@ def get_my_exhibitions():
 
 @exhibition_bp.route("/forum/<int:exhibition_id>/comments", methods=["GET"])
 def get_comments(exhibition_id):
+
     comments_resp = (
         supabase.table("comments")
         .select("*")
@@ -554,6 +579,16 @@ def get_comments(exhibition_id):
 
     comments = comments_resp.data
     user_ids = list({e["user_id"] for e in comments if e.get("user_id")})
+    o_resp = (
+        supabase.table("organizers")
+        .select("user_id")
+        .in_("user_id", user_ids)
+        .execute()
+    )
+
+    organizer_user_ids = [row["user_id"] for row in o_resp.data] if o_resp.data else []
+
+    print(organizer_user_ids)
 
     user_resp = supabase.table("users").select("*").in_("id", user_ids).execute()
     users = user_resp.data
@@ -586,6 +621,11 @@ def get_comments(exhibition_id):
         )
 
         c["photo_url"] = photo_map.get(c["photo_id"])
+
+        if c["user_id"] in organizer_user_ids:
+            c["is_organizer"] = True
+        else:
+            c["is_organizer"] = False
 
     return jsonify({"success": True, "comments": comments}), 200
 
