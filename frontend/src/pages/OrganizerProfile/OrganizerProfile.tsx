@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+
+import { useEffect, useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button, LoadingButton } from "@/components/ui/button";
 import { supabase } from "@/config/supabase";
-import { fetchPost } from "@/utils/fetchUtils";
+import { fetchPost, fetchGet, fetchDelete } from "@/utils/fetchUtils";
 import { useAuth } from "@/components/context/AuthProvider";
-
 import { Banner, BannerImage, BannerFallback } from "@/components/ui/banner";
 import { Logo, LogoImage, LogoFallback } from "@/components/ui/logo";
+import { ImagePlus, X, Grid, Loader2 } from "lucide-react";
+import { number } from "zod";
+import { Spinner } from "@/components/ui/spinner";
+
 
 /* ---------------- Types ---------------- */
 
@@ -20,13 +24,20 @@ type OrganizerProfileForm = {
   membership_plan_id: number | null;
   membership_expiry_date: string | null;
   approved_by_admin: boolean | null;
+
 };
+
+type Photo = {
+  id: number
+  url: string
+}
 
 /* ---------------- Component ---------------- */
 
 export default function OrganizerProfile() {
   const { user } = useAuth();
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [idBeingRemoved, setIdBeingRemoved] = useState<number | null>(null)
   const [form, setForm] = useState<OrganizerProfileForm>({
     profile_name: "",
     description: "",
@@ -41,6 +52,10 @@ export default function OrganizerProfile() {
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
+
 
   /* ---------------- Load organizer profile ---------------- */
 
@@ -75,8 +90,24 @@ export default function OrganizerProfile() {
       }
     }
 
+    async function loadOrganizerImages() {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const res = await fetchGet<{ success: boolean, photos: Photo[] }>(
+        "/organizer/photos",
+        {
+          Authorization: `Bearer ${data.session.access_token}`,
+        }
+      );
+      if (res.photos) {
+        setPhotos(res.photos)
+        setLoadingPhotos(false)
+      }
+    }
+
     if (user?.role === "organizator") {
       loadOrganizerProfile();
+      loadOrganizerImages();
     }
   }, [user]);
 
@@ -124,6 +155,41 @@ export default function OrganizerProfile() {
     setUploadingBanner(false);
   }
 
+  async function handleImageUpload(file: File | null) {
+
+    if (!file) {
+      return null;
+    }
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session) {
+      return;
+    }
+    const userId = sessionData.session.user.id;
+    const timestamp = Date.now();
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${userId}_${timestamp}.${fileExt}`; // unique file path
+
+    const { error: uploadError } = await supabase.storage
+      .from("photos")
+      .upload(filePath, file, { upsert: false }); // don’t overwrite old images
+
+    if (uploadError) {
+      console.error("Failed to upload image:", uploadError);
+      return;
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("photos")
+      .getPublicUrl(filePath);
+
+    if (!urlData) {
+      console.error("Failed to get public URL");
+      return;
+    }
+    return urlData.publicUrl
+  }
   /* ---------------- Save profile ---------------- */
 
   async function handleSave() {
@@ -151,6 +217,51 @@ export default function OrganizerProfile() {
       setSaving(false);
     }
   }
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    setUploadingPhoto(true);
+    try {
+      const publicUrl = await handleImageUpload(file);
+
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const res = await fetchPost<{ success: boolean; photo: Photo }>(
+        "/organizer/photos/add",
+        { url: publicUrl },
+        { Authorization: `Bearer ${data.session.access_token}` }
+      );
+
+      if (res.success) {
+        setPhotos(prev => [...prev, res.photo]);
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: number) => {
+    try {
+      setIdBeingRemoved(photoId)
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const res = await fetchDelete<{ success: boolean }>(
+        `/organizer/photos/delete/${photoId}`,
+        { Authorization: `Bearer ${data.session.access_token}` }
+      );
+
+      if (res.success) {
+        setPhotos(prev => prev.filter(photo => photo.id !== photoId));
+      }
+    } catch (err) {
+      console.error("Deletion failed", err);
+    } finally {
+      setIdBeingRemoved(null)
+    }
+  };
 
   /* ---------------- Loading ---------------- */
 
@@ -165,136 +276,216 @@ export default function OrganizerProfile() {
   /* ---------------- Render ---------------- */
 
   return (
-    <div className="flex justify-center p-6">
-      <Card className="w-full max-w-3xl rounded-2xl shadow-sm">
-        <CardContent className="p-6 space-y-8">
-          <h1 className="text-2xl font-semibold">Organizer Profile</h1>
+    <div className="max-w-4xl mx-auto py-10 px-4 space-y-10">
+      <Card className="border-border bg-card shadow-lg overflow-hidden">
+        {/* ... (Existing Banner and Logo code) ... */}
 
-          {/* Approval status */}
-          <div>
-            <Label>Status</Label>
-            <Input
-              value={form.approved_by_admin ? "Approved" : "Pending approval"}
-              disabled
-            />
-          </div>
+        <CardContent className="p-8 space-y-6">
+          <CardContent className="p-6 space-y-8">
+            <h1 className="text-2xl font-semibold">Organizer Profile</h1>
 
-          {/* Banner */}
-          <div className="space-y-2">
-            <Label>Banner</Label>
+            {/* Approval status */}
+            <div>
+              <Label>Status</Label>
+              <Input
+                value={form.approved_by_admin ? "Approved" : "Pending approval"}
+                disabled
+              />
+            </div>
 
-            <Banner className="h-48">
-              {form.banner_url ? (
-                <BannerImage src={form.banner_url} />
-              ) : (
-                <BannerFallback>No banner uploaded</BannerFallback>
-              )}
-            </Banner>
+            {/* Banner */}
+            <div className="space-y-2">
+              <Label>Banner</Label>
 
-            <input
-              type="file"
-              accept="image/*"
-              id="banner-upload"
-              className="hidden"
-              onChange={(e) =>
-                e.target.files && handleBannerUpload(e.target.files[0])
-              }
-            />
-
-            <Button
-              variant="outline"
-              disabled={uploadingBanner}
-              onClick={() =>
-                document.getElementById("banner-upload")?.click()
-              }
-            >
-              {uploadingBanner ? "Uploading..." : "Change banner"}
-            </Button>
-          </div>
-
-          {/* Logo */}
-          <div className="space-y-2">
-            <Label>Logo</Label>
-
-            <div className="flex items-center gap-6">
-              <Logo>
-                {form.logo_url ? (
-                  <LogoImage src={form.logo_url} />
+              <Banner className="h-48">
+                {form.banner_url ? (
+                  <BannerImage src={form.banner_url} />
                 ) : (
-                  <LogoFallback>
-                    {form.profile_name?.[0] ?? "O"}
-                  </LogoFallback>
+                  <BannerFallback>No banner uploaded</BannerFallback>
                 )}
-              </Logo>
+              </Banner>
 
               <input
                 type="file"
                 accept="image/*"
-                id="logo-upload"
+                id="banner-upload"
                 className="hidden"
                 onChange={(e) =>
-                  e.target.files && handleLogoUpload(e.target.files[0])
+                  e.target.files && handleBannerUpload(e.target.files[0])
                 }
               />
 
               <Button
                 variant="outline"
-                disabled={uploadingLogo}
+                disabled={uploadingBanner}
                 onClick={() =>
-                  document.getElementById("logo-upload")?.click()
+                  document.getElementById("banner-upload")?.click()
                 }
               >
-                {uploadingLogo ? "Uploading..." : "Change logo"}
+                {uploadingBanner ? "Uploading..." : "Change banner"}
               </Button>
             </div>
-          </div>
 
-          {/* Organizer name */}
-          <div>
-            <Label>Organizer name</Label>
-            <Input
-              value={form.profile_name ?? ""}
-              onChange={(e) =>
-                setForm({ ...form, profile_name: e.target.value })
-              }
-            />
-          </div>
+            {/* Logo */}
+            <div className="space-y-2">
+              <Label>Logo</Label>
 
-          {/* Description */}
-          <div>
-            <Label>Description</Label>
-            <Input
-              value={form.description ?? ""}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-            />
-          </div>
+              <div className="flex items-center gap-6">
+                <Logo>
+                  {form.logo_url ? (
+                    <LogoImage src={form.logo_url} />
+                  ) : (
+                    <LogoFallback>
+                      {form.profile_name?.[0] ?? "O"}
+                    </LogoFallback>
+                  )}
+                </Logo>
 
-          {/* Membership info */}
-          <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="logo-upload"
+                  className="hidden"
+                  onChange={(e) =>
+                    e.target.files && handleLogoUpload(e.target.files[0])
+                  }
+                />
+
+                <Button
+                  variant="outline"
+                  disabled={uploadingLogo}
+                  onClick={() =>
+                    document.getElementById("logo-upload")?.click()
+                  }
+                >
+                  {uploadingLogo ? "Uploading..." : "Change logo"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Organizer name */}
             <div>
-              <Label>Membership plan</Label>
+              <Label>Organizer name</Label>
               <Input
-                value={form.membership_plan_id ?? "—"}
-                disabled
+                value={form.profile_name ?? ""}
+                onChange={(e) =>
+                  setForm({ ...form, profile_name: e.target.value })
+                }
               />
             </div>
 
+            {/* Description */}
             <div>
-              <Label>Expiry date</Label>
+              <Label>Description</Label>
               <Input
-                value={form.membership_expiry_date ?? "—"}
-                disabled
+                value={form.description ?? ""}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
               />
             </div>
-          </div>
 
-          <LoadingButton loading={saving} onClick={handleSave}>
-            Save changes
+            {/* Membership info */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Membership plan</Label>
+                <Input
+                  value={form.membership_plan_id ?? "—"}
+                  disabled
+                />
+              </div>
+
+              <div>
+                <Label>Expiry date</Label>
+                <Input
+                  value={form.membership_expiry_date ?? "—"}
+                  disabled
+                />
+              </div>
+            </div>
+          </CardContent>
+          <LoadingButton loading={saving} onClick={handleSave} className="w-full">
+            Save Profile Changes
           </LoadingButton>
+        </CardContent>
+      </Card>
+
+      {/* --- Previous Work Gallery --- */}
+      <Card className="border-border bg-card shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Grid className="w-5 h-5 text-primary" />
+              Previous Work
+            </CardTitle>
+            <CardDescription>
+              Showcase photos from your past exhibitions and events.
+            </CardDescription>
+          </div>
+
+          <div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleGalleryUpload}
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              variant="outline"
+              className="rounded-full border-primary/20 text-primary hover:bg-primary/10"
+            >
+              {uploadingPhoto ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <ImagePlus className="w-4 h-4 mr-2" />
+              )}
+              Add Photo
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {loadingPhotos ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="w-8 h-8 animate-spin text-primary/40" />
+            </div>
+          ) : photos.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {photos.map((photo) => (
+                <div key={photo.id} className="group relative aspect-square rounded-xl overflow-hidden border border-border shadow-sm">
+                  <img
+                    src={photo.url}
+                    alt="Previous work"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="h-8 w-8 rounded-full shadow-xl"
+                      onClick={() => handleDeletePhoto(photo.id)}
+                    >
+                      {idBeingRemoved == photo.id ? (
+                        <Spinner></Spinner>
+                      ) : (
+                        <X className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl bg-muted/10">
+              <p className="text-muted-foreground text-sm font-medium">No photos uploaded yet.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
+

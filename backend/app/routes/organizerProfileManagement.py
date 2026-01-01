@@ -151,6 +151,131 @@ def update_organizer_profile():
         return jsonify({"error": str(e)}), 400
 
 
+@organizerProfile_bp.route("/organizer/photos", methods=["GET"])
+def get_images():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    user_resp = admin_supabase.auth.get_user(token)
+    auth_id = user_resp.user.id
+
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+
+    user_id = user_resp.data.get("id")
+
+    organizer_resp = (
+        supabase.table("organizers")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+    organizer_id = organizer_resp.data["id"]
+
+    resp = (
+        supabase.table("organizer_photos")
+        .select("*")
+        .eq("organizer_id", organizer_id)
+        .execute()
+    )
+
+    photo_ids = list({e["photo_id"] for e in resp.data if e.get("photo_id")})
+
+    photo_resp = supabase.table("photos").select("*").in_("id", photo_ids).execute()
+
+    return jsonify({"success": True, "photos": photo_resp.data}), 200
+
+
+@organizerProfile_bp.route("/organizer/photos/add", methods=["POST"])
+def upload_image():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    user_resp = admin_supabase.auth.get_user(token)
+    auth_id = user_resp.user.id
+
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+
+    user_id = user_resp.data.get("id")
+
+    organizer_resp = (
+        supabase.table("organizers")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+    organizer_id = organizer_resp.data["id"]
+
+    data = request.json
+
+    url = data["url"]
+
+    resp = supabase.table("photos").insert({"url": url}).execute()
+
+    photo_id = resp.data[0]["id"]
+
+    respp = (
+        supabase.table("organizer_photos")
+        .insert({"organizer_id": organizer_id, "photo_id": photo_id})
+        .execute()
+    )
+
+    return jsonify({"success": True, "photo": resp.data[0]}), 200
+
+
+@organizerProfile_bp.route(
+    "/organizer/photos/delete/<int:photo_id>", methods=["DELETE"]
+)
+def delete_photo(photo_id):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    user_resp = admin_supabase.auth.get_user(token)
+    auth_id = user_resp.user.id
+
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+
+    user_id = user_resp.data.get("id")
+
+    organizer_resp = (
+        supabase.table("organizers")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+    organizer_id = organizer_resp.data["id"]
+
+    resp = (
+        supabase.table("organizer_photos")
+        .delete()
+        .eq("organizer_id", organizer_id)
+        .eq("photo_id", photo_id)
+        .execute()
+    )
+
+    if resp.data:
+        supabase.table("photos").delete().eq("id", photo_id).execute()
+
+    return jsonify({"success": True}), 200
+
+
 @organizerProfile_bp.route("/organizer/pending", methods=["GET"])
 def get_pending():
     auth_header = request.headers.get("Authorization")
@@ -250,7 +375,6 @@ def get_pending():
 @organizerProfile_bp.route("/organizer/approve/<int:reservation_id>", methods=["POST"])
 def approve_reservation(reservation_id):
     auth_header = request.headers.get("Authorization")
-    print(auth_header)
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({"error": "Unauthorized"}), 401
 
