@@ -103,7 +103,7 @@ export default function Pending() {
                             className="group relative bg-card rounded-2xl border border-border p-5 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="h-14 w-14 rounded-full bg-muted flex-shrink-0 overflow-hidden border border-border">
+                                <div className="h-14 w-14 rounded-full bg-muted shrink-0 overflow-hidden border border-border">
                                     {reg.participant_profile_photo_url ? (
                                         <img
                                             src={reg.participant_profile_photo_url}

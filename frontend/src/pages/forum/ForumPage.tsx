@@ -14,8 +14,8 @@ import PageLayout from "@/components/layout/PageLayout";
 import { RefreshCw } from "lucide-react";
 type Comment = {
     id: number;
-    user_username: string;
-    user_profile_photo_url: string;
+    user_username?: string;
+    user_profile_photo_url?: string;
     content: string;
     photo_url?: string;
     created_at: string;
@@ -286,13 +286,13 @@ export default function ForumPage() {
                         comments.map((comment) => (
                             <div key={comment.id} className="flex gap-4 group animate-in fade-in slide-in-from-bottom-3 duration-500">
                                 <Avatar className="h-11 w-11 border-2 border-background shadow-sm">
-                                    <AvatarImage src={comment.user_profile_photo_url} className="object-cover" />
-                                    <AvatarFallback className="bg-muted font-bold">{comment.user_username[0]}</AvatarFallback>
+                                    {comment.user_profile_photo_url ? (<AvatarImage src={comment.user_profile_photo_url} className="object-cover" />) : (<div></div>)}
+                                    <AvatarFallback className="bg-muted font-bold">{comment.user_username ? (comment.user_username)[0] : "Anonymous"}</AvatarFallback>
                                 </Avatar>
 
                                 <div className="flex-1 space-y-1.5">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-sm text-foreground">{comment.user_username}</span>
+                                        <span className="font-bold text-sm text-foreground">{comment.user_username || "Anonymous"}</span>
                                         <span className="text-[10px] text-muted-foreground font-medium">
                                             {new Date(comment.created_at).toLocaleString()}
                                         </span>
@@ -323,6 +323,6 @@ export default function ForumPage() {
                     )}
                 </div>
             </div>
-        </PageLayout>
+        </PageLayout >
     );
 }

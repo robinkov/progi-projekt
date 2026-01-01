@@ -560,7 +560,9 @@ def get_comments(exhibition_id):
 
     username_map = {o["id"]: o["username"] for o in users or []}
 
-    profile_photo_ids = list({e["profile_photo_id"] for e in users if e.get("id")})
+    profile_photo_ids = list(
+        {e["profile_photo_id"] for e in users if e.get("profile_photo_id")}
+    )
 
     photo_ids = list({e["photo_id"] for e in comments if e.get("photo_id")})
 
