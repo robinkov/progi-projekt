@@ -540,3 +540,111 @@ def get_my_exhibitions():
             w["time"] = None
 
     return jsonify({"success": True, "exhibitions": exhibitions}), 200
+
+
+@exhibition_bp.route("/forum/<int:exhibition_id>/comments", methods=["GET"])
+def get_comments(exhibition_id):
+    comments_resp = (
+        supabase.table("comments")
+        .select("*")
+        .eq("exhibition_id", exhibition_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    comments = comments_resp.data
+    user_ids = list({e["user_id"] for e in comments if e.get("user_id")})
+
+    user_resp = supabase.table("users").select("*").in_("id", user_ids).execute()
+    users = user_resp.data
+
+    username_map = {o["id"]: o["username"] for o in users or []}
+
+    profile_photo_ids = list({e["profile_photo_id"] for e in users if e.get("id")})
+
+    photo_ids = list({e["photo_id"] for e in comments if e.get("photo_id")})
+
+    photos_resp = (
+        supabase.table("photos")
+        .select("*")
+        .in_("id", photo_ids + profile_photo_ids)
+        .execute()
+    )
+
+    photos = photos_resp.data
+
+    photo_map = {o["id"]: o["url"] for o in photos or []}
+    profile_photo_id_map = {o["id"]: o["profile_photo_id"] for o in users or []}
+
+    for c in comments:
+
+        c["user_username"] = username_map.get(c["user_id"])
+        c["user_profile_photo_url"] = photo_map.get(
+            profile_photo_id_map.get(c["user_id"])
+        )
+
+        c["photo_url"] = photo_map.get(c["photo_id"])
+
+    return jsonify({"success": True, "comments": comments}), 200
+
+
+@exhibition_bp.route("/forum/<int:exhibition_id>/post", methods=["POST"])
+def post_comment(exhibition_id):
+
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Invalid token payload"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("id").eq("auth_id", auth_id).single().execute()
+    )
+
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_id = user_resp.data["id"]
+
+    data = request.json
+
+    content = data.get("content")
+    url = data.get("url")
+
+    if url:
+        response = (
+            supabase.table("photos").insert({"url": url, "description": None}).execute()
+        )
+
+        photo_id = response.data[0]["id"]
+    else:
+        photo_id = None
+
+    response = (
+        supabase.table("comments")
+        .insert(
+            {
+                "user_id": user_id,
+                "exhibition_id": exhibition_id,
+                "content": content,
+                "photo_id": photo_id,
+                "created_at": str(datetime.now()),
+            }
+        )
+        .execute()
+    )
+
+    if response.data:
+        return jsonify({"success": True}), 200
+    else:
+        return jsonify({"success": False}), 400

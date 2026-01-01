@@ -85,25 +85,25 @@ export default function Pending() {
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-[#0f172a]">Neodobrene prijave za Vaše izložbe</h1>
-                <p className="text-slate-500 mt-2">Pregledajte i odobrite prijave</p>
+                <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Neodobrene prijave za Vaše izložbe</h1>
+                <p className="text-muted-foreground mt-2 font-medium">Pregledajte i odobrite prijave polaznika</p>
             </header>
 
             {registrations.length === 0 ? (
-                <div className="text-center py-20 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                    <Users className="mx-auto h-12 w-12 text-slate-300" />
-                    <h3 className="mt-4 text-lg font-medium text-slate-900">Nema prijava</h3>
-                    <p className="text-slate-500">U toku ste! Nove prijave će se pojaviti ovdje</p>
+                <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed border-border">
+                    <Users className="mx-auto h-12 w-12 text-muted/50" />
+                    <h3 className="mt-4 text-lg font-semibold text-foreground">Nema prijava</h3>
+                    <p className="text-muted-foreground">U toku ste! Nove prijave će se pojaviti ovdje.</p>
                 </div>
             ) : (
                 <div className="grid gap-4">
                     {registrations.map((reg) => (
                         <div
                             key={reg.id}
-                            className="group relative bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
+                            className="group relative bg-card rounded-2xl border border-border p-5 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="h-14 w-14 rounded-full bg-slate-100 flex-shrink-0 overflow-hidden border border-slate-200">
+                                <div className="h-14 w-14 rounded-full bg-muted flex-shrink-0 overflow-hidden border border-border">
                                     {reg.participant_profile_photo_url ? (
                                         <img
                                             src={reg.participant_profile_photo_url}
@@ -111,23 +111,23 @@ export default function Pending() {
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (
-                                        <div className="h-full w-full flex items-center justify-center bg-slate-50 text-slate-400">
+                                        <div className="h-full w-full flex items-center justify-center text-muted-foreground">
                                             <User size={24} />
                                         </div>
                                     )}
                                 </div>
 
                                 <div>
-                                    <h3 className="font-bold text-lg text-slate-900">
+                                    <h3 className="font-bold text-lg text-foreground">
                                         {reg.participant_username || "Anonymous"}
                                     </h3>
-                                    <div className="flex items-center gap-3 mt-1 text-sm text-slate-600">
+                                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground font-medium">
                                         <span className="flex items-center gap-1">
-                                            <Calendar size={14} className="text-[#4d7c0f]" />
+                                            <Calendar size={14} className="text-primary" />
                                             {new Date(reg.exhibition_date_time).toLocaleDateString('hr-HR')}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Clock size={14} className="text-[#4d7c0f]" />
+                                            <Clock size={14} className="text-primary" />
                                             {new Date(reg.exhibition_date_time).toLocaleTimeString('hr-HR', { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
@@ -135,10 +135,10 @@ export default function Pending() {
                             </div>
 
                             <div className="flex-1 md:px-6">
-                                <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Prijava za</div>
-                                <div className="font-medium text-slate-800">{reg.exhibition_title}</div>
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1">Prijava za</div>
+                                <div className="font-bold text-foreground">{reg.exhibition_title}</div>
                                 <div className="mt-2 flex items-center gap-2">
-                                    <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-[#4d7c0f] border border-green-100">
+                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-accent/30 text-accent-foreground border border-accent">
                                         {reg.number_of_already_approved_participants} polaznika odobreno
                                     </span>
                                 </div>
@@ -147,7 +147,7 @@ export default function Pending() {
                             <div className="flex items-center gap-2">
                                 <Button
                                     disabled={approvingId === reg.id}
-                                    className="text-white min-w-[100px]"
+                                    className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[120px] rounded-xl shadow-sm"
                                     onClick={() => handleApprove(reg.id)}
                                 >
                                     {approvingId === reg.id ? (
