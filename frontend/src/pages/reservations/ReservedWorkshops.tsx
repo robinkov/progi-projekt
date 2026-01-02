@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { computeEventStatus, isCancellationAllowed } from "@/utils/statusUtils";
 import {
@@ -30,6 +31,13 @@ import {
 import { fetchGet } from "@/utils/fetchUtils";
 import { supabase } from "@/config/supabase";
 import { fetchDelete } from "@/utils/fetchUtils";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyContent,
+  EmptyDescription,
+} from "@/components/ui/empty";
 
 // ==================== end of imports ====================
 
@@ -61,7 +69,7 @@ export default function ReservedWorkshops() {
   const [rows, setRows] = useState<Workshop[]>(mockReserved);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
 
   const cancelReservation = async (id: number) => {
     setRows((prev) => prev.filter((w) => w.id !== id));
@@ -101,76 +109,89 @@ export default function ReservedWorkshops() {
     }
 
     loadReservations()
-  })
+  }, [])
 
   return (
     <div className="w-full">
       <h1 className="text-2xl font-semibold mb-6">Rezervirane radionice</h1>
 
-      {loading ? (
-        <div>Učitavanje radionica...</div>
-      ) : (
-        <Table>
-          <TableCaption>Popis tvojih rezerviranih radionica.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Datum</TableHead>
-              <TableHead>Vrijeme</TableHead>
-              <TableHead>Naziv</TableHead>
-              <TableHead>Instruktor</TableHead>
-              <TableHead>Lokacija</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Akcija</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((w) => (
-              <TableRow key={w.id}>
-                <TableCell className="font-medium">{w.date.substring(0, 9)}</TableCell>
-                <TableCell>{w.time}</TableCell>
-                <TableCell>
-                  <span className="truncate inline-block max-w-[300px] align-middle">{w.title}</span>
-                </TableCell>
-                <TableCell>{w.organizer}</TableCell>
-                <TableCell className="text-muted-foreground">{w.location}</TableCell>
-                <TableCell>{computeEventStatus(w.date, w.time)}</TableCell>
-                <TableCell className="text-right">
-                  {isCancellationAllowed(w.date, w.time) ? (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">OTKAŽI</Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Želiš li otkazati rezervaciju?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Ova radnja se ne može poništiti. Otkazat ćeš rezervaciju radionice "{w.title}"
-                            zakazane za {w.date}{w.time ? ` u ${w.time}` : ""}. Radionicu više nećeš moći ponovno prijaviti.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Odustani</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => cancelReservation(w.id)}>Potvrdi</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  ) : (
-                    <HoverCard>
-                      <HoverCardTrigger asChild>
-                        <span className="inline-block">
-                          <Button variant="destructive" size="sm" disabled>OTKAŽI</Button>
-                        </span>
-                      </HoverCardTrigger>
-                      <HoverCardContent>
-                        <p>Otkazivanje rezervacije moguće je najkasnije 48 sati prije početka radionice.</p>
-                      </HoverCardContent>
-                    </HoverCard>
-                  )}
-                </TableCell>
+        {loading ? (
+          <div>Učitavanje radionica...</div>
+        ) : rows.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>Nema rezerviranih radionica</EmptyTitle>
+              <EmptyDescription>Trenutno nema rezervacija za prikaz.</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="link" onClick={() => {navigate("/workshops")}}>
+                Pregledaj radionice
+              </Button>
+            </EmptyContent>
+          </Empty>
+        ) : (
+          <Table>
+            <TableCaption>Popis tvojih rezerviranih radionica.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Datum</TableHead>
+                <TableHead>Vrijeme</TableHead>
+                <TableHead>Naziv</TableHead>
+                <TableHead>Instruktor</TableHead>
+                <TableHead>Lokacija</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Akcija</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>)}
+            </TableHeader>
+            <TableBody>
+              {rows.map((w) => (
+                <TableRow key={w.id}>
+                  <TableCell className="font-medium">{w.date.substring(0, 9)}</TableCell>
+                  <TableCell>{w.time}</TableCell>
+                  <TableCell>
+                    <span className="truncate inline-block max-w-[300px] align-middle">{w.title}</span>
+                  </TableCell>
+                  <TableCell>{w.organizer}</TableCell>
+                  <TableCell className="text-muted-foreground">{w.location}</TableCell>
+                  <TableCell>{computeEventStatus(w.date, w.time)}</TableCell>
+                  <TableCell className="text-right">
+                    {isCancellationAllowed(w.date, w.time) ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">OTKAŽI</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Želiš li otkazati rezervaciju?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Ova radnja se ne može poništiti. Otkazat ćeš rezervaciju radionice "{w.title}"
+                              zakazane za {w.date}{w.time ? ` u ${w.time}` : ""}. Radionicu više nećeš moći ponovno prijaviti.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Odustani</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => cancelReservation(w.id)}>Potvrdi</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : (
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <span className="inline-block">
+                            <Button variant="destructive" size="sm" disabled>OTKAŽI</Button>
+                          </span>
+                        </HoverCardTrigger>
+                        <HoverCardContent>
+                          <p>Otkazivanje rezervacije moguće je najkasnije 48 sati prije početka radionice.</p>
+                        </HoverCardContent>
+                      </HoverCard>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
 
       <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <AlertDialogContent>
