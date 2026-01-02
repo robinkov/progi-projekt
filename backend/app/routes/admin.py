@@ -110,5 +110,9 @@ def approve_organizer(organizer_id):
         supabase.table("organizers")
         .update({"approved_by_admin": True})
         .eq("id", organizer_id)
+        .execute()
     )
-    return jsonify({"success": True}), 200
+    if resp.data and len(resp.data) == 1:
+        return jsonify({"success": True}), 200
+    else:
+        print(resp)
