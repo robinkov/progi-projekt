@@ -19,8 +19,6 @@ import {
   EmptyContent,
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 
 // ==================== end of imports ====================
 
@@ -71,9 +69,8 @@ export default function RegisteredExhibitions() {
   }, [])
 
   return (
-    <PageLayout>
-      <MainColumn>
-        <h1 className="text-2xl font-semibold mb-6">Prijavljene izložbe</h1>
+    <div className="w-full">
+      <h1 className="text-2xl font-semibold mb-6">Prijavljene izložbe</h1>
         {loading ? (
           <div>Učitavanje radionica...</div>
         ) : rows.length === 0 ? (
@@ -126,7 +123,6 @@ export default function RegisteredExhibitions() {
             </TableBody>
           </Table>
         )}
-      </MainColumn>
-    </PageLayout>
+    </div>
   );
 }
