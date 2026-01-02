@@ -1,9 +1,11 @@
 import { type RouteObject } from "react-router";
 import ReservedWorkshops from "@/pages/reservations/ReservedWorkshops";
 import RegisteredExhibitions from "@/pages/reservations/RegisteredExhibitions";
+import HomeLayout from "@/pages/app/_Layout";
 
 const routes: RouteObject = {
   path: "reservations",
+  Component: HomeLayout,
   children: [
     {
       path: "workshops",

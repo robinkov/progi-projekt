@@ -176,6 +176,18 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                 </Button>
               </li>
             )}
+            {auth.user?.role === "admin" && (
+              <li>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => navigate("/admin/pending")}
+                >
+                  Odobravanje profila
+                </Button>
+              </li>
+            )}
+
 
             {auth.user?.role === "polaznik" && (
               <li>

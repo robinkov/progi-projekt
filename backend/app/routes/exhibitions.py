@@ -110,27 +110,15 @@ def get_exhibitions():
 
     organizers_resp = (
         supabase.table("organizers")
-        .select("id, user_id")
+        .select("id, profile_name")
         .in_("id", organizer_ids)
         .execute()
     )
 
-    organizer_map = {o["id"]: o["user_id"] for o in organizers_resp.data or []}
-
-    users_resp = (
-        supabase.table("users")
-        .select("id, first_name, last_name")
-        .in_("id", list(organizer_map.values()))
-        .execute()
-    )
-
-    user_map = {
-        u["id"]: f"{u['first_name']} {u['last_name']}" for u in users_resp.data or []
-    }
+    organizer_map = {o["id"]: o["profile_name"] for o in organizers_resp.data or []}
 
     for e in exhibitions:
-        user_id = organizer_map.get(e.get("organizer_id"))
-        e["organizer_name"] = user_map.get(user_id, "Organizator")
+        e["organizer_name"] = organizer_map.get(e["organizer_id"])
 
         start_dt = datetime.fromisoformat(e["date_time"])
 

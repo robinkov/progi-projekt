@@ -1,10 +1,16 @@
 import Navbar from "@/components/app/Navbar";
 import { supabase } from "@/config/supabase";
-import { useEffect} from "react";
+import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
+import { fetchPost } from "@/utils/fetchUtils";
+import AuthController from "@/controllers/authController";
+import { useAuth } from "@/components/context/AuthProvider";
+import { useState } from "react";
 
 export default function OrganizerProfileLayout() {
   const navigate = useNavigate();
+  const auth = useAuth();
+  const [loading, setLoading] = useState(true); // <-- local loading state
 
   useEffect(() => {
 
@@ -16,6 +22,39 @@ export default function OrganizerProfileLayout() {
 
     return () => listener.subscription.unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    async function guard() {
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      if (!sessionData.session) {
+        navigate("/auth", { replace: true });
+        return;
+      }
+
+      const token = sessionData.session.access_token;
+
+      try {
+        const res = await fetchPost<{ user_role: string }>(
+          "/user",
+          {},
+          { Authorization: `Bearer ${token}` },
+        );
+
+        if (res.user_role == "none" && window.location.pathname !== "/rolechoose") {
+          navigate("/rolechoose", { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        AuthController.logoutUser();
+      } finally {
+        setLoading(false); // <-- stop spinner once done
+      }
+    }
+
+    guard();
+  }, [auth, navigate]);
 
 
   return (
