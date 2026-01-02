@@ -106,9 +106,9 @@ const ExhibitionPage = () => {
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="p-12 text-center text-lg">Učitavamo izložbu...</div>
-      </PageLayout>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p>Učitavanje izložbe...</p>
+      </div>
     );
   }
 
@@ -123,7 +123,7 @@ const ExhibitionPage = () => {
           <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="space-y-4">
               <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                Upcoming Event
+                Izložba
               </Badge>
               <h1 className="text-4xl font-extrabold text-foreground tracking-tight">
                 {exhibition.title}
@@ -149,10 +149,10 @@ const ExhibitionPage = () => {
                   <CheckCircle2 className="mr-2 h-6 w-6" />
                   Prijavljeni ste
                 </Button>
-              ) : user && user.role == "organizator" ? (
+              ) : user && user.role != "polaznik" ? (
                 <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center gap-3 text-amber-800 shadow-sm">
                   <ShieldAlert className="w-5 h-5 shrink-0" />
-                  <p className="text-sm font-bold text-left">Kao organizator, ne možete <br /> vršiti prijavu.</p>
+                  <p className="text-sm font-bold text-left">Samo polaznici smiju <br /> poslati prijavu.</p>
                 </div>
               ) : (
                 <Button

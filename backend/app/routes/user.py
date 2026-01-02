@@ -12,7 +12,9 @@ def get_user_role():
     if not auth_header:
         return jsonify({"validToken": False, "error": "Missing token"}), 401
 
-    token = auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else auth_header
+    token = (
+        auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else auth_header
+    )
     valid, token_data = verify_token(token)
 
     if not valid:
@@ -23,8 +25,7 @@ def get_user_role():
     try:
         # --- Get user id ---
         user_resp = (
-            supabase
-            .table("users")
+            supabase.table("users")
             .select("id")
             .eq("auth_id", auth_id)
             .single()
@@ -38,8 +39,7 @@ def get_user_role():
 
         # --- Check organizer role ---
         org_resp = (
-            supabase
-            .table("organizers")
+            supabase.table("organizers")
             .select("id")
             .eq("user_id", user_id)
             .limit(1)
@@ -51,8 +51,7 @@ def get_user_role():
 
         # --- Check participant role ---
         part_resp = (
-            supabase
-            .table("participants")
+            supabase.table("participants")
             .select("id")
             .eq("user_id", user_id)
             .limit(1)
@@ -61,6 +60,17 @@ def get_user_role():
 
         if part_resp.data:
             return jsonify({"role": "polaznik"}), 200
+
+        admin_resp = (
+            supabase.table("admins")
+            .select("id")
+            .eq("user_id", user_id)
+            .limit(1)
+            .execute()
+        )
+
+        if admin_resp.data:
+            return jsonify({"role": "admin"}), 200
 
         # --- No role ---
         return jsonify({"role": "none"}), 200

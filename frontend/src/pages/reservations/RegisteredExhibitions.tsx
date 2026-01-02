@@ -62,11 +62,13 @@ export default function RegisteredExhibitions() {
     <PageLayout>
       <MainColumn>
         <h1 className="text-2xl font-semibold mb-6">Prijavljene izložbe</h1>
+        <h2>Odobren Vam je dolazak tek kad pod "STATUS" piše "ODOBRENO"</h2>
         {loading ? (
           <div>Učitavanje radionica...</div>
         ) : (
           <Table>
             <TableCaption>Popis prijavljenih izložbi.</TableCaption>
+            <TableCaption>Odobren Vam je dolazak tek kad pod "STATUS" piše "ODOBRENO"</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Datum</TableHead>
