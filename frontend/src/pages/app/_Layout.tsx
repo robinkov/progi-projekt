@@ -9,7 +9,7 @@ import { Outlet, useNavigate } from "react-router";
 
 type HomeLayoutProps = {};
 
-export default function HomeLayout({}: HomeLayoutProps) {
+export default function HomeLayout({ }: HomeLayoutProps) {
   const auth = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true); // <-- local loading state
@@ -49,8 +49,8 @@ export default function HomeLayout({}: HomeLayoutProps) {
 
   if (loading || auth.status === "loading") {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <Spinner />
+      <div className="flex flex-1 justify-center items-center">
+        <Spinner className="size-12" />
       </div>
     );
   }

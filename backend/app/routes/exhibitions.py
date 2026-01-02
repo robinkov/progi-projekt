@@ -230,6 +230,7 @@ def check_registration(exhibition_id):
         .eq("participant_id", participant_id)
         .execute()
     )
+    print(resp)
 
     if len(resp.data) == 1:
         return jsonify({"registered": True}), 200

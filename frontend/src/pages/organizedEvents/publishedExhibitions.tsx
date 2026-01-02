@@ -1,5 +1,3 @@
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import { computeEventStatus } from "@/utils/statusUtils";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,8 +55,8 @@ export default function PublishedExhibitions() {
     loadExhibitions();
   }, []);
   return (
-    <PageLayout>
-      <MainColumn>
+    <div className="w-full">
+      <div>
         <h1 className="text-2xl font-semibold mb-6">Objavljene izložbe</h1>
         {loading ? (
           <p>Učitavanje...</p>
@@ -92,7 +90,7 @@ export default function PublishedExhibitions() {
               ))}
             </TableBody>
           </Table>)}
-      </MainColumn>
-    </PageLayout>
+      </div>
+    </div>
   );
 }

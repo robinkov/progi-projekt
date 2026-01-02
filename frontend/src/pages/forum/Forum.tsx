@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import BriefCard from "@/components/app/BriefCard";
 import { fetchGet } from "@/utils/fetchUtils";
 import { Switch } from "@/components/ui/switch";
@@ -53,67 +51,65 @@ export default function Forum() {
     }, []);
 
     return (
-        <PageLayout>
-            <MainColumn>
-                <h1 className="text-2xl font-semibold mb-6">FORUM: Ostavite komentar o svojoj najdražoj izložbi!</h1>
-                <div className="mb-8 w-1/2">
-                    {user?.role != "admin" ? (
-                        <div className="flex items-center justify-between gap-6 rounded-xl border border-border bg-muted/40 px-6 py-4">
-                            {user?.role == "polaznik" ? (
-                                <div className="flex flex-col">
+        <div className="w-full">
+            <h1 className="text-2xl font-semibold mb-6">FORUM: Ostavite komentar o svojoj najdražoj izložbi!</h1>
+            <div className="mb-8 w-1/2">
+                {user?.role != "admin" ? (
+                    <div className="flex items-center justify-between gap-6 rounded-xl border border-border bg-muted/40 px-6 py-4">
+                        {user?.role == "polaznik" ? (
+                            <div className="flex flex-col">
 
-                                    <label
-                                        htmlFor="my_exhibitions"
-                                        className="cursor-pointer text-sm font-medium leading-none text-foreground"
-                                    >
-                                        Prikaži samo izložbe na kojima sam bio/la)
-                                    </label>
-                                    <span className="mt-1 text-xs text-muted-foreground">
-                                        Filtriraj prikaz izložbi prema vlastitim posjetima
-                                    </span>
-                                </div>) : (
-                                <div className="flex flex-col">
-                                    <label
-                                        htmlFor="my_exhibitions"
-                                        className="cursor-pointer text-sm font-medium leading-none text-foreground"
-                                    >
-                                        Prikaži samo moje izložbe
-                                    </label>
-                                    <span className="mt-1 text-xs text-muted-foreground">
-                                        Pronađite rasprave o vlastitim izložbama    .
-                                    </span>
-                                </div>)}
+                                <label
+                                    htmlFor="my_exhibitions"
+                                    className="cursor-pointer text-sm font-medium leading-none text-foreground"
+                                >
+                                    Prikaži samo izložbe na kojima sam bio/la)
+                                </label>
+                                <span className="mt-1 text-xs text-muted-foreground">
+                                    Filtriraj prikaz izložbi prema vlastitim posjetima
+                                </span>
+                            </div>) : (
+                            <div className="flex flex-col">
+                                <label
+                                    htmlFor="my_exhibitions"
+                                    className="cursor-pointer text-sm font-medium leading-none text-foreground"
+                                >
+                                    Prikaži samo moje izložbe
+                                </label>
+                                <span className="mt-1 text-xs text-muted-foreground">
+                                    Pronađite rasprave o vlastitim izložbama    .
+                                </span>
+                            </div>)}
 
-                            <Switch
-                                id="my_exhibitions"
-                                checked={filter}
-                                onCheckedChange={setFilter}
+                        <Switch
+                            id="my_exhibitions"
+                            checked={filter}
+                            onCheckedChange={setFilter}
+                        />
+                    </div>) : (<div></div>)}
+            </div>
+
+            {loading ? (
+                <div>Učitavanje izložbi...</div>
+            ) : (
+                <div className="flex flex-wrap gap-4 pt-4">
+                    {exhibitions.filter((e) => !filter || !e.filter_out).map((exhibition) => (
+                        <a
+                            key={exhibition.id}
+                            href={`/forum/${exhibition.id}`}
+                        >
+                            <BriefCard
+                                title={exhibition.title}
+                                name={exhibition.organizer_name}
+                                place={exhibition.location}
+                                date={exhibition.date}
+                                timeFrom={exhibition.timeFrom}
+                                timeTo={exhibition.timeTo}
                             />
-                        </div>) : (<div></div>)}
+                        </a>
+                    ))}
                 </div>
-
-                {loading ? (
-                    <div>Učitavanje izložbi...</div>
-                ) : (
-                    <div className="flex flex-wrap gap-4 pt-4">
-                        {exhibitions.filter((e) => !filter || !e.filter_out).map((exhibition) => (
-                            <a
-                                key={exhibition.id}
-                                href={`/forum/${exhibition.id}`}
-                            >
-                                <BriefCard
-                                    title={exhibition.title}
-                                    name={exhibition.organizer_name}
-                                    place={exhibition.location}
-                                    date={exhibition.date}
-                                    timeFrom={exhibition.timeFrom}
-                                    timeTo={exhibition.timeTo}
-                                />
-                            </a>
-                        ))}
-                    </div>
-                )}
-            </MainColumn>
-        </PageLayout >
+            )}
+        </div>
     );
 }

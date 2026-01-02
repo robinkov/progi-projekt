@@ -1,4 +1,3 @@
-import PageLayout from "@/components/layout/PageLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router";
@@ -98,60 +97,57 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <PageLayout>
-        <div className="p-12 text-center text-red-600 text-lg">
-          Proizvod nije pronađen.
-        </div>
-      </PageLayout>
+      <div className="p-12 text-center text-red-600 text-lg">
+        Proizvod nije pronađen.
+      </div>
     );
   }
 
   return (
-    <PageLayout>
-      <div className="w-full max-w-[1500px] mx-auto px-6 py-12 flex flex-col lg:flex-row gap-10">
+    <div className="w-full max-w-[1500px] mx-auto px-6 py-12 flex flex-col lg:flex-row gap-10">
 
-        {/* ---------- Product Card ---------- */}
-        <Card className="flex-1 rounded-3xl shadow-2xl hover:shadow-xl transition-shadow duration-300">
-          <CardContent className="p-10 space-y-8">
-            <h1 className="text-4xl font-bold">{product.name}</h1>
-            {product.description && (
-              <p className="text-gray-700 text-lg">{product.description}</p>
+      {/* ---------- Product Card ---------- */}
+      <Card className="flex-1 rounded-3xl shadow-2xl hover:shadow-xl transition-shadow duration-300">
+        <CardContent className="p-10 space-y-8">
+          <h1 className="text-4xl font-bold">{product.name}</h1>
+          {product.description && (
+            <p className="text-gray-700 text-lg">{product.description}</p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm md:text-base">
+            <div>
+              <span className="font-semibold text-gray-800">Cijena</span>
+              <p className="mt-1">{product.price}€</p>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-800">Dostupnost</span>
+              <p className="mt-1">{product.sold ? "Prodano" : "Dostupno"}</p>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-800">Kategorija</span>
+              <p className="mt-1">{product.category}</p>
+            </div>
+          </div>
+
+          <div className="pt-6">
+            <Button
+              onClick={handleBuy}
+              disabled={product.sold || buying}
+              className="w-full"
+            >
+              {product.sold ? "PRODANO" : buying ? "Kupujem..." : "KUPI"}
+            </Button>
+            {error && (
+              <p className="mt-3 text-red-600 font-medium text-sm">{error}</p>
             )}
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm md:text-base">
-              <div>
-                <span className="font-semibold text-gray-800">Cijena</span>
-                <p className="mt-1">{product.price}€</p>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800">Dostupnost</span>
-                <p className="mt-1">{product.sold ? "Prodano" : "Dostupno"}</p>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800">Kategorija</span>
-                <p className="mt-1">{product.category}</p>
-              </div>
-            </div>
-
-            <div className="pt-6">
-              <Button
-                onClick={handleBuy}
-                disabled={product.sold || buying}
-                className="w-full"
-              >
-                {product.sold ? "PRODANO" : buying ? "Kupujem..." : "KUPI"}
-              </Button>
-              {error && (
-                <p className="mt-3 text-red-600 font-medium text-sm">{error}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ---------- Organizer Card (Seller) ---------- */}
-        {seller && (
+      {/* ---------- Organizer Card (Seller) ---------- */}
+      {seller && (
         <Card className="flex-1 rounded-3xl shadow-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
-          
+
           <CardContent className="p-8 space-y-6">
             <h1 className="text-3xl font-bold">Profil prodavača</h1>
             <Banner className="h-48 md:h-56">
@@ -181,9 +177,8 @@ export default function ProductPage() {
           </CardContent>
 
         </Card>
-        )}
+      )}
 
-      </div>
-    </PageLayout>
+    </div>
   );
 }

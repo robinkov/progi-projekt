@@ -1,7 +1,5 @@
 
 import { useEffect, useState } from "react";
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import BriefCard from "@/components/app/BriefCard";
 import { fetchGet } from "@/utils/fetchUtils";
 
@@ -43,29 +41,27 @@ export default function Workshops() {
   }, []);
 
   return (
-    <PageLayout>
-      <MainColumn>
-        <h1 className="text-2xl font-semibold mb-6">Radionice</h1>
+    <div>
+      <h1 className="text-2xl font-semibold mb-6">Radionice</h1>
 
-        {loading ? (
-          <div>Učitavanje radionica...</div>
-        ) : (
-          <div className="flex flex-wrap gap-4 pt-4">
-            {workshops.map((workshop) => (
-              <a key={workshop.id} href={`/workshops/${workshop.id}`}>
-                <BriefCard
-                  title={workshop.title}
-                  name={workshop.organizer_name}
-                  place={workshop.location}
-                  date={workshop.date}
-                  timeFrom={workshop.timeFrom}
-                  timeTo={workshop.timeTo}
-                />
-              </a>
-            ))}
-          </div>
-        )}
-      </MainColumn>
-    </PageLayout>
+      {loading ? (
+        <div>Učitavanje radionica...</div>
+      ) : (
+        <div className="flex flex-wrap gap-4 pt-4">
+          {workshops.map((workshop) => (
+            <a key={workshop.id} href={`/workshops/${workshop.id}`}>
+              <BriefCard
+                title={workshop.title}
+                name={workshop.organizer_name}
+                place={workshop.location}
+                date={workshop.date}
+                timeFrom={workshop.timeFrom}
+                timeTo={workshop.timeTo}
+              />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

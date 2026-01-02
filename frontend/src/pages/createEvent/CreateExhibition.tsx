@@ -1,6 +1,4 @@
 import { useState } from "react";
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,80 +82,78 @@ export default function CreateExhibition() {
   /* ---------------- Render ---------------- */
 
   return (
-    <PageLayout>
-      <MainColumn>
-        <h1 className="text-2xl font-semibold mb-6">
-          Kreiraj novu izložbu
-        </h1>
+    <div className="w-full">
+      <h1 className="text-2xl font-semibold mb-6">
+        Kreiraj novu izložbu
+      </h1>
 
-        <Card className="w-full max-w-2xl rounded-2xl shadow-sm">
-          <CardContent className="p-6 space-y-8">
+      <Card className="w-full max-w-2xl rounded-2xl shadow-sm">
+        <CardContent className="p-6 space-y-8">
 
-            {/* Title */}
+          {/* Title */}
+          <div className="space-y-1">
+            <Label>Naziv izložbe</Label>
+            <Input
+              value={form.title}
+              onChange={(e) =>
+                setForm({ ...form, title: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Date & Time */}
+          <div>
             <div className="space-y-1">
-              <Label>Naziv izložbe</Label>
+              <Label>Početak</Label>
               <Input
-                value={form.title}
+                type="datetime-local"
+                value={form.date_time}
                 onChange={(e) =>
-                  setForm({ ...form, title: e.target.value })
+                  setForm({ ...form, date_time: e.target.value })
                 }
               />
             </div>
+          </div>
 
-            {/* Date & Time */}
-            <div>
-              <div className="space-y-1">
-                <Label>Početak</Label>
-                <Input
-                  type="datetime-local"
-                  value={form.date_time}
-                  onChange={(e) =>
-                    setForm({ ...form, date_time: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Location */}
-            <div className="space-y-1">
-              <Label>Lokacija</Label>
-              <Input
-                value={form.location}
-                onChange={(e) =>
-                  setForm({ ...form, location: e.target.value })
-                }
-              />
-            </div>
+          {/* Location */}
+          <div className="space-y-1">
+            <Label>Lokacija</Label>
+            <Input
+              value={form.location}
+              onChange={(e) =>
+                setForm({ ...form, location: e.target.value })
+              }
+            />
+          </div>
 
 
-            {/* Description */}
-            <div className="space-y-1">
-              <Label>Opis izložbe</Label>
-              <Input
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-              />
-            </div>
+          {/* Description */}
+          <div className="space-y-1">
+            <Label>Opis izložbe</Label>
+            <Input
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+            />
+          </div>
 
-            {error && (
-              <p className="text-sm text-red-600">{error}</p>
-            )}
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
 
-            {success && (
-              <p className="text-sm text-green-600">
-                Izložba je uspješno kreirana!
-              </p>
-            )}
+          {success && (
+            <p className="text-sm text-green-600">
+              Izložba je uspješno kreirana!
+            </p>
+          )}
 
-            <LoadingButton loading={saving} onClick={handleSave}>
-              Kreiraj izložbu
-            </LoadingButton>
+          <LoadingButton loading={saving} onClick={handleSave}>
+            Kreiraj izložbu
+          </LoadingButton>
 
-          </CardContent>
-        </Card>
-      </MainColumn>
-    </PageLayout>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

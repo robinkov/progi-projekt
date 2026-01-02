@@ -1,7 +1,5 @@
 
 import { useState } from "react";
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -81,115 +79,113 @@ export default function CreateWorkshop() {
   }
 
   return (
-    <PageLayout>
-      <MainColumn>
-        <h1 className="text-2xl font-semibold mb-6">
-          Kreiraj novu radionicu
-        </h1>
+    <div className="w-full">
+      <h1 className="text-2xl font-semibold mb-6">
+        Kreiraj novu radionicu
+      </h1>
 
-        <Card className="w-full max-w-2xl rounded-2xl shadow-sm">
-          <CardContent className="p-6 space-y-8">
-            {/* Title */}
+      <Card className="w-full max-w-2xl rounded-2xl shadow-sm">
+        <CardContent className="p-6 space-y-8">
+          {/* Title */}
+          <div className="space-y-1">
+            <Label>Naziv radionice</Label>
+            <Input
+              value={form.title}
+              onChange={(e) =>
+                setForm({ ...form, title: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Duration & Date */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label>Naziv radionice</Label>
+              <Label>Trajanje</Label>
               <Input
-                value={form.title}
+                type="time"
+                step="1"
+                value={form.duration}
                 onChange={(e) =>
-                  setForm({ ...form, title: e.target.value })
+                  setForm({ ...form, duration: e.target.value })
                 }
               />
             </div>
 
-            {/* Duration & Date */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label>Trajanje</Label>
-                <Input
-                  type="time"
-                  step="1"
-                  value={form.duration}
-                  onChange={(e) =>
-                    setForm({ ...form, duration: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label>Datum i vrijeme</Label>
-                <Input
-                  type="datetime-local"
-                  value={form.date_time}
-                  onChange={(e) =>
-                    setForm({ ...form, date_time: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Location */}
             <div className="space-y-1">
-              <Label>Lokacija</Label>
+              <Label>Datum i vrijeme</Label>
               <Input
-                value={form.location}
+                type="datetime-local"
+                value={form.date_time}
                 onChange={(e) =>
-                  setForm({ ...form, location: e.target.value })
+                  setForm({ ...form, date_time: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="space-y-1">
+            <Label>Lokacija</Label>
+            <Input
+              value={form.location}
+              onChange={(e) =>
+                setForm({ ...form, location: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Capacity & Price */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label>Kapacitet</Label>
+              <Input
+                type="number"
+                value={form.capacity}
+                onChange={(e) =>
+                  setForm({ ...form, capacity: e.target.value })
                 }
               />
             </div>
 
-            {/* Capacity & Price */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label>Kapacitet</Label>
-                <Input
-                  type="number"
-                  value={form.capacity}
-                  onChange={(e) =>
-                    setForm({ ...form, capacity: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label>Cijena (€)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={form.price}
-                  onChange={(e) =>
-                    setForm({ ...form, price: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Description */}
             <div className="space-y-1">
-              <Label>Opis radionice</Label>
+              <Label>Cijena (€)</Label>
               <Input
-                value={form.description}
+                type="number"
+                step="0.01"
+                value={form.price}
                 onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
+                  setForm({ ...form, price: e.target.value })
                 }
               />
             </div>
+          </div>
 
-            {error && (
-              <p className="text-sm text-red-600">{error}</p>
-            )}
+          {/* Description */}
+          <div className="space-y-1">
+            <Label>Opis radionice</Label>
+            <Input
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+            />
+          </div>
 
-            {success && (
-              <p className="text-sm text-green-600">
-                Radionica je uspješno kreirana!
-              </p>
-            )}
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
 
-            <LoadingButton loading={saving} onClick={handleSave}>
-              Kreiraj radionicu
-            </LoadingButton>
-          </CardContent>
-        </Card>
-      </MainColumn>
-    </PageLayout>
+          {success && (
+            <p className="text-sm text-green-600">
+              Radionica je uspješno kreirana!
+            </p>
+          )}
+
+          <LoadingButton loading={saving} onClick={handleSave}>
+            Kreiraj radionicu
+          </LoadingButton>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,5 +1,3 @@
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import ProductCard from "@/components/shop/ProductCard";
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
@@ -41,33 +39,31 @@ export default function SellerProducts() {
   }, [id]);
 
   return (
-    <PageLayout>
-      <MainColumn>
-        <h1 className="text-2xl font-semibold mb-6">Ponuda prodavača</h1>
+    <div className="w-full">
+      <h1 className="text-2xl font-semibold mb-6">Ponuda prodavača</h1>
 
-        {loading ? (
-          <div className="p-12 text-center text-lg">Učitavanje proizvoda...</div>
-        ) : products.length === 0 ? (
-          <div className="p-12 text-center text-muted-foreground text-lg">
-            Nema dostupnih proizvoda.
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-4 pt-4">
-            {products.map((product) => (
-              <a key={product.id} href={`/products/${product.id}`}>
-                <ProductCard
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    author: `Prodavač #${product.seller_id}`,
-                    price: `${product.price} €`,
-                  }}
-                />
-              </a>
-            ))}
-          </div>
-        )}
-      </MainColumn>
-    </PageLayout>
+      {loading ? (
+        <div className="p-12 text-center text-lg">Učitavanje proizvoda...</div>
+      ) : products.length === 0 ? (
+        <div className="p-12 text-center text-muted-foreground text-lg">
+          Nema dostupnih proizvoda.
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-4 pt-4">
+          {products.map((product) => (
+            <a key={product.id} href={`/products/${product.id}`}>
+              <ProductCard
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  author: `Prodavač #${product.seller_id}`,
+                  price: `${product.price} €`,
+                }}
+              />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

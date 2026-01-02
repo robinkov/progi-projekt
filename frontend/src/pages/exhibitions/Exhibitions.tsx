@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import BriefCard from "@/components/app/BriefCard";
 import { fetchGet } from "@/utils/fetchUtils";
 
@@ -46,32 +44,30 @@ export default function Exhibitions() {
   }, []);
 
   return (
-    <PageLayout>
-      <MainColumn>
-        <h1 className="text-2xl font-semibold mb-6">Izložbe</h1>
+    <div className="w-full">
+      <h1 className="text-2xl font-semibold mb-6">Izložbe</h1>
 
-        {loading ? (
-          <div>Učitavanje izložbi...</div>
-        ) : (
-          <div className="flex flex-wrap gap-4 pt-4">
-            {exhibitions.map((exhibition) => (
-              <a
-                key={exhibition.id}
-                href={`/exhibitions/${exhibition.id}`}
-              >
-                <BriefCard
-                  title={exhibition.title}
-                  name={exhibition.organizer_name}
-                  place={exhibition.location}
-                  date={exhibition.date}
-                  timeFrom={exhibition.timeFrom}
-                  timeTo={exhibition.timeTo}
-                />
-              </a>
-            ))}
-          </div>
-        )}
-      </MainColumn>
-    </PageLayout>
+      {loading ? (
+        <div>Učitavanje izložbi...</div>
+      ) : (
+        <div className="flex flex-wrap gap-4 pt-4">
+          {exhibitions.map((exhibition) => (
+            <a
+              key={exhibition.id}
+              href={`/exhibitions/${exhibition.id}`}
+            >
+              <BriefCard
+                title={exhibition.title}
+                name={exhibition.organizer_name}
+                place={exhibition.location}
+                date={exhibition.date}
+                timeFrom={exhibition.timeFrom}
+                timeTo={exhibition.timeTo}
+              />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

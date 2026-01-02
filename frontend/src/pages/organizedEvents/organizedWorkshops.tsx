@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import PageLayout from "@/components/layout/PageLayout";
-import MainColumn from "@/components/layout/MainColumn";
 import { computeEventStatus } from "@/utils/statusUtils";
 import { Button } from "@/components/ui/button";
 import {
@@ -83,8 +81,8 @@ export default function MyWorkshops() {
   };
 
   return (
-    <PageLayout>
-      <MainColumn>
+    <div className="w-full">
+      <div>
         <h1 className="text-2xl font-semibold mb-6">Moje radionice</h1>
 
         {loading ? (
@@ -139,19 +137,21 @@ export default function MyWorkshops() {
             </TableBody>
           </Table>
         )}
-      </MainColumn>
+      </div>
 
-      {confirmWorkshop && (
-        <ConfirmCard
-          title="Potvrdi brisanje radionice"
-          message={`Za brisanje radionice morate upisati naziv radionice: "${confirmWorkshop.title}"`}
-          confirmText={deletingId === confirmWorkshop.id ? "Brisanje..." : "Obriši"}
-          expectedText={confirmWorkshop.title} // <-- workshop name here
-          onCancel={() => setConfirmWorkshop(null)}
-          onConfirm={handleDelete}
-        />
-      )}
+      {
+        confirmWorkshop && (
+          <ConfirmCard
+            title="Potvrdi brisanje radionice"
+            message={`Za brisanje radionice morate upisati naziv radionice: "${confirmWorkshop.title}"`}
+            confirmText={deletingId === confirmWorkshop.id ? "Brisanje..." : "Obriši"}
+            expectedText={confirmWorkshop.title} // <-- workshop name here
+            onCancel={() => setConfirmWorkshop(null)}
+            onConfirm={handleDelete}
+          />
+        )
+      }
 
-    </PageLayout>
+    </div >
   );
 }
