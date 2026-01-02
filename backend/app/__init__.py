@@ -3,13 +3,14 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 
-load_dotenv() 
+load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
-    app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
     CORS(app, origins=["*"], supports_credentials=True)
 
@@ -22,6 +23,7 @@ def create_app():
     from .routes.exhibitions import exhibition_bp
     from .routes.product import product_bp
     from .routes.organizers import organizers_bp
+    from .routes.admin import admin_bp
 
     app.register_blueprint(exhibition_bp)
     app.register_blueprint(workshop_bp)
@@ -31,6 +33,6 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(organizerProfile_bp)
+    app.register_blueprint(admin_bp)
 
     return app
-
