@@ -10,7 +10,6 @@ import { useAuth } from "@/components/context/AuthProvider";
 import { Banner, BannerImage, BannerFallback } from "@/components/ui/banner";
 import { Logo, LogoImage, LogoFallback } from "@/components/ui/logo";
 import { ImagePlus, X, Grid, Loader2 } from "lucide-react";
-import { number } from "zod";
 import { Spinner } from "@/components/ui/spinner";
 
 

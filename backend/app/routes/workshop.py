@@ -187,7 +187,58 @@ def get_reservation_count(workshop_id):
     return jsonify({"count": resp.count or 0}), 200
 
 
-@workshop_bp.route("/workshops/<int:workshop_id>/reservations", methods=["POST"])
+@workshop_bp.route("/workshops/<int:workshop_id>/check-reservation", methods=["GET"])
+def check_reservation(workshop_id):
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Invalid token payload"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("id").eq("auth_id", auth_id).single().execute()
+    )
+
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_id = user_resp.data["id"]
+
+    participant_resp = (
+        supabase.table("participants")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+
+    participant_id = participant_resp.data["id"]
+
+    resp = (
+        supabase.table("workshop_reservations")
+        .select("*")
+        .eq("workshop_id", workshop_id)
+        .eq("participant_id", participant_id)
+        .execute()
+    )
+
+    if len(resp.data) == 1:
+        return jsonify({"registered": True}), 200
+    else:
+        return jsonify({"registered": False}), 200
+
+
+@workshop_bp.route("/workshops/<int:workshop_id>/reserve", methods=["POST"])
 def make_reservation(workshop_id):
     auth_header = request.headers.get("Authorization")
 

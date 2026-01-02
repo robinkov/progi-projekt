@@ -7,9 +7,26 @@ import PageLayout from "@/components/layout/PageLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Logo, LogoImage, LogoFallback } from "@/components/ui/logo";
 import { Banner, BannerImage, BannerFallback } from "@/components/ui/banner";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/components/context/AuthProvider";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Info,
+  Image as ImageIcon,
+  CheckCircle2,
+  Loader2,
+  UserPlus,
+  Clock,
+  Euro,
+  ShieldAlert
+} from "lucide-react";
 
 /* ---------------- Types ---------------- */
+type Photo = { id: number; url: string; }
+
 type Workshop = {
   id: number;
   organizer_id: number;
@@ -28,203 +45,195 @@ type Organizer = {
   logo_url: string | null;
   banner_url: string | null;
   approved_by_admin: boolean | null;
-  membership_plan_id: number | null;
-  membership_expiry_date: string | null;
+  photos: Photo[];
+  mail: string;
+  phone: string;
+  address: string;
 };
 
-type ReservationCountResponse = {
-  count: number;
-};
-
-/* ---------------- Component ---------------- */
 const WorkshopPage = () => {
   const { id } = useParams<{ id: string }>();
-
+  const { user } = useAuth();
   const [workshop, setWorkshop] = useState<Workshop | null>(null);
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
-  const [reservationCount, setReservationCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [reserving, setReserving] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [already_reserved, setStatus] = useState(false)
-  const remainingSpots =
-    workshop ? workshop.capacity - reservationCount : 0;
-  const user = useAuth().user;
 
-  /* ---------------- Load data ---------------- */
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
+
+
   useEffect(() => {
-    async function loadWorkshop() {
-      if (!id) return;
-      if (!user) return;
-
-
+    const fetchData = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
       try {
-        const workshopRes = await fetchGet<{ success: boolean; workshop: Workshop; already_reserved: boolean }>(
-          `/workshops/${id}`
-        );
+        const workshopRes = await fetchGet<{ success: boolean; workshop: Workshop }>(`/workshops/${id}`);
+        if (workshopRes.success) {
+          setWorkshop(workshopRes.workshop);
+          const organizerRes = await fetchGet<Organizer>(`/organizers/${workshopRes.workshop.organizer_id}`);
+          setOrganizer(organizerRes);
 
-        const reservationRes = await fetchGet<ReservationCountResponse>(
-          `/workshops/${id}/reservations/count`
-        );
-
-        const organizerRes = await fetchGet<Organizer>(
-          `/organizers/${workshopRes.workshop.organizer_id}`
-        );
-
-        setWorkshop(workshopRes.workshop);
-        setReservationCount(reservationRes.count);
-        setOrganizer(organizerRes);
-        setStatus(already_reserved)
-      } catch (err) {
-        console.error("Failed to load workshop or organizer", err);
+          if (user && user.role != "organizator") {
+            const regCheck = await fetchGet<{ registered: boolean }>(`/workshops/${id}/check-reservation`, {
+              Authorization: `Bearer ${data.session.access_token}`,
+            });
+            setIsRegistered(regCheck.registered);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
-    }
+    };
+    fetchData();
+  }, [id, user]);
 
-    loadWorkshop();
-  }, [id]);
+  const handleRegister = async () => {
+    if (!user) return alert("Please log in to register.");
 
-  /* ---------------- Handle reservation ---------------- */
-  const handleReserve = async () => {
-    if (!workshop) return;
-
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) return;
+    setRegistering(true);
     try {
-      setReserving(true);
-      await fetchPost(
-        `/workshops/${workshop.id}/reservations`,
-        {},
-        {
-          Authorization: `Bearer ${data.session.access_token}`,
-        }
-      );
-      setReservationCount(prev => prev + 1);
-      setSuccess(true);
-    } catch (err) {
-      setStatus(true)
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const res = await fetchPost<{ success: boolean }>(`/workshops/${id}/reserve`, {}, {
+        Authorization: `Bearer ${data.session.access_token}`,
+      });
+      if (res.success) setIsRegistered(true);
+    } catch (error) {
+      console.error("Registration failed", error);
     } finally {
-      setReserving(false);
+      setRegistering(false);
     }
   };
 
-  /* ---------------- Render states ---------------- */
-  if (loading) {
-    return <div className="p-12 text-center text-lg">Loading workshop...</div>;
-  }
+  if (loading) return (
+    <PageLayout>
+      <div className="flex items-center justify-center min-h-[60vh] text-primary">
+        <Loader2 className="animate-spin h-10 w-10" />
+      </div>
+    </PageLayout>
+  );
 
-  if (!workshop) {
-    return <div className="p-12 text-center text-red-600 text-lg">Workshop not found.</div>;
-  }
+  if (!workshop) return null;
 
-
-  if (!user) return;
-  /* ---------------- Render page ---------------- */
   return (
     <PageLayout>
-      <div className="w-full max-w-[1500px] mx-auto px-6 py-12 flex flex-col lg:flex-row gap-10">
+      <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
 
-        {/* ---------- Workshop Card ---------- */}
-        <Card className="flex-1 rounded-3xl shadow-2xl hover:shadow-xl transition-shadow duration-300">
-          <CardContent className="p-10 space-y-8">
-            <h1 className="text-4xl font-bold">{workshop.title}</h1>
-            <p className="text-gray-700 text-lg">{workshop.description}</p>
+        {/* --- Workshop Detail Card --- */}
+        <Card className="border-none shadow-xl overflow-hidden bg-card">
+          <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="space-y-4">
+              <Badge className="bg-primary/10 text-primary border-primary/20">Radionica</Badge>
+              <h1 className="text-4xl font-extrabold text-foreground tracking-tight">{workshop.title}</h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm md:text-base">
-              <div>
-                <span className="font-semibold text-gray-800">Datum</span>
-                <p className="mt-1">{new Date(workshop.date_time).toLocaleDateString("en-GB")}</p>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800">Vrijeme</span>
-                <p className="mt-1">{new Date(workshop.date_time).toLocaleTimeString("en-GB")}</p>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800">Trajanje</span>
-                <p className="mt-1">{workshop.duration}</p>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800">Lokacija</span>
-                <p className="mt-1">{workshop.location}</p>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800">Cijena</span>
-                <p className="mt-1">{workshop.price}€</p>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800">Slobodna mjesta</span>
-                <p className="mt-1">{remainingSpots > 0 ? remainingSpots : "Radionica puna"}</p>
+              <div className="flex flex-wrap gap-5 text-muted-foreground font-medium text-sm">
+                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" /> {new Date(workshop.date_time).toLocaleDateString("hr-HR")}</div>
+                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> {workshop.duration}</div>
+                <div className="flex items-center gap-2"><Euro className="w-4 h-4 text-primary" /> {workshop.price}€</div>
+                <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> {workshop.location}</div>
               </div>
             </div>
 
-            <div className="pt-6">
-
-
-              {
-                user.role == "organizator" ? (
-                  <p className="text-red-600 font-medium text-lg">
-                    Greška: organizatori ne mogu rezervirati radionice
-                  </p>
-                ) :
-
-                  already_reserved ? (
-                    <p className="text-red-600 font-medium text-lg">
-                      Greška: provjerite jeste li već rezervirali ovu radionicu.
-                    </p>
-                  ) : success ? (
-                    /* 2. Check if the user JUST successfully clicked the button */
-                    <p className="text-green-600 font-medium text-lg">
-                      Rezervacija uspješna
-                    </p>
-                  ) : (
-                    /* 3. If neither, show the reservation button */
-                    <Button
-                      onClick={handleReserve}
-                      disabled={reserving || remainingSpots <= 0}
-                      className="w-full"
-                    >
-                      {remainingSpots <= 0
-                        ? "Popunjeno"
-                        : reserving
-                          ? "Rezerviranje..."
-                          : "Rezerviraj"
-                      }
-                    </Button>
-                  )}
+            {/* --- Reservation Logic & Organizer Message --- */}
+            <div className="w-full md:w-auto text-center md:text-right">
+              {user?.role == "organizator" ? (
+                <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center gap-3 text-amber-800 shadow-sm">
+                  <ShieldAlert className="w-5 h-5 shrink-0" />
+                  <p className="text-sm font-bold text-left">Kao organizator, ne možete <br /> vršiti rezervacije.</p>
+                </div>
+              ) : isRegistered ? (
+                <Button disabled className="w-full md:w-auto bg-primary/20 text-primary border border-primary/30 rounded-xl px-8 py-6 h-auto font-bold text-lg">
+                  <CheckCircle2 className="mr-2 h-6 w-6" /> Mjesto rezervirano
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleRegister}
+                  disabled={registering}
+                  className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg rounded-xl px-10 py-6 h-auto font-bold text-lg transition-transform active:scale-95"
+                >
+                  {registering ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <UserPlus className="mr-2 h-6 w-6" />}
+                  Rezerviraj mjesto
+                </Button>
+              )}
             </div>
+          </div>
+
+          <CardContent className="p-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-3"><Info className="w-5 h-5 text-primary" /> O radionici</h3>
+            <p className="text-foreground/80 leading-relaxed text-lg whitespace-pre-wrap">{workshop.description}</p>
           </CardContent>
         </Card>
 
-        {/* ---------- Organizer Card ---------- */}
+        {/* --- Organizer Info Section --- */}
         {organizer && (
-          <Card className="flex-1 rounded-3xl shadow-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
+          <div className="space-y-8">
+            <div className="flex items-center gap-3 border-l-4 border-primary pl-4">
+              <h2 className="text-2xl font-bold text-foreground">O organizatoru</h2>
+            </div>
 
-            <CardContent className="p-8 space-y-6">
-              <h1 className="text-3xl font-bold">Organizer Profile</h1>
-              <Banner className="h-48 md:h-56">
-                {organizer.banner_url ? <BannerImage src={organizer.banner_url} /> : <BannerFallback>No banner</BannerFallback>}
+            <Card className="border-border bg-card shadow-md overflow-hidden">
+              <Banner className="h-48 md:h-64">
+                {organizer.banner_url ? <BannerImage src={organizer.banner_url} /> : <BannerFallback className="bg-muted">No banner</BannerFallback>}
               </Banner>
-              <div className="flex items-center gap-5">
-                <Logo className="w-24 h-24 md:w-28 md:h-28">
-                  {organizer.logo_url ? <LogoImage src={organizer.logo_url} /> : <LogoFallback>{organizer.profile_name?.[0] ?? "O"}</LogoFallback>}
-                </Logo>
 
-                <div>
-                  <h2 className="text-2xl font-bold">{organizer.profile_name}</h2>
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    {organizer.approved_by_admin ? "Verified organizer" : "Pending verification"}
-                  </p>
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row gap-8">
+                  <div className="flex flex-col items-center md:items-start gap-4">
+                    <Logo className="w-32 h-32 md:w-40 md:h-40 border-4 border-background shadow-lg -mt-20">
+                      {organizer.logo_url ? <LogoImage src={organizer.logo_url} /> : (
+                        <LogoFallback className="text-3xl font-bold bg-primary text-primary-foreground">{organizer.profile_name?.[0]}</LogoFallback>
+                      )}
+                    </Logo>
+                    <h2 className="text-3xl font-bold text-foreground flex items-center gap-2">
+                      {organizer.profile_name}
+                      {organizer.approved_by_admin && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                    </h2>
+                  </div>
+
+                  {/* Contact Info Grid */}
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-muted/30 p-6 rounded-2xl border border-border self-start">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">E-mail</p>
+                      <a href={`mailto:${organizer.mail}`} className="flex items-center gap-2 text-foreground font-medium hover:text-primary transition-colors"><Mail className="w-4 h-4" /> {organizer.mail || "Nije navedeno"}</a>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Telefon</p>
+                      <p className="flex items-center gap-2 text-foreground font-medium"><Phone className="w-4 h-4" /> {organizer.phone || "Nije navedeno"}</p>
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Adresa</p>
+                      <p className="flex items-center gap-2 text-foreground font-medium"><MapPin className="w-4 h-4" /> {organizer.address || "Nije navedeno"}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <h3 className="text-lg font-semibold">Opis organizatora:</h3>
-              <p className="text-gray-700 text-base">{organizer.description}</p>
+                <div className="mt-8">
+                  <h3 className="text-lg font-bold text-foreground mb-2">Opis</h3>
+                  <p className="text-foreground/70 leading-relaxed italic">"{organizer.description}"</p>
+                </div>
 
-            </CardContent>
-          </Card>
+                {/* Gallery */}
+                {organizer.photos && organizer.photos.length > 0 && (
+                  <div className="mt-12 space-y-6">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5 text-primary" />
+                      <h3 className="text-xl font-bold text-foreground">Slike s prethodnih događaja</h3>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {organizer.photos.map((photo) => (
+                        <div key={photo.id} className="group aspect-square rounded-xl overflow-hidden border border-border shadow-sm">
+                          <img src={photo.url} alt="Rad" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
-
       </div>
     </PageLayout>
   );
