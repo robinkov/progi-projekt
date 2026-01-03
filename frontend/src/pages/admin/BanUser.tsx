@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { fetchDelete, fetchGet, fetchPost } from '@/utils/fetchUtils';
+import { fetchDelete, fetchGet } from '@/utils/fetchUtils';
 import { useState } from 'react';
 // shadcn components
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,7 @@ export default function BanUser() {
                         </Card>
                     ))
                 ) : !loading && searchQuery && (
-                    <div className="text-center py-16 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border">
+                    <div className="text-center py-16 bg-muted/10 rounded-4xl border-2 border-dashed border-border">
                         <UserIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
                         <h3 className="text-xl font-bold text-foreground">Korisnik nije pronađen</h3>
                         <p className="text-muted-foreground mt-1">Provjerite jeste li ispravno upisali e-mail adresu.</p>
