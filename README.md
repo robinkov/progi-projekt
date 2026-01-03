@@ -18,36 +18,39 @@ ClayPlay je mobilna i web aplikacija namijenjena svima koji se žele baviti kera
 Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetnosti keramike kroz pristupačno i intuitivno korisničko iskustvo. ClayPlay spaja funkcionalnost, estetiku i zajednicu – stvarajući prostor u kojem ljubitelji keramike mogu učiti, surađivati i inspirirati jedni druge.
 
 ## ⚡Funkcijski zahtjevi
-> Aplikacija mora omogućiti predstavniku kreiranje novog sastanka.<br />
-> Prilikom kreiranja sastanka, aplikacija mora omogućiti dodavanje naslova, sažetak namjere sastanka, vrijeme, mjesto i niz točaka dnevnog reda.<br />
-> Aplikacija mora omogućiti predstavniku prevođenje kreiranog sastanka u stanje "Objavljen", osim ako sastanak nema definiranu nijednu točku dnevnog reda.<br />
-> Aplikacija predstavniku mora omogućiti dodavanje novih točaka dnevnog reda za sastanke u stanju "Planiran".<br />
-> Za sastanak u stanju "Objavljen" aplikacija mora poslati obavijest na e-mail suvlasnicima i prikazati ga na oglasnoj ploči aplikacije.<br />
-> Za sastanak u stanju "Objavljen" aplikacija mora omogućiti označavanje sudjelovanja suvlasnicima.<br />
-> Aplikacija mora prikazivati broj potvrđenih sudjelovanja na početnom prikazu sastanka.<br />
-> Aplikacija mora omogućiti predstavniku prevođenje sastanka iz stanja "Objavljen" u stanje "Obavljen" nakon isteka termina sastanka.<br />
-> Aplikacija mora omogućiti predstavniku dodavanje zaključka svakoj točki dnevnog reda za sastanke u stanju "Obavljen".<br />
-> Aplikacija mora omogućiti predstavniku svrstavanje pojedine točke dnevnog reda u onu s pravnim učinkom ili onu bez pravnog učinka.<br />
-> Aplikacija mora omogućiti predstavniku svrstavanje zaključka s pravnim učinkom u "Izglasan" ili "Odbijen".<br />
-> Aplikacija mora omogućiti predstavniku prevođenje sastanka iz stanja "Obavljen" u stanje "Arhiviran", osim ako nisu dodani zaključci na točke dnevnog reda koje imaju pravni učinak.<br />
-> Za sastanak u stanju "Arhiviran" aplikacija mora poslati obavijest na e-mail suvlasnicima.<br />
-> Aplikacija mora omogućiti suvlasnicima pregledavanje zaključaka arhiviranih sastanaka.<br />
-> Aplikacija se mora moći spojiti kao klijent na aplikacijsko sučelje aplikacije StanBlog, preuzeti listu diskusija i njihove poveznice.<br />
-> Aplikacija mora moći postaviti poveznicu na diskusiju u aplikaciji StanBlog za neku točku dnevnog reda.<br />
-> Aplikacija mora omogućiti administratoru kreiranje profila predstavnika i suvlasnika.<br />
-> Aplikacija za svaki profil omogućuje kreiranje korisničkog imena, lozinke i e-mail adrese.<br />
-> Aplikacija mora korisnicima omogućiti promjenu lozinke koristeći prethodnu lozinku.<br />
-> Aplikacija realizira aplikacijsko sučelje koje će koristiti aplikacija StanBlog, a preko kojeg je moguće kreirati sastanak kreiran iz specifične diskusije.<br />
-> Proces registracije i prijave bit će pojednostavljen korištenjem vanjskih servisa za autentifikaciju.<br />
+Sustav omogućuje registraciju i prijavu korisnika kao polaznika ili organizatora.<br />
+Sustav omogućuje prijavu korisnika putem vanjskih servisa za autentifikaciju.<br />
+Sustav omogućuje uređivanje javnog profila organizatora.<br />
+Sustav omogućuje organizatoru dodavanje novih radionica s pripadajućim detaljima.<br />
+Sustav omogućuje polaznicima pregled i rezervaciju termina radionica.<br />
+Sustav omogućuje prikaz termina radionica putem integriranog kalendara.<br />
+Sustav omogućuje korisnicima plaćanje termina radionica putem integriranih servisa.<br />
+Sustav omogućuje organizatorima plaćanje članarine prema odabranom planu.<br />
+Sustav omogućuje korisnicima otkazivanje rezervacija najkasnije 48 sati prije početka radionice.<br />
+Sustav sadrži internetsku trgovinu keramičkih radova.<br />
+Sustav omogućuje kupcima pregled, filtriranje i kupovinu proizvoda.<br />
+Sustav omogućuje korisnicima ostavljanje recenzija i ocjena proizvoda nakon kupnje.<br />
+Sustav omogućuje organizaciju i promociju izložbi keramičkih radova polaznika.<br />
+Sustav omogućuje polaznicima prijavu za sudjelovanje na izložbi.<br />
+Sustav omogućuje sudionicima objavu komentara i fotografija nakon održane izložbe.<br />
+Sustav omogućuje korisnicima pretplatu na obavijesti o novim radionicama i proizvodima.<br />
+Sustav omogućuje administratorima upravljanje korisnicima i odobravanje profila.<br />
+Sustav omogućuje administratorima definiranje i ažuriranje cijena članarina.<br />
+Sustav mora primjenjivati kontrolu pristupa prema korisničkim ulogama (polaznik, organizator, administrator) i ograničiti pristup nedozvoljenim funkcijama.<br />
 
 ## ⚙️ Nefunkcijski zahtjevi
-> Sustav mora čuvati i osigurati sve podatke o korisnicima, instruktorima i administratorima. <br />
-> Aplikacija mora biti dostupna korisnicima 24 sata dnevno. <br />
-> Svi podaci o radionicama, izložbama, narudžbama i transakcijama moraju biti sigurno pohranjeni. <br />
-> Sustav mora omogućiti brz i pouzdan pristup informacijama bez dugog učitavanja. <br />
-> Korisničko sučelje mora biti jednostavno za korištenje i prilagođeno mobilnim uređajima. <br />
-> Aplikacija mora omogućiti jednostavno dodavanje novih funkcionalnosti bez potrebe za promjenom postojećih dijelova sustava. <br />
-> Svi osjetljivi podaci, poput lozinki i ključeva, moraju biti zaštićeni i pohranjeni izvan izvornog koda. <br />
+
+Sustav mora biti responzivan i prilagođen prikazu na uređajima različitih veličina ekrana (računala, tableti, mobilni uređaji).<br />
+Sustav mora imati intuitivno korisničko sučelje koje omogućuje korisniku izvršavanje glavnih funkcija unutar najviše tri koraka.<br />
+Vrijeme učitavanja svake stranice ne smije prelaziti 3 sekunde pri prosječnoj brzini internetske veze od 10 Mbps.<br />
+Sustav mora podržavati istovremeni rad najmanje 100 aktivnih korisnika bez značajnog pada performansi (manje od 10% usporenja).<br />
+Sustav mora sinkronizirati vanjske kalendare i servise unutar 10 sekundi od promjene podataka.<br />
+Sustav mora osigurati sigurnu autentifikaciju korisnika korištenjem protokola koji podržavaju dvofaktorsku provjeru identiteta.<br />
+Sustav mora pohranjivati i obrađivati osobne podatke korisnika u skladu s važećom GDPR regulativom.<br />
+Sav mrežni promet između klijenta i poslužitelja mora biti šifriran korištenjem sigurnosnog protokola s certifikatom.<br />
+Sustav mora biti izrađen na način koji omogućuje jednostavnu izmjenu i proširenje funkcionalnosti u roku kraćem od 2 dana po izmjeni.<br />
+Sustav mora sadržavati tehničku dokumentaciju koja uključuje opis arhitekture, modula i API-ja, priručnik za korištenje s opisom osnovnih funkcionalnosti i postupaka rada te plan implementacije koji omogućuje postavljanje sustava u novo okruženje u roku od najviše 4 sata.<br />
+
 
 ## 🛠️Tehnologije
 | Sloj                    | Tehnologija                   |
