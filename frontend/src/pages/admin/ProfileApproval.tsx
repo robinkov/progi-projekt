@@ -187,8 +187,8 @@ export default function ProfileApproval() {
                                             )}
                                             Odobri Profil
                                         </Button>
-                                        <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground text-xs" onClick={() => navigate(`/organizer/${profile.id}`)}>
-                                            <ExternalLink className="mr-2 h-3 w-3" /> Pogledaj Detalje
+                                        <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground text-xs" onClick={() => navigate(`/admin/organizer-preview/${profile.id}`)}>
+                                            <ExternalLink className="mr-2 h-3 w-3" /> Pogledaj Cijeli Profil
                                         </Button>
                                     </div>
                                 </div>

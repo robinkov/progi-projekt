@@ -70,10 +70,16 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
           sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
-        {/* Sidebar (LEFT) */}
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/40"
+          onClick={() => setSidebarOpen(false)}
+        />
+
+        {/* Sidebar */}
         <aside
           className={cn(
-            "w-64 bg-card h-full p-4 shadow-lg transform transition-transform duration-300 ease-in-out border-r",
+            "relative w-64 bg-card h-full p-4 shadow-lg transform transition-transform duration-300 ease-in-out border-r",
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
