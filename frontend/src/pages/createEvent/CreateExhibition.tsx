@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/button";
 import { supabase } from "@/config/supabase";
 import { fetchPost } from "@/utils/fetchUtils";
+import { fetchGet } from "@/utils/fetchUtils";
+import { Loader2 } from "lucide-react";
 
 /* ---------------- Types ---------------- */
 
@@ -32,6 +34,30 @@ export default function CreateExhibition() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [allowed, setAllowed] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  async function fetchData() {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return;
+    try {
+      const res = await fetchGet<{ success: true, allowed: boolean }>("/organizer/check-if-allowed", {
+        Authorization: `Bearer ${data.session.access_token}`,
+      });
+
+      if (res.success) {
+        setAllowed(res.allowed)
+      }
+    } catch (err) {
+      console.error("Failed to check if allowed", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   /* ---------------- Save ---------------- */
 
@@ -77,6 +103,23 @@ export default function CreateExhibition() {
     } finally {
       setSaving(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-muted-foreground font-medium animate-pulse">Provjeravanje smijete li objaviti događaj...</p>
+      </div>
+    )
+  }
+
+  if (!allowed) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <p className="text-destructive font-medium animate-bounce">Trebate imati odobren profil i plaćenu pretplatu kako bi organizirali događaj.</p>
+      </div>
+    )
   }
 
   /* ---------------- Render ---------------- */

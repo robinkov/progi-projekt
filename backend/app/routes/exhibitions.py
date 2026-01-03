@@ -57,6 +57,8 @@ def create_exhibition():
 
     if not organizer_resp.data:
         return jsonify({"success": False, "error": "Organizer not found"}), 404
+    if not organizer_resp.data["approved_by_admin"] == True:
+        return jsonify({"success": False, "error": "Account not valid"}), 401
 
     organizer_id = organizer_resp.data["id"]
 

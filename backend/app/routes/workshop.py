@@ -65,7 +65,10 @@ def create_workshop():
         .single()
         .execute()
     )
+
     organizer_id = organizer_resp.data.get("id")
+    if not organizer_resp.data["approved_by_admin"] == True:
+        return jsonify({"success": False, "error": "Account not valid"}), 401
 
     # Insert workshop
     result = (
@@ -159,6 +162,17 @@ def get_specific_workshop(workshop_id):
     workshop_resp = (
         supabase.table("workshops").select("*").eq("id", workshop_id).single().execute()
     )
+    resp = (
+        supabase.table("workshop_reservations")
+        .select("id", count="exact")
+        .eq("workshop_id", workshop_id)
+        .execute()
+    )
+
+    count = resp.count
+
+    workshop = workshop_resp.data
+    workshop["places_left"] = workshop["capacity"] - count
 
     if not workshop_resp:
         return jsonify({"success": False, "error": "Workshop not found"}), 404

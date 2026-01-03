@@ -20,7 +20,8 @@ import {
   UserPlus,
   Clock,
   Euro,
-  ShieldAlert
+  ShieldAlert,
+  Users
 } from "lucide-react";
 
 /* ---------------- Types ---------------- */
@@ -36,6 +37,7 @@ type Workshop = {
   location: string;
   capacity: number;
   price: number;
+  places_left: number
 };
 
 type Organizer = {
@@ -122,20 +124,54 @@ const WorkshopPage = () => {
       <Card className="border-none shadow-xl overflow-hidden bg-card">
         <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-4">
-            <Badge className="bg-primary/10 text-primary border-primary/20">Radionica</Badge>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-primary/10 text-primary border-primary/20">Radionica</Badge>
+              {workshop.places_left <= 2 && workshop.places_left > 0 && (
+                <Badge variant="destructive" className="animate-pulse">
+                  Skoro popunjeno!
+                </Badge>
+              )}
+              {workshop.places_left == 0 && (
+                <Badge variant="destructive" >
+                  POPUNJENO
+                </Badge>
+              )}
+
+            </div>
             <h1 className="text-4xl font-extrabold text-foreground tracking-tight">{workshop.title}</h1>
 
             <div className="flex flex-wrap gap-5 text-muted-foreground font-medium text-sm">
-              <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" /> {new Date(workshop.date_time).toLocaleDateString("hr-HR")}</div>
-              <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> {workshop.duration}</div>
-              <div className="flex items-center gap-2"><Euro className="w-4 h-4 text-primary" /> {workshop.price}€</div>
-              <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> {workshop.location}</div>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                {new Date(workshop.date_time).toLocaleDateString("hr-HR")}
+              </div>
+              {/* Extracted time from date_time */}
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                {new Date(workshop.date_time).toLocaleTimeString("hr-HR", {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </div>
+              <div className="flex items-center gap-2">
+                <Euro className="w-4 h-4 text-primary" />
+                {workshop.price}€
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                {workshop.location}
+              </div>
+              {/* Places left display */}
+              <div className="flex items-center gap-2 px-2 py-0.5 rounded-md bg-muted/50 text-foreground">
+                <Users className="w-4 h-4 text-primary" />
+                <span>{workshop.places_left} / {workshop.capacity} slobodnih mjesta</span>
+              </div>
             </div>
           </div>
 
           {/* --- Reservation Logic & Organizer Message --- */}
           <div className="w-full md:w-auto text-center md:text-right">
-            {user?.role != "polaznik" ? (
+            {user?.role !== "polaznik" ? (
               <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center gap-3 text-amber-800 shadow-sm">
                 <ShieldAlert className="w-5 h-5 shrink-0" />
                 <p className="text-sm font-bold text-left">Samo polaznici smiju <br /> rezervirati radionicu.</p>
@@ -147,19 +183,39 @@ const WorkshopPage = () => {
             ) : (
               <Button
                 onClick={handleRegister}
-                disabled={registering}
+                disabled={registering || workshop.places_left === 0}
                 className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg rounded-xl px-10 py-6 h-auto font-bold text-lg transition-transform active:scale-95"
               >
-                {registering ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <UserPlus className="mr-2 h-6 w-6" />}
-                Rezerviraj mjesto
+                {registering ? (
+                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                ) : (
+                  <UserPlus className="mr-2 h-6 w-6" />
+                )}
+                {workshop.places_left === 0 ? "Popunjeno" : "Rezerviraj mjesto"}
               </Button>
             )}
           </div>
         </div>
 
         <CardContent className="p-8">
-          <h3 className="text-lg font-bold flex items-center gap-2 mb-3"><Info className="w-5 h-5 text-primary" /> O radionici</h3>
-          <p className="text-foreground/80 leading-relaxed text-lg whitespace-pre-wrap">{workshop.description}</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-3">
+              <h3 className="text-lg font-bold flex items-center gap-2 mb-3">
+                <Info className="w-5 h-5 text-primary" /> O radionici
+              </h3>
+              <p className="text-foreground/80 leading-relaxed text-lg whitespace-pre-wrap">
+                {workshop.description}
+              </p>
+            </div>
+            <div className="bg-muted/30 p-6 rounded-2xl border border-border h-fit">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4 text-center md:text-left">
+                Trajanje
+              </h4>
+              <div className="flex items-center justify-center md:justify-start gap-3 text-xl font-bold text-primary">
+                {workshop.duration}
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from ..supabase_client import supabase
+from app.auth.auth import verify_token
 from datetime import datetime, timedelta, timezone
 
 organizers_bp = Blueprint("organizers_bp", __name__)
@@ -90,3 +91,44 @@ def get_organizer(organizer_id: int):
         )
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@organizers_bp.route("/organizer/check-if-allowed", methods=["GET"])
+def check_if_allowed():
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Invalid token payload"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("id").eq("auth_id", auth_id).single().execute()
+    )
+
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_id = user_resp.data["id"]
+
+    organizers_resp = (
+        supabase.table("organizers")
+        .select("*")
+        .eq("user_id", user_id)
+        .eq("approved_by_admin", True)
+        .execute()
+    )
+
+    if organizers_resp.data and len(organizers_resp.data) == 1:
+        return jsonify({"success": True, "allowed": True}), 200
+    else:
+        return jsonify({"success": True, "allowed": False}), 200

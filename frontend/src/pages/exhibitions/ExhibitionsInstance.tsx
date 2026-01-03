@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/config/supabase';
 import { useAuth } from "@/components/context/AuthProvider";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Clock } from "lucide-react";
 
 import {
   Mail,
@@ -117,6 +117,7 @@ const ExhibitionPage = () => {
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
 
       {/* --- Exhibition Detail Card --- */}
+      {/* --- Exhibition Detail Card --- */}
       <Card className="border-none shadow-xl overflow-hidden bg-card">
         <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-4">
@@ -133,6 +134,14 @@ const ExhibitionPage = () => {
                   weekday: 'short', year: 'numeric', month: 'long', day: 'numeric'
                 })}
               </div>
+              {/* Prikaz vremena izvučenog iz date_time */}
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                {new Date(exhibition.date_time).toLocaleTimeString("hr-HR", {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary" />
                 {exhibition.location}
@@ -142,15 +151,23 @@ const ExhibitionPage = () => {
 
           {/* --- Registration Button Section --- */}
           <div className="w-full md:w-auto">
-            {isRegistered ? (
-              <Button disabled className="w-full md:w-auto bg-primary/20 text-primary border border-primary/30 rounded-xl px-8 py-6 h-auto font-bold text-lg cursor-default">
-                <CheckCircle2 className="mr-2 h-6 w-6" />
-                Prijavljeni ste
-              </Button>
-            ) : user && user.role != "polaznik" ? (
+            {user?.role !== "polaznik" ? (
               <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center gap-3 text-amber-800 shadow-sm">
                 <ShieldAlert className="w-5 h-5 shrink-0" />
-                <p className="text-sm font-bold text-left">Samo polaznici smiju <br /> poslati prijavu.</p>
+                <p className="text-sm font-bold text-left">
+                  Samo polaznici smiju <br /> se prijaviti na izložbu.
+                </p>
+              </div>
+            ) : isRegistered ? (
+              <div className="flex flex-col items-center md:items-end gap-2">
+                <Button disabled className="w-full md:w-auto bg-primary/20 text-primary border border-primary/30 rounded-xl px-8 py-6 h-auto font-bold text-lg cursor-default">
+                  <CheckCircle2 className="mr-2 h-6 w-6" />
+                  Prijavljeni ste
+                </Button>
+                <p className="text-[11px] text-muted-foreground font-medium text-center md:text-right max-w-[200px]">
+                  Provjerite status prijave pod <br />
+                  <span className="text-primary">Moje rezervacije &gt; Prijavljene izložbe</span>
+                </p>
               </div>
             ) : (
               <Button
