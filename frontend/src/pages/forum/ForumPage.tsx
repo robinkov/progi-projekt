@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ImagePlus, X, Send, Loader2, MapPin, Calendar, MessageSquarePlus } from "lucide-react";
 import { RefreshCw } from "lucide-react";
+import { useAuth } from "@/components/context/AuthProvider";
 type Comment = {
     id: number;
     user_username?: string;
@@ -18,7 +19,8 @@ type Comment = {
     content: string;
     photo_url?: string;
     created_at: string;
-    is_organizer: boolean
+    is_organizer: boolean,
+    mail: string
 }
 
 type Exhibition = {
@@ -54,6 +56,7 @@ export default function ForumPage() {
     const [exhibition, setExhibition] = useState<Exhibition | null>(null);
     const [organizer, setOrganizer] = useState<Organizer | null>(null);
     const [refreshing, setRefreshing] = useState(false); // State for refresh animation
+    const { user } = useAuth()
 
     async function loadComments(isManualRefresh = false) {
         if (isManualRefresh) setRefreshing(true);
@@ -295,6 +298,7 @@ export default function ForumPage() {
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-sm text-foreground">{comment.user_username || "Anonymous"}</span>
                                     {comment.is_organizer ? (<Badge className="bg-primary text-primary-foreground hover:bg-primary/90">Organizator</Badge>) : (null)}
+                                    {user?.role == "admin" ? (<span className="text-sm text-foreground">({comment.mail})</span>) : (<div></div>)}
                                     <span className="text-[10px] text-muted-foreground font-medium">
                                         {new Date(comment.created_at).toLocaleString()}
                                     </span>

@@ -658,6 +658,7 @@ def get_comments(exhibition_id):
     users = user_resp.data
 
     username_map = {o["id"]: o["username"] for o in users or []}
+    mail_map = {o["id"]: o["mail"] for o in users or []}
 
     profile_photo_ids = list(
         {e["profile_photo_id"] for e in users if e.get("profile_photo_id")}
@@ -683,6 +684,7 @@ def get_comments(exhibition_id):
         c["user_profile_photo_url"] = photo_map.get(
             profile_photo_id_map.get(c["user_id"])
         )
+        c["mail"] = mail_map.get(c["user_id"])
 
         c["photo_url"] = photo_map.get(c["photo_id"])
 

@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
-from ..supabase_client import supabase
+from ..supabase_client import supabase, admin_supabase
 from app.auth.auth import verify_token
 from datetime import datetime, timedelta, timezone
+
 
 admin_bp = Blueprint("admin_bp", __name__)
 
@@ -116,3 +117,65 @@ def approve_organizer(organizer_id):
         return jsonify({"success": True}), 200
     else:
         print(resp)
+
+
+@admin_bp.route("/admin/users/search", methods=["GET"])
+def search():
+    mail_substring = request.args.get("q")  # returns None if not present
+    user_resp = (
+        supabase.table("users")
+        .select("id,mail,profile_photo_id,first_name,last_name,username")
+        .like("mail", f"%{mail_substring}%")
+        .execute()
+    )
+    users = user_resp.data
+    photo_ids = list(
+        {e["profile_photo_id"] for e in users if e.get("profile_photo_id")}
+    )
+    photo_resp = supabase.table("photos").select("*").in_("id", photo_ids).execute()
+    photo_map = {o["id"]: o["url"] for o in photo_resp.data or []}
+
+    for u in users:
+        u["profile_photo_url"] = photo_map.get(u["profile_photo_id"])
+    return jsonify({"success": True, "users": users})
+
+
+@admin_bp.route("/admin/users/delete/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Invalid token payload"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("id").eq("auth_id", auth_id).single().execute()
+    )
+
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_id_admin = user_resp.data["id"]
+
+    admin_resp = (
+        supabase.table("admins").select("*").eq("user_id", user_id_admin).execute()
+    )
+
+    if not (admin_resp.data and len(admin_resp.data) == 1):
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+    resp = supabase.table("users").delete().eq("id", user_id).execute()
+
+    admin_supabase.auth.admin.delete_user(resp.data[0]["auth_id"])
+
+    return jsonify({"success": True}), 200
