@@ -119,7 +119,7 @@ const WorkshopPage = () => {
   if (!workshop) return null;
 
   return (
-    <PayPalScriptProvider options={{ "clientId": "test", currency: "EUR" }}>
+    <PayPalScriptProvider options={{ "clientId": "AVVlqKLPC4luvZ69cQTY3CD2AhNdY4DiycWRE75pry8u-X9oZFF0sF19JDvJ4pWqr-Cuni-0F0TWPbOE", currency: "EUR" }}>
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
 
         {/* --- Workshop Detail Card --- */}
@@ -193,10 +193,10 @@ const WorkshopPage = () => {
                   <PayPalButtons
                     createOrder={async () => {
                       // We send the workshop ID to our backend
-                      const res = await fetchPost<{ orderID: string }>("/api/paypal/create-order", {
+                      const res = await fetchPost<{ id: string }>("/api/paypal/create-order", {
                         workshopId: workshop.id
                       });
-                      return res.orderID; // The backend returns a real PayPal Order ID
+                      return res.id; // The backend returns a real PayPal Order ID
                     }}
                     onApprove={async (data) => {
                       // After user pays, tell backend to "capture" (confirm) the money

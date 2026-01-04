@@ -24,6 +24,7 @@ def create_app():
     from .routes.product import product_bp
     from .routes.organizers import organizers_bp
     from .routes.admin import admin_bp
+    from .routes.paypal import paypal_bp
 
     app.register_blueprint(exhibition_bp)
     app.register_blueprint(workshop_bp)
@@ -34,5 +35,5 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(organizerProfile_bp)
     app.register_blueprint(admin_bp)
-
+    app.register_blueprint(paypal_bp)
     return app
