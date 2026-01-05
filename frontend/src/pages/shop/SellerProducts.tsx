@@ -56,8 +56,9 @@ export default function SellerProducts() {
                 product={{
                   id: product.id,
                   name: product.name,
-                  author: `Prodavač #${product.seller_id}`,
+                  seller: `Prodavač #${product.seller_id}`,
                   price: `${product.price} €`,
+                  category: product.category,
                 }}
               />
             </a>
