@@ -66,6 +66,7 @@ def create_workshop():
         .execute()
     )
 
+    organizer = organizer_resp.data
     organizer_id = organizer_resp.data.get("id")
     if not organizer_resp.data["approved_by_admin"] == True:
         return jsonify({"success": False, "error": "Account not valid"}), 401
@@ -83,6 +84,19 @@ def create_workshop():
                 "capacity": data["capacity"],
                 "price": data["price"],
                 "description": data["description"],
+            }
+        )
+        .execute()
+    )
+    res = (
+        supabase.table("notifications")
+        .insert(
+            {
+                "type": "workshop",
+                "title": f"Organizator {organizer["profile_name"]} objavio novu radionicu!",
+                "subtitle": data["title"],
+                "body": data["description"],
+                "created_at": str(datetime.now()),
             }
         )
         .execute()

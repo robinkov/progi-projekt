@@ -68,6 +68,22 @@ def get_home():
     if "product" in types:
         newProductNotifications = True
 
+    if not newWorkshopNotifications and not newProductNotifications:
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "needsUsername": needsUsername,
+                    "needsApproval": needsApproval,
+                    "needsMembership": needsMembership,
+                    "newWorkshopNotifications": newWorkshopNotifications,
+                    "newProductNotifications": newProductNotifications,
+                    "notifications": [],
+                }
+            ),
+            200,
+        )
+
     read_resp = (
         supabase.table("read_notifications")
         .select("*")
@@ -84,6 +100,8 @@ def get_home():
         .select("*")
         .in_("type", types)
         .not_.in_("id", notification_ids)
+        .gte("created_at", datetime.now() - timedelta(7))
+        .order("created_at", desc=True)
         .execute()
     )
 

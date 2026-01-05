@@ -86,6 +86,7 @@ export default function Home() {
     else setnewProductNotifications(!currentVal);
 
     await fetchPost("/toggle-notification-settings", { type: type, enabled: !currentVal }, { Authorization: `Bearer ${data.session.access_token}` });
+    fetchData()
   };
 
   useEffect(() => {
@@ -201,13 +202,24 @@ export default function Home() {
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <BellRing className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold tracking-tight">Novosti za Vas</h2>
+            <h2 className="text-xl font-bold tracking-tight">Novosti za Vas iz proteklih 7 dana</h2>
           </div>
           <Badge variant="outline" className="rounded-full border-primary/20 text-primary">
             {notifications.length} novih poruka
           </Badge>
         </div>
 
+        <div className="w-full flex justify-end">
+          <Button onClick={
+            () => {
+              notifications.map((n) => {
+                markAsRead(n.id);
+              })
+            }
+          }>
+            Označi sve kao pročitano
+          </Button>
+        </div>
         {notifications.length > 0 ? (
           <div className="grid gap-4">
             {notifications.map((n) => (
@@ -229,12 +241,11 @@ export default function Home() {
                     </div>
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
+                      className="rounded-2xl hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
                       onClick={() => markAsRead(n.id)}
                       title="Označi kao pročitano"
                     >
-                      <Check className="w-5 h-5" />
+                      <Check className="w-5 h-5" /> Označi kao pročitano
                     </Button>
                   </div>
                 </CardContent>
@@ -264,6 +275,6 @@ export default function Home() {
         )}
       </div>
 
-    </div>
+    </div >
   );
 }
