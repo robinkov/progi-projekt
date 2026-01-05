@@ -43,6 +43,25 @@ def list_products():
             seller_id = p.get("seller_id")
             p["seller_name"] = organizer_map.get(seller_id)
 
+        # Attach photo URL based on photo_id
+        photo_ids = list({p["photo_id"] for p in products if p.get("photo_id")})
+
+        if photo_ids:
+            photos_resp = (
+                supabase.table("photos")
+                .select("id, url")
+                .in_("id", photo_ids)
+                .execute()
+            )
+
+            photo_map = {
+                ph["id"]: ph.get("url") for ph in (photos_resp.data or [])
+            }
+
+            for p in products:
+                pid = p.get("photo_id")
+                p["photo"] = photo_map.get(pid)
+
         return jsonify({"success": True, "products": products}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -63,7 +82,23 @@ def get_product(product_id: int):
         if not product_resp.data:
             return jsonify({"success": False, "error": "Product not found"}), 404
 
-        return jsonify({"success": True, "product": product_resp.data}), 200
+        product = product_resp.data
+
+        # Attach photo URL if photo_id is present
+        photo_url = None
+        if product.get("photo_id"):
+            photo_resp = (
+                supabase.table("photos")
+                .select("url")
+                .eq("id", product.get("photo_id"))
+                .single()
+                .execute()
+            )
+            photo_url = photo_resp.data.get("url") if photo_resp.data else None
+
+        product["photo"] = photo_url
+
+        return jsonify({"success": True, "product": product}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 

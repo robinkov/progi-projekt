@@ -64,12 +64,12 @@ export default function Products() {
                                     name: product.name,
                                     seller:
                                         product.seller_name ||
-                                        `Prodavač #${product.seller_id}`,
+                                        `anonimni prodavač ${product.seller_id}`,
                                     price: `${product.price} €`,
                                     category:
                                         product.category ||
                                         product.product_category ||
-                                        "Bez kategorije",
+                                        "nedefinirano",
                                 }}
                             />
                         </a>

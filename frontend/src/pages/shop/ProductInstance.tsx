@@ -4,11 +4,25 @@ import { useParams } from "react-router";
 import { Logo, LogoImage, LogoFallback } from "@/components/ui/logo";
 import { Banner, BannerImage, BannerFallback } from "@/components/ui/banner";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Phone, MapPin, ShieldAlert } from "lucide-react";
+import { Mail, Phone, MapPin, ShieldAlert, Box, Coffee, CookingPot, Squircle, Star } from "lucide-react";
 import { fetchGet, fetchPost } from "@/utils/fetchUtils";
 import { useEffect, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useAuth } from "@/components/context/AuthProvider";
+
+const categoryMeta: Record<string, { Icon: React.ComponentType<any>; badgeClass: string; textClass?: string }> = {
+  skulpture: { Icon: Box, badgeClass: "bg-rose-100 border-rose-200", textClass: "text-rose-800" },
+  tanjuri: { Icon: Squircle, badgeClass: "bg-amber-100 border-amber-200", textClass: "text-amber-800" },
+  zdjele: { Icon: CookingPot, badgeClass: "bg-green-100 border-green-200", textClass: "text-green-800" },
+  salice: { Icon: Coffee, badgeClass: "bg-sky-100 border-sky-200", textClass: "text-sky-800" },
+  other: { Icon: Star, badgeClass: "bg-muted/20 border-border", textClass: "text-foreground" },
+};
+
+const getMeta = (category?: string | null) => {
+  if (!category) return categoryMeta.other;
+  const key = category.toLowerCase();
+  return (categoryMeta as any)[key] ?? categoryMeta.other;
+};
 
 type Product = {
   id: number;
@@ -17,7 +31,7 @@ type Product = {
   price: number;
   name: string;
   description: string;
-  photo_id: number | null;
+  photo: string | null;
   sold: boolean;
   exhibition_id: number | null;
 };
@@ -89,9 +103,17 @@ export default function ProductPage() {
             <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="bg-primary/10 text-primary border-primary/20">
-                    {product.category}
-                  </Badge>
+                  { /* Category Badge */ }
+                  {(() => {
+                    const { Icon, badgeClass, textClass } = getMeta(product.category);
+                    return (
+                      <Badge className={`text-xs flex items-center gap-2 px-2 py-1 border ${badgeClass} ${textClass ?? ""}`}>
+                        <Icon className="w-4 h-4" />
+                        <span className="capitalize">{product.category ?? "Bez kategorije"}</span>
+                      </Badge>
+                    );
+                  })()}
+                  { /* Sold / Available Badge */ }
                   {product.sold ? (
                     <Badge variant="destructive" className="font-semibold">
                       Prodano
@@ -190,9 +212,19 @@ export default function ProductPage() {
         </div>
 
         {/* ---------- Right Column: Product Image ---------- */}
-        <div className="w-full md:w-[360px] md:flex-shrink-0">
-          <div className="w-full h-full min-h-[260px] rounded-2xl overflow-hidden border border-border bg-muted flex items-center justify-center text-muted-foreground text-sm">
-            Slika proizvoda
+        <div className="w-full md:w-[420px] md:flex-shrink-0">
+          <div className="w-full rounded-2xl overflow-hidden border border-border bg-muted flex items-center justify-center text-muted-foreground text-sm">
+            {product.photo ? (
+              <img
+                src={product.photo}
+                alt={product.name}
+                className="w-full h-auto max-h-[500px] object-contain"
+              />
+            ) : (
+              <div className="w-full h-[260px] flex items-center justify-center">
+                <span>Slika proizvoda</span>
+              </div>
+            )}
           </div>
         </div>
 
