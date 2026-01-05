@@ -1,10 +1,12 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface Product {
     id: number;
     price: string;
     name: string;
-    author: string;
+    seller: string;
+    category: string;
 }
 
 interface ProductCardProps {
@@ -15,18 +17,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return (
         <Card className="gap-3 min-w-[300px] w-[300px] duration-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5">
             <CardHeader>
-                <h2 className="font-semibold">{product.price}</h2>
+                <Badge variant="default" className="text-xs">
+                    {product.category}
+                </Badge>
             </CardHeader>
 
             <CardContent>
                 <h1 className="text-lg font-semibold">{product.name}</h1>
-                <p className="text-xs">{product.author}</p>
+                <p className="text-xs">{product.seller}</p>
             </CardContent>
 
             <CardFooter>
-                <p className="text-xs text-muted-foreground">
-                    Available product
-                </p>
+                <h2 className="font-semibold">{product.price}</h2>
             </CardFooter>
         </Card>
     );
