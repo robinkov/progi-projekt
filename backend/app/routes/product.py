@@ -12,11 +12,10 @@ def list_products():
     products.seller_id references organizers.id.
     """
     try:
-        # By default show only products that are not sold
+        # By default show all products (regardless of sold status)
         products_resp = (
             supabase.table("products")
             .select("*")
-            .eq("sold", False)
             .execute()
         )
 

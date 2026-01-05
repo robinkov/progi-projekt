@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ProductCard from "@/components/shop/ProductCard";
 import { fetchGet } from "@/utils/fetchUtils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Switch } from "@/components/ui/switch";
 import { Box, Coffee, CookingPot, Squircle } from "lucide-react";
 
 type Product = {
@@ -14,7 +15,7 @@ type Product = {
     name: string;
     description: string;
     photo_id: number | null;
-    sold: boolean;
+    sold: boolean | null;
     exhibition_id: number | null;
 };
 
@@ -25,6 +26,7 @@ export default function Products() {
     const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
     const [minPrice, setMinPrice] = useState<number | null>(null);
     const [maxPrice, setMaxPrice] = useState<number | null>(null);
+    const [showSoldOnly, setShowSoldOnly] = useState<boolean>(false);
 
     useEffect(() => {
         async function loadProducts() {
@@ -57,6 +59,10 @@ export default function Products() {
         }
 
         if (maxPrice !== null && product.price > maxPrice) {
+            return false;
+        }
+
+        if (showSoldOnly && product.sold !== true) {
             return false;
         }
 
@@ -108,7 +114,7 @@ export default function Products() {
                         </ToggleGroupItem>
                     </ToggleGroup>
 
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-4 text-sm">
                         <input
                             type="number"
                             min={0}
@@ -142,6 +148,15 @@ export default function Products() {
                         >
                             Reset cijene
                         </button>
+
+                        <div className="flex items-center gap-2 pl-4 border-l border-border text-xs">
+                            <span className="text-muted-foreground">prodano</span>
+                            <Switch
+                                checked={showSoldOnly}
+                                onCheckedChange={(v) => setShowSoldOnly(!!v)}
+                                aria-label="Prikaži samo prodane proizvode"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
