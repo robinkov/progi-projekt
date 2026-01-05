@@ -23,6 +23,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
       await AuthController.logoutUser();
       navigate("/auth", { replace: true });
     } catch (error: any) {
+      navigate("/auth", { replace: true });
       alert(error?.message || "Logout failed");
     } finally {
       setLogoutLoading(false);

@@ -20,7 +20,8 @@ import {
   Clock,
   Euro,
   ShieldAlert,
-  Users
+  Users,
+  Loader2
 } from "lucide-react";
 
 /* ---------------- Types ---------------- */
@@ -60,7 +61,6 @@ const WorkshopPage = () => {
 
   const [isRegistered, setIsRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
 
   useEffect(() => {
@@ -90,24 +90,6 @@ const WorkshopPage = () => {
     fetchData();
   }, [id, user]);
 
-  const handlePaymentSuccess = async (details: any) => {
-    setRegistering(true);
-    try {
-      // Now that they paid, we register them in our database
-      const res = await fetchPost<{ success: boolean }>(`/workshops/${id}/register`, {
-        paypalOrderId: details.id, // Good for records
-      });
-      if (res.success) {
-        setIsRegistered(true);
-        setPaymentSuccess(true);
-      }
-    } catch (error) {
-      console.error("Registration after payment failed", error);
-      alert("Plaćanje uspjelo, ali registracija nije uspjela. Molimo kontaktirajte podršku.");
-    } finally {
-      setRegistering(false);
-    }
-  };
 
   if (loading) return (
     <div className="flex flex-1 justify-center items-center">
@@ -119,7 +101,11 @@ const WorkshopPage = () => {
   if (!workshop) return null;
 
   return (
-    <PayPalScriptProvider options={{ "clientId": "AVVlqKLPC4luvZ69cQTY3CD2AhNdY4DiycWRE75pry8u-X9oZFF0sF19JDvJ4pWqr-Cuni-0F0TWPbOE", currency: "EUR" }}>
+    <PayPalScriptProvider options={{
+      "clientId": "ARXyr_WfSF1KmFDFtp6FUNOJvCXnalaf9yBXHyouQFozXdmUHolBhU0iTIyf_N565XP08BX8G58aSOwF",
+      currency: "EUR",
+      locale: "en_HR"
+    }}>
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
 
         {/* --- Workshop Detail Card --- */}
@@ -190,23 +176,39 @@ const WorkshopPage = () => {
                     Osigurajte mjesto uplatom:
                   </p>
                   {/* 3. The Actual PayPal Button */}
-                  <PayPalButtons
-                    createOrder={async () => {
-                      // We send the workshop ID to our backend
-                      const res = await fetchPost<{ id: string }>("/api/paypal/create-order", {
-                        workshopId: workshop.id
-                      });
-                      return res.id; // The backend returns a real PayPal Order ID
-                    }}
-                    onApprove={async (data) => {
-                      // After user pays, tell backend to "capture" (confirm) the money
-                      const res = await fetchPost<{ success: boolean }>("/api/paypal/capture-order", {
-                        orderID: data.orderID,
-                        workshopId: workshop.id
-                      });
-                      if (res.success) setIsRegistered(true);
-                    }}
-                  />
+
+                  {registering ? (
+                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+
+                  ) : (
+                    <div>
+                      <PayPalButtons
+
+                        createOrder={async () => {
+                          const res = await fetchPost<{ id: string }>("/api/paypal/create-order", {
+                            workshopId: workshop.id
+                          });
+                          return res.id;
+                        }}
+                        onApprove={async (data) => {
+                          setRegistering(true)
+                          const dbdata = (await supabase.auth.getSession()).data;
+                          if (!dbdata.session) return;
+                          const res = await fetchPost<{ success: boolean }>("/api/paypal/capture-order", {
+                            orderID: data.orderID,
+                            workshopId: workshop.id
+                          }, {
+                            Authorization: `Bearer ${dbdata.session.access_token}`
+                          });
+                          if (res.success) {
+                            setIsRegistered(true);
+                            setRegistering(false)
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+
                 </div>
               )}
             </div>

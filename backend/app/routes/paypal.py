@@ -12,7 +12,7 @@ paypal_bp = Blueprint("paypal_bp", __name__)
 
 PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID")
 PAYPAL_SECRET = os.environ.get("PAYPAL_SECRET")
-PAYPAL_API = "https://api-m.paypal.com"  # Use 'api-m.paypal.com' for production
+PAYPAL_API = "https://api-m.sandbox.paypal.com"  # Use 'api-m.paypal.com' for production
 
 
 # Helper: Get PayPal Access Token
@@ -22,7 +22,6 @@ def get_paypal_token():
         auth=(PAYPAL_CLIENT_ID, PAYPAL_SECRET),
         data={"grant_type": "client_credentials"},
     )
-    print(res.json())
     return res.json()["access_token"]
 
 
@@ -32,7 +31,6 @@ def create_order():
     data = request.json
     workshop_id = data.get("workshopId")
 
-    # 1. Fetch real price from Supabase (Source of Truth)
     workshop = (
         supabase.table("workshops")
         .select("price, title")
@@ -70,12 +68,39 @@ def create_order():
 # --- ENDPOINT 2: Capture Order & Save to Supabase ---
 @paypal_bp.route("/api/paypal/capture-order", methods=["POST"])
 def capture_order():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    valid, payload = verify_token(token)
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Token missing user ID"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+    user_id = user_resp.data["id"]
     data = request.json
     order_id = data.get("orderID")
     workshop_id = data.get("workshopId")
-    user_id = data.get("userId")  # Passed from frontend auth state
+    participant_resp = (
+        supabase.table("participants")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
 
-    # 1. Tell PayPal to finalize (capture) the payment
+    participant_id = participant_resp.data["id"]
     token = get_paypal_token()
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
@@ -83,6 +108,8 @@ def capture_order():
         f"{PAYPAL_API}/v2/checkout/orders/{order_id}/capture", headers=headers
     )
     capture_data = res.json()
+    payment_source = capture_data.get("payment_source", {})
+    method = "card" if "card" in payment_source else "paypal"
 
     # 2. Check if payment was actually successful
     if capture_data.get("status") == "COMPLETED":
@@ -96,15 +123,32 @@ def capture_order():
             ]["value"],
             "status": "approved",
         }
-
-        db_res = (
-            supabase.table("workshop_registrations")
-            .insert(registration_entry)
+        transactions_res = (
+            supabase.table("transactions")
+            .insert(
+                {
+                    "paypal_order_id": order_id,
+                    "amount": capture_data["purchase_units"][0]["payments"]["captures"][
+                        0
+                    ]["amount"]["value"],
+                    "method": method,
+                    "date_time": str(datetime.now()),
+                }
+            )
             .execute()
         )
 
-        # 4. Optional: Decrement places_left in workshops table
-        supabase.rpc("decrement_workshop_places", {"row_id": workshop_id}).execute()
+        db_res = (
+            supabase.table("workshop_reservations")
+            .insert(
+                {
+                    "workshop_id": workshop_id,
+                    "participant_id": participant_id,
+                    "transaction_id": transactions_res.data[0]["id"],
+                }
+            )
+            .execute()
+        )
 
         return jsonify({"success": True})
 
