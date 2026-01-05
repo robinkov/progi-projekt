@@ -500,6 +500,14 @@ def forum():
     )
 
     admins_resp = supabase.table("admins").select("id").eq("user_id", user_id).execute()
+    
+    organizer_resp = (
+        supabase.table("organizers")
+        .select("id")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
 
     if participant_resp.data and len(participant_resp.data) == 1:
 
@@ -533,13 +541,6 @@ def forum():
 
         return jsonify({"success": True, "exhibitions": exhibitions}), 200
     elif admins_resp.data and len(admins_resp.data) != 1:
-        organizer_resp = (
-            supabase.table("organizers")
-            .select("id")
-            .eq("user_id", user_id)
-            .single()
-            .execute()
-        )
 
         organizer_id = organizer_resp.data["id"]
         for e in exhibitions:
@@ -551,14 +552,11 @@ def forum():
             e["date"] = start_dt.strftime("%d.%m")
             e["timeFrom"] = start_dt.strftime("%H:%M")
             e["timeTo"] = None
-
-            if organizer_id == e["organizer_id"]:
-                e["filter_out"] = False
-            else:
-                e["filter_out"] = True
+            e["filter_out"] = organizer_id != e["organizer_id"]
 
         return jsonify({"success": True, "exhibitions": exhibitions}), 200
     else:
+        organizer_id = organizer_resp.data["id"]
         for e in exhibitions:
             user_id = organizer_map.get(e.get("organizer_id"))
             e["organizer_name"] = user_map.get(user_id, "Organizator")
@@ -568,7 +566,7 @@ def forum():
             e["date"] = start_dt.strftime("%d.%m")
             e["timeFrom"] = start_dt.strftime("%H:%M")
             e["timeTo"] = None
-            e["filter_out"] = False
+            e["filter_out"] = organizer_id != e["organizer_id"]
         return jsonify({"success": True, "exhibitions": exhibitions}), 200
 
 
