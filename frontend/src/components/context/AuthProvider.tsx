@@ -9,6 +9,7 @@ type AuthContextType = {
   status: AuthContextStatus;
   user: null | User;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  token: string | null
 };
 
 
@@ -17,12 +18,13 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<AuthContextStatus>("loading");
   const [user, setUser] = useState<null | User>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
+        const token = session.access_token;
         try {
-          const token = session.access_token;
           const userData = await fetchPost<{ role: string | null }>(
             "/getrole", // url
             {}, // body
@@ -32,15 +34,17 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           setUser(
             userToViewModel(session.user, userData.role ?? null)
           );
-
+          setToken(token);
           setStatus("authenticated");
         } catch (error) {
           console.error("Failed to fetch user role:", error);
           setUser(userToViewModel(session.user)); // fallback without role
+          setToken(token);
           setStatus("authenticated");
         }
       } else {
         setStatus("unauthenticated");
+        setToken(null);
         setUser(null);
       }
     });
@@ -53,7 +57,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     console.log("AuthContext user:", user);
   }, [user]);
 
-  const value: AuthContextType = { status, user, setUser };
+  const value: AuthContextType = { status, user, setUser, token };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
