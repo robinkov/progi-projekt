@@ -62,7 +62,7 @@ const ExhibitionPage = () => {
       if (!data.session) return;
 
       try {
-        const exhibitionRes = await fetchGet<{ success: boolean; exhibition: Exhibition }>(`/exhibitions/${id}`);
+        const exhibitionRes = await fetchGet<{ success: boolean; exhibition: Exhibition }>(`/exhibitions/${id}`, { Authorization: `Bearer ${data.session.access_token}` });
         if (exhibitionRes.success) {
           setExhibition(exhibitionRes.exhibition);
 

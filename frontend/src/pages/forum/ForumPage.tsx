@@ -9,9 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { ImagePlus, X, Send, Loader2, MapPin, Calendar, MessageSquarePlus } from "lucide-react";
+import { ImagePlus, X, Send, Loader2, MapPin, Calendar, MessageSquarePlus, Info } from "lucide-react";
 import { RefreshCw } from "lucide-react";
 import { useAuth } from "@/components/context/AuthProvider";
+import { Spinner } from "@/components/ui/spinner";
 type Comment = {
     id: number;
     user_username?: string;
@@ -56,7 +57,10 @@ export default function ForumPage() {
     const [exhibition, setExhibition] = useState<Exhibition | null>(null);
     const [organizer, setOrganizer] = useState<Organizer | null>(null);
     const [refreshing, setRefreshing] = useState(false); // State for refresh animation
+    const [allowed_to_comment, setAllowedToComment] = useState(false)
     const { user } = useAuth()
+
+
 
     async function loadComments(isManualRefresh = false) {
         if (isManualRefresh) setRefreshing(true);
@@ -77,13 +81,20 @@ export default function ForumPage() {
         }
     }
     async function loadExhibition() {
+
         if (!id) return;
 
         try {
+            setLoading(true)
+            const { data } = await supabase.auth.getSession();
+            if (!data.session) return;
             const exhibitionRes = await fetchGet<{
                 success: boolean;
                 exhibition: Exhibition;
-            }>(`/exhibitions/${id}`);
+                allowed_to_comment: boolean
+            }>(`/exhibitions/${id}`, {
+                Authorization: `Bearer ${data.session.access_token}`,
+            });
 
             const organizerRes = await fetchGet<Organizer>(
                 `/organizers/${exhibitionRes.exhibition.organizer_id}`
@@ -91,6 +102,7 @@ export default function ForumPage() {
 
             setExhibition(exhibitionRes.exhibition);
             setOrganizer(organizerRes);
+            setAllowedToComment(exhibitionRes.allowed_to_comment)
         } catch (err) {
             console.error("Failed to load exhibition", err);
         } finally {
@@ -182,7 +194,7 @@ export default function ForumPage() {
         <div className="max-w-3xl mx-auto py-10 px-4 space-y-8">
 
             {/* --- Exhibition & Organizer Info Header (Using Accent/Primary) --- */}
-            {exhibition && (
+            {exhibition ? (
                 <div className="bg-accent/30 border border-primary/20 rounded-3xl p-6 shadow-sm">
                     <div className="flex flex-col md:flex-row justify-between gap-6">
                         <div className="space-y-3">
@@ -227,60 +239,91 @@ export default function ForumPage() {
                         )}
                     </div>
                 </div>
-            )}
+            ) : (
+                <div className="w-full flex flex-col items-center space-y-4">
+                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                </div>)}
 
             {/* --- Input Section --- */}
-            <Card className="shadow-lg border-border/60 overflow-hidden bg-card">
-                <CardContent className="pt-6">
-                    <Textarea
-                        placeholder="Pridruži se raspravi..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        disabled={posting}
-                        className="min-h-20 border-none focus-visible:ring-2 focus-visible:ring-ring text-lg resize-none p-0 mb-4 placeholder:text-muted-foreground/50"
-                    />
+            {allowed_to_comment ? (
+                <Card className="shadow-lg border-border/60 overflow-hidden bg-card">
+                    <CardContent className="pt-6">
+                        <Textarea
+                            placeholder="Pridruži se raspravi..."
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            disabled={posting}
+                            className="min-h-20 border-none focus-visible:ring-2 focus-visible:ring-ring text-lg resize-none p-0 mb-4 placeholder:text-muted-foreground/50"
+                        />
 
-                    {previewUrl && (
-                        <div className="relative group w-fit mb-4">
-                            <img src={previewUrl} alt="Preview" className="h-52 w-auto rounded-xl object-cover border shadow-md" />
+                        {previewUrl && (
+                            <div className="relative group w-fit mb-4">
+                                <img src={previewUrl} alt="Preview" className="h-52 w-auto rounded-xl object-cover border shadow-md" />
+                                <Button
+                                    variant="destructive" size="icon"
+                                    className="absolute -top-2 -right-2 h-7 w-7 rounded-full shadow-lg"
+                                    onClick={removeImage}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+
+                        <Separator className="mb-4 opacity-50" />
+
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <input type="file" id="photo-upload" className="hidden" accept="image/*" onChange={handleImageChange} disabled={posting} />
+                                <Button variant="outline" size="sm" className="rounded-full border-border text-foreground hover:bg-accent transition-colors" asChild>
+                                    <label htmlFor="photo-upload" className="cursor-pointer">
+                                        <ImagePlus className="h-4 w-4 mr-2" />
+                                        Slika
+                                    </label>
+                                </Button>
+                            </div>
+
                             <Button
-                                variant="destructive" size="icon"
-                                className="absolute -top-2 -right-2 h-7 w-7 rounded-full shadow-lg"
-                                onClick={removeImage}
+                                disabled={(!content.trim() && !selectedImage) || posting}
+                                className={`rounded-full px-8 transition-all duration-300 ${posting ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg'
+                                    }`}
+                                onClick={handlePost}
                             >
-                                <X className="h-4 w-4" />
+                                {posting ? (
+                                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Objavljujem...</>
+                                ) : (
+                                    <><Send className="h-4 w-4 mr-2" /> Objavi</>
+                                )}
                             </Button>
                         </div>
-                    )}
-
-                    <Separator className="mb-4 opacity-50" />
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <input type="file" id="photo-upload" className="hidden" accept="image/*" onChange={handleImageChange} disabled={posting} />
-                            <Button variant="outline" size="sm" className="rounded-full border-border text-foreground hover:bg-accent transition-colors" asChild>
-                                <label htmlFor="photo-upload" className="cursor-pointer">
-                                    <ImagePlus className="h-4 w-4 mr-2" />
-                                    Slika
-                                </label>
-                            </Button>
+                    </CardContent>
+                </Card>
+            ) : (
+                <Card className="border-none bg-muted/40 shadow-inner overflow-hidden">
+                    <CardContent className="py-10 flex flex-col items-center text-center space-y-4">
+                        {/* Ikona s blagim krugom u pozadini */}
+                        <div className="bg-background p-4 rounded-full shadow-sm border border-border">
+                            <Info className="h-8 w-8 text-muted-foreground" />
                         </div>
 
-                        <Button
-                            disabled={(!content.trim() && !selectedImage) || posting}
-                            className={`rounded-full px-8 transition-all duration-300 ${posting ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg'
-                                }`}
-                            onClick={handlePost}
-                        >
-                            {posting ? (
-                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Objavljujem...</>
-                            ) : (
-                                <><Send className="h-4 w-4 mr-2" /> Objavi</>
-                            )}
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
+                        <div className="space-y-2 max-w-[400px]">
+                            <h3 className="text-xl font-bold text-foreground tracking-tight">
+                                Rasprava je ograničena
+                            </h3>
+                            <p className="text-muted-foreground leading-relaxed">
+                                Samo korisnici koji su <span className="font-semibold text-primary">posjetili izložbu</span> mogu sudjelovati u raspravi, objavljivati komentare i fotografije.
+                            </p>
+                        </div>
+
+                        {/* Dodatni savjet ili link ako je potrebno */}
+                        <div className="pt-2">
+                            <Badge variant="outline" className="px-4 py-1.5 border-dashed border-muted-foreground/30 text-muted-foreground font-medium">
+                                Pregled dopušten svim korisnicima
+                            </Badge>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
 
             {/* --- Comments Feed --- */}
             <div className="space-y-6 pt-4">
@@ -304,7 +347,7 @@ export default function ForumPage() {
                                     </span>
                                 </div>
 
-                                <div className="text-[15px] leading-relaxed text-foreground/90 bg-card border border-border p-4 rounded-2xl rounded-tl-none shadow-sm group-hover:shadow-md transition-shadow">
+                                <div className={`text-[15px] leading-relaxed text-foreground/90 border border-border p-4 rounded-2xl ${user?.email === comment.mail ? "rounded-tr-none bg-accent" : "rounded-tl-none bg-card"} shadow-sm group-hover:shadow-md transition-shadow`}>
                                     {comment.content}
                                     {comment.photo_url && (
                                         <div className="mt-3 rounded-xl overflow-hidden border border-border/50">

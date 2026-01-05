@@ -133,6 +133,30 @@ def get_exhibitions():
 
 @exhibition_bp.route("/exhibitions/<int:exhibition_id>", methods=["GET"])
 def get_exhibition(exhibition_id):
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Invalid token payload"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("mail").eq("auth_id", auth_id).single().execute()
+    )
+
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_mail = user_resp.data["mail"]
 
     exhibition_resp = (
         supabase.table("exhibitions")
@@ -159,7 +183,7 @@ def get_exhibition(exhibition_id):
 
     user_resp = (
         supabase.table("users")
-        .select("first_name, last_name")
+        .select("first_name, last_name,mail")
         .eq("id", organizer["user_id"])
         .single()
         .execute()
@@ -168,6 +192,45 @@ def get_exhibition(exhibition_id):
     user = user_resp.data
 
     organizer["full_name"] = f"{user['first_name']} {user['last_name']}"
+
+    can_comment = False
+    if user["mail"] == user_mail:
+
+        can_comment = True
+    else:
+        resp = (
+            supabase.table("exhibition_registrations")
+            .select("*")
+            .eq("exhibition_id", exhibition["id"])
+            .eq("approved", True)
+            .execute()
+        )
+
+        participant_ids = list(
+            {w["participant_id"] for w in resp.data if w.get("participant_id")}
+        )
+
+        resp = (
+            supabase.table("participants")
+            .select("*")
+            .in_("id", participant_ids)
+            .execute()
+        )
+
+        user_ids = list({w["user_id"] for w in resp.data if w.get("user_id")})
+
+        resp = (
+            supabase.table("users")
+            .select("mail")
+            .in_("id", user_ids)
+            .eq("mail", user_mail)
+            .execute()
+        )
+
+        if len(resp.data) > 0 and user_mail == resp.data[0]["mail"]:
+            can_comment = True
+        else:
+            can_comment = False
 
     start_dt = datetime.fromisoformat(exhibition["date_time"])
 
@@ -180,6 +243,7 @@ def get_exhibition(exhibition_id):
                 "success": True,
                 "exhibition": exhibition,
                 "organizer": organizer,
+                "allowed_to_comment": can_comment,
             }
         ),
         200,
@@ -232,7 +296,6 @@ def check_registration(exhibition_id):
         .eq("participant_id", participant_id)
         .execute()
     )
-    print(resp)
 
     if len(resp.data) == 1:
         return jsonify({"registered": True}), 200
@@ -500,13 +563,9 @@ def forum():
     )
 
     admins_resp = supabase.table("admins").select("id").eq("user_id", user_id).execute()
-    
+
     organizer_resp = (
-        supabase.table("organizers")
-        .select("id")
-        .eq("user_id", user_id)
-        .single()
-        .execute()
+        supabase.table("organizers").select("id").eq("user_id", user_id).execute()
     )
 
     if participant_resp.data and len(participant_resp.data) == 1:
@@ -541,7 +600,7 @@ def forum():
 
         return jsonify({"success": True, "exhibitions": exhibitions}), 200
     elif admins_resp.data and len(admins_resp.data) != 1:
-
+        organizer_resp.data = organizer_resp.data[0]  # nije mi se dalo sve prepravljat
         organizer_id = organizer_resp.data["id"]
         for e in exhibitions:
             user_id = organizer_map.get(e.get("organizer_id"))
@@ -721,6 +780,30 @@ def post_comment(exhibition_id):
         return jsonify({"success": False, "error": "User not found"}), 404
 
     user_id = user_resp.data["id"]
+
+    respp = supabase.table("participants").select("*").eq("user_id", user_id).execute()
+
+    if len(respp.data) == 1:
+        participant = respp.data[0]
+        resper = (
+            supabase.table("exhibition_registrations")
+            .select("*")
+            .eq("participant_id", participant["id"])
+            .eq("approved", True)
+            .single()
+            .execute()
+        )
+    else:
+        reso = supabase.table("organizers").select("*").eq("user_id", user_id).execute()
+        if len(respp.data) == 1:
+            organizer = reso.data[0]
+            rese = (
+                supabase.table("exhibitions")
+                .select("*")
+                .eq("organizer_id", organizer["id"])
+                .single()
+                .execute()
+            )
 
     data = request.json
 
