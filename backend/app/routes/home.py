@@ -40,10 +40,12 @@ def get_home():
         supabase.table("organizers").select("*").eq("user_id", user["id"]).execute()
     )
 
-    needsApproval = True
-    needsMembership = True
+    needsApproval = False
+    needsMembership = False
     if organizer_resp.data and len(organizer_resp.data) == 1:
         organizer = organizer_resp.data[0]
+        needsApproval = True
+        needsMembership = True
         if organizer["approved_by_admin"] == True:
             needsApproval = False
         if (
