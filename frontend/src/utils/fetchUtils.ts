@@ -2,9 +2,8 @@ const backend_url = import.meta.env.VITE_BACKEND_URL
 
 export async function fetchGet<T>(
   url: string,
-  headers?: Record<string, string>): Promise<T> {
+  headers: Record<string, string> = {}): Promise<T> {
 
-  if (!headers) headers = {}
   const response = await fetch(backend_url + url, {
     method: "GET",
     headers: {
@@ -16,7 +15,7 @@ export async function fetchGet<T>(
   try {
     const data = await response.json();
     if (!response.ok) {
-      return Promise.reject(new Error(data.message || "Unknown error."));
+      return Promise.reject(new Error(data.message || data.error || "Unknown error."));
     }
     return Promise.resolve(data as T);
   } catch (error) {
@@ -41,9 +40,9 @@ export async function fetchPost<T>(
   try {
     const data = await response.json();
     if (!response.ok) {
-      return Promise.reject(new Error(data.message || "Unknown error."));
+      return Promise.reject(new Error(data.message || data.error || "Unknown error."));
     }
-    return data as T;
+    return Promise.resolve(data as T);
   } catch (error) {
     return Promise.reject(new Error("Invalid JSON response."));
   }

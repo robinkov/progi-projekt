@@ -140,6 +140,15 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
               <Button
                 variant="ghost"
                 className="w-full justify-start"
+                onClick={() => { navigate("/membership"); setSidebarOpen(false); }}
+              >
+                Članstvo
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
                 onClick={() => { navigate("/forum"); setSidebarOpen(false); }}>
                 Forum
               </Button>
