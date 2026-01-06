@@ -18,7 +18,22 @@ type Product = {
   name: string;
   description: string;
   photo_id: number | null;
-  sold: boolean | null;
+  /**
+   * Broj preostalih komada. Ako je 0 ili manje, proizvod je rasprodan.
+   */
+  quantity_left: number;
+  /**
+   * True ako je proizvod barem jednom prodan.
+   */
+  sold_at_least_once?: boolean | null;
+  /**
+   * Dodano iz backenda: broj recenzija.
+   */
+  review_count?: number;
+  /**
+   * Dodano iz backenda: ima li proizvod barem jednu recenziju.
+   */
+  has_reviews?: boolean;
   exhibition_id: number | null;
 };
 
@@ -43,6 +58,9 @@ export default function SellerProducts() {
   const [seller, setSeller] = useState<Organizer | null>(null);
 
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  // Filter "recenzije" – prikazuje samo proizvode koji imaju ostavljene recenzije
+  const [showReviewedOnly, setShowReviewedOnly] = useState<boolean>(false);
+  // Filter "prodano" – umjesto dostupnih prikazuje proizvode koji su rasprodani (quantity_left === 0)
   const [showSoldOnly, setShowSoldOnly] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<"price-asc" | "price-desc" | "">("");
 
@@ -79,8 +97,27 @@ export default function SellerProducts() {
     if (categoryFilter.length > 0 && !categoryFilter.includes(cat)) {
       return false;
     }
-    if (showSoldOnly && product.sold !== true) {
-      return false;
+
+    // Filtriranje po dostupnosti / prodanosti
+    // Ako je uključen filter "prodano", prikazujemo samo rasprodane proizvode (quantity_left === 0).
+    // Inače prikazujemo samo dostupne proizvode (quantity_left > 0).
+    if (showSoldOnly) {
+      if (product.quantity_left !== 0) {
+        return false;
+      }
+    } else {
+      if (product.quantity_left <= 0) {
+        return false;
+      }
+    }
+
+    // Ako je uključen filter "recenzije", prikazujemo samo proizvode s recenzijama
+    if (showReviewedOnly) {
+      const reviewCount = product.review_count ?? 0;
+      const hasReviews = product.has_reviews ?? reviewCount > 0;
+      if (!hasReviews) {
+        return false;
+      }
     }
     return true;
   });
@@ -156,6 +193,15 @@ export default function SellerProducts() {
                 <option value="price-asc">Cijena: najmanja prvo</option>
                 <option value="price-desc">Cijena: najveća prvo</option>
               </select>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground">recenzije</span>
+              <Switch
+                checked={showReviewedOnly}
+                onCheckedChange={(v) => setShowReviewedOnly(!!v)}
+                aria-label="Prikaži samo proizvode s recenzijama"
+              />
             </div>
 
             <div className="flex items-center gap-2 text-xs">

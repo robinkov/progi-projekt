@@ -16,7 +16,24 @@ type Product = {
     name: string;
     description: string;
     photo_id: number | null;
-    sold: boolean | null;
+    /**
+     * Broj preostalih komada. Ako je 0 ili manje, proizvod je rasprodan.
+     * U bazi ne može biti NULL.
+     */
+    quantity_left: number;
+    /**
+     * True ako je proizvod barem jednom prodan.
+     * Koristimo ga samo informativno, filtriranje se radi preko quantity_left i recenzija.
+     */
+    sold_at_least_once?: boolean | null;
+    /**
+     * Dodano iz backenda: broj recenzija za proizvod.
+     */
+    review_count?: number;
+    /**
+     * Dodano iz backenda: ima li proizvod barem jednu recenziju.
+     */
+    has_reviews?: boolean;
     exhibition_id: number | null;
 };
 
@@ -27,6 +44,9 @@ export default function Products() {
     const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
     const [minPrice, setMinPrice] = useState<number | null>(null);
     const [maxPrice, setMaxPrice] = useState<number | null>(null);
+    // Filter "recenzije" – prikazuje samo proizvode koji imaju ostavljene recenzije
+    const [showReviewedOnly, setShowReviewedOnly] = useState<boolean>(false);
+    // Filter "prodano" – umjesto dostupnih prikazuje proizvode koji su rasprodani (quantity_left === 0)
     const [showSoldOnly, setShowSoldOnly] = useState<boolean>(false);
     const [sortOrder, setSortOrder] = useState<"price-asc" | "price-desc" | "">("");
 
@@ -64,14 +84,24 @@ export default function Products() {
             return false;
         }
 
-        // Po defaultu prikazujemo samo NEPRODANE proizvode (sold !== true).
-        // Ako je switch "prodano" uključen, prikazujemo samo prodane (sold === true).
+        // Filtriranje po dostupnosti / prodanosti
+        // Ako je uključen filter "prodano", prikazujemo samo rasprodane proizvode (quantity_left === 0).
+        // Inače prikazujemo samo dostupne proizvode (quantity_left > 0).
         if (showSoldOnly) {
-            if (product.sold !== true) {
+            if (product.quantity_left !== 0) {
                 return false;
             }
         } else {
-            if (product.sold === true) {
+            if (product.quantity_left <= 0) {
+                return false;
+            }
+        }
+
+        // Ako je uključen filter "recenzije", prikazujemo samo proizvode s recenzijama
+        if (showReviewedOnly) {
+            const reviewCount = product.review_count ?? 0;
+            const hasReviews = product.has_reviews ?? reviewCount > 0;
+            if (!hasReviews) {
                 return false;
             }
         }
@@ -91,7 +121,7 @@ export default function Products() {
 
     return (
         <div className="w-full">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+            <div className="flex flex-col gap-3 mb-4">
                 <h1 className="text-2xl font-semibold">Clay Shop</h1>
 
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-8">
@@ -183,6 +213,17 @@ export default function Products() {
                                 <option value="price-asc">Cijena: najmanja prvo</option>
                                 <option value="price-desc">Cijena: najveća prvo</option>
                             </select>
+                        </div>
+
+                        <Separator orientation="vertical" className="h-6" />
+
+                        <div className="flex items-center gap-2 text-xs">
+                            <span className="text-muted-foreground">recenzije</span>
+                            <Switch
+                                checked={showReviewedOnly}
+                                onCheckedChange={(v) => setShowReviewedOnly(!!v)}
+                                aria-label="Prikaži samo proizvode s recenzijama"
+                            />
                         </div>
 
                         <Separator orientation="vertical" className="h-6" />

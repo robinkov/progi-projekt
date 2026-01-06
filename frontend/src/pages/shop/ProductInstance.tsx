@@ -32,7 +32,15 @@ type Product = {
   name: string;
   description: string;
   photo: string | null;
-  sold: boolean;
+  /**
+   * Broj preostalih komada. Ako je 0 ili manje, proizvod je rasprodan.
+   * U bazi ne može biti NULL.
+   */
+  quantity_left: number;
+  /**
+   * True ako je proizvod barem jednom prodan.
+   */
+  sold_at_least_once?: boolean | null;
   exhibition_id: number | null;
 };
 
@@ -181,7 +189,7 @@ export default function ProductPage() {
                     );
                   })()}
                   { /* Sold / Available Badge */ }
-                  {product.sold ? (
+                  {product.quantity_left <= 0 ? (
                     <Badge variant="destructive" className="font-semibold">
                       Prodano
                     </Badge>
@@ -203,7 +211,9 @@ export default function ProductPage() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold uppercase tracking-widest">Status</p>
-                    <p className="text-base font-medium text-foreground">{product.sold ? "Prodano" : "Dostupno"}</p>
+                    <p className="text-base font-medium text-foreground">
+                      {product.quantity_left <= 0 ? "Prodano" : "Dostupno"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -212,7 +222,7 @@ export default function ProductPage() {
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest text-center md:text-left mb-3">
                   Kupnja proizvoda
                 </p>
-                {product.sold ? (
+                {product.quantity_left <= 0 ? (
                   <Button disabled className="w-full rounded-xl py-4 text-lg font-bold">Prodano</Button>
                 ) : user?.role !== "polaznik" ? (
                   <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center gap-3 text-amber-800 shadow-sm">
@@ -249,7 +259,16 @@ export default function ProductPage() {
                           );
                           if (res.success) {
                             setPaymentSuccess(true);
-                            setProduct((prev) => (prev ? { ...prev, sold: true } : prev));
+                            // Lokalan update: smanji quantity_left za 1 (ne pada ispod 0)
+                            setProduct((prev) => (
+                              prev
+                                ? {
+                                    ...prev,
+                                    quantity_left: Math.max(prev.quantity_left - 1, 0),
+                                    sold_at_least_once: true,
+                                  }
+                                : prev
+                            ));
                           } else {
                             setError("Plaćanje nije završeno.");
                           }

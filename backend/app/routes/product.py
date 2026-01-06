@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime, timezone
+from collections import Counter
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
 
@@ -43,6 +44,28 @@ def list_products():
         for p in products:
             seller_id = p.get("seller_id")
             p["seller_name"] = organizer_map.get(seller_id)
+
+        # Attach review metadata (review_count, has_reviews)
+        product_ids = [p["id"] for p in products if p.get("id") is not None]
+
+        review_counts: dict[int, int] = {}
+        if product_ids:
+            reviews_resp = (
+                supabase.table("product_reviews")
+                .select("product_id")
+                .in_("product_id", product_ids)
+                .execute()
+            )
+
+            review_counts = Counter(
+                r["product_id"] for r in (reviews_resp.data or []) if r.get("product_id") is not None
+            )
+
+        for p in products:
+            pid = p.get("id")
+            count = review_counts.get(pid, 0) if pid is not None else 0
+            p["review_count"] = count
+            p["has_reviews"] = count > 0
 
         # Attach photo URL based on photo_id
         photo_ids = list({p["photo_id"] for p in products if p.get("photo_id")})
@@ -117,6 +140,28 @@ def list_products_for_seller(seller_id: int):
             for p in products:
                 pid = p.get("photo_id")
                 p["photo"] = photo_map.get(pid)
+
+        # Attach review metadata (review_count, has_reviews) for this seller's products
+        product_ids = [p["id"] for p in products if p.get("id") is not None]
+
+        review_counts: dict[int, int] = {}
+        if product_ids:
+            reviews_resp = (
+                supabase.table("product_reviews")
+                .select("product_id")
+                .in_("product_id", product_ids)
+                .execute()
+            )
+
+            review_counts = Counter(
+                r["product_id"] for r in (reviews_resp.data or []) if r.get("product_id") is not None
+            )
+
+        for p in products:
+            pid = p.get("id")
+            count = review_counts.get(pid, 0) if pid is not None else 0
+            p["review_count"] = count
+            p["has_reviews"] = count > 0
 
         return jsonify({"success": True, "products": products}), 200
     except Exception as e:
