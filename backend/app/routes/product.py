@@ -66,6 +66,61 @@ def list_products():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@product_bp.route("/sellers/<int:seller_id>/products", methods=["GET"])
+def list_products_for_seller(seller_id: int):
+    """Fetch products for a specific seller.
+
+    Mirrors list_products, but filtered by seller_id and includes seller_name
+    and photo URL for each product.
+    """
+    try:
+        products_resp = (
+            supabase.table("products")
+            .select("*")
+            .eq("seller_id", seller_id)
+            .execute()
+        )
+
+        products = products_resp.data or []
+
+        if not products:
+            return jsonify({"success": True, "products": []}), 200
+
+        organizer_resp = (
+            supabase.table("organizers")
+            .select("id, profile_name")
+            .eq("id", seller_id)
+            .maybe_single()
+            .execute()
+        )
+
+        organizer = organizer_resp.data if organizer_resp else None
+        seller_name = organizer.get("profile_name") if organizer else None
+
+        for p in products:
+            p["seller_name"] = seller_name
+
+        photo_ids = list({p["photo_id"] for p in products if p.get("photo_id")})
+
+        if photo_ids:
+            photos_resp = (
+                supabase.table("photos")
+                .select("id, url")
+                .in_("id", photo_ids)
+                .execute()
+            )
+
+            photo_map = {ph["id"]: ph.get("url") for ph in (photos_resp.data or [])}
+
+            for p in products:
+                pid = p.get("photo_id")
+                p["photo"] = photo_map.get(pid)
+
+        return jsonify({"success": True, "products": products}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @product_bp.route("/products/<int:product_id>", methods=["GET"])
 def get_product(product_id: int):
     """Fetch a single product by ID for ProductInstance page."""
