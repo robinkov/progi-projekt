@@ -25,27 +25,74 @@ def get_paypal_token():
     return res.json()["access_token"]
 
 
-# --- ENDPOINT 1: Create Order ---
-@paypal_bp.route("/api/paypal/create-order", methods=["POST"])
-def create_order():
-    data = request.json
-    workshop_id = data.get("workshopId")
+def _get_workshop_order_item(workshop_id: int):
+    """Load workshop price and description for PayPal order.
 
-    workshop = (
+    Returns (price, description, error_response_or_None).
+    """
+    workshop_resp = (
         supabase.table("workshops")
         .select("price, title")
         .eq("id", workshop_id)
-        .single()
+        .maybe_single()
         .execute()
     )
 
-    if not workshop.data:
-        return jsonify({"error": "Workshop not found"}), 404
+    if not workshop_resp or not workshop_resp.data:
+        return None, None, (jsonify({"error": "Workshop not found"}), 404)
 
-    price = workshop.data["price"]
-    title = workshop.data["title"]
+    price = workshop_resp.data["price"]
+    title = workshop_resp.data["title"]
+    description = f"Registration for: {title}"
+    return price, description, None
 
-    # 2. Tell PayPal to create the order
+
+def _get_product_order_item(product_id: int):
+    """Load product price and description for PayPal order.
+
+    Returns (price, description, error_response_or_None).
+    """
+    product_resp = (
+        supabase.table("products")
+        .select("price, name")
+        .eq("id", product_id)
+        .maybe_single()
+        .execute()
+    )
+
+    if not product_resp or not product_resp.data:
+        return None, None, (jsonify({"error": "Product not found"}), 404)
+
+    price = product_resp.data["price"]
+    name = product_resp.data["name"]
+    description = f"Purchase of product: {name}"
+    return price, description, None
+
+
+# --- ENDPOINT 1: Create Order ---
+@paypal_bp.route("/api/paypal/create-order", methods=["POST"])
+def create_order():
+    """Create a PayPal order for either a workshop or a product.
+
+    If request body contains "workshopId", a workshop registration is created.
+    If it contains "productId", a product purchase is created.
+    """
+    data = request.json or {}
+    workshop_id = data.get("workshopId")
+    product_id = data.get("productId")
+
+    if workshop_id:
+        price, description, error = _get_workshop_order_item(workshop_id)
+        if error is not None:
+            return error
+    elif product_id:
+        price, description, error = _get_product_order_item(product_id)
+        if error is not None:
+            return error
+    else:
+        return jsonify({"error": "Missing workshopId or productId"}), 400
+
+    # Tell PayPal to create the order
     token = get_paypal_token()
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
     payload = {
@@ -53,7 +100,7 @@ def create_order():
         "purchase_units": [
             {
                 "amount": {"currency_code": "EUR", "value": str(price)},
-                "description": f"Registration for: {title}",
+                "description": description,
             }
         ],
     }
@@ -61,7 +108,6 @@ def create_order():
     res = requests.post(
         f"{PAYPAL_API}/v2/checkout/orders", json=payload, headers=headers
     )
-    print(res.json())
     return jsonify(res.json())
 
 
@@ -89,9 +135,10 @@ def capture_order():
     if not user_resp.data:
         return jsonify({"success": False, "error": "User not found"}), 404
     user_id = user_resp.data["id"]
-    data = request.json
+    data = request.json or {}
     order_id = data.get("orderID")
     workshop_id = data.get("workshopId")
+    product_id = data.get("productId")
     participant_resp = (
         supabase.table("participants")
         .select("id")
@@ -113,24 +160,17 @@ def capture_order():
 
     # 2. Check if payment was actually successful
     if capture_data.get("status") == "COMPLETED":
-        # 3. Save registration to Supabase
-        registration_entry = {
-            "user_id": user_id,
-            "workshop_id": workshop_id,
-            "paypal_order_id": order_id,
-            "paid_amount": capture_data["purchase_units"][0]["payments"]["captures"][0][
-                "amount"
-            ]["value"],
-            "status": "approved",
-        }
+        # 3. Save payment to transactions
+        amount_value = capture_data["purchase_units"][0]["payments"]["captures"][0][
+            "amount"
+        ]["value"]
+
         transactions_res = (
             supabase.table("transactions")
             .insert(
                 {
                     "paypal_order_id": order_id,
-                    "amount": capture_data["purchase_units"][0]["payments"]["captures"][
-                        0
-                    ]["amount"]["value"],
+                    "amount": amount_value,
                     "method": method,
                     "date_time": str(datetime.now()),
                 }
@@ -138,17 +178,50 @@ def capture_order():
             .execute()
         )
 
-        db_res = (
-            supabase.table("workshop_reservations")
-            .insert(
+        transaction_id = transactions_res.data[0]["id"]
+
+        if workshop_id:
+            # Existing behaviour: save workshop reservation
+            supabase.table("workshop_reservations").insert(
                 {
                     "workshop_id": workshop_id,
                     "participant_id": participant_id,
-                    "transaction_id": transactions_res.data[0]["id"],
+                    "transaction_id": transaction_id,
                 }
+            ).execute()
+        elif product_id:
+            # New behaviour: save product order
+            order_res = (
+                supabase.table("orders")
+                .insert(
+                    {
+                        "participant_id": participant_id,
+                        "order_time": str(datetime.now()),
+                        "transaction_id": transaction_id,
+                    }
+                )
+                .execute()
             )
-            .execute()
-        )
+
+            order_id_db = order_res.data[0]["id"]
+
+            # Link product to order
+            supabase.table("products_orders").insert(
+                {
+                    "product_id": product_id,
+                    "order_id": order_id_db,
+                    "quantity": 1,
+                }
+            ).execute()
+
+            # Optionally mark product as sold
+            try:
+                supabase.table("products").update({"sold": True}).eq(
+                    "id", product_id
+                ).execute()
+            except Exception:
+                # If "sold" column does not exist, ignore
+                pass
 
         return jsonify({"success": True})
 
