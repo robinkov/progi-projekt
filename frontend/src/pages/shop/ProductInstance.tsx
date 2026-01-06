@@ -49,9 +49,19 @@ type Organizer = {
   address?: string | null;
 };
 
+type Review = {
+  id: number;
+  product_id: number;
+  participant_id: number;
+  rating: number;
+  text: string | null;
+  created_at: string;
+  reviewer_name?: string | null;
+};
+
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [seller, setSeller] = useState<Organizer | null>(null);
@@ -59,16 +69,43 @@ export default function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [canReview, setCanReview] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const [newRating, setNewRating] = useState<number | null>(null);
+  const [newText, setNewText] = useState("");
+
   useEffect(() => {
     async function loadProduct() {
       if (!id) return;
       try {
         const productRes = await fetchGet<{ success: boolean; product: Product }>(`/products/${id}`);
-
         setProduct(productRes.product);
 
         const sellerRes = await fetchGet<Organizer>(`/organizers/${productRes.product.seller_id}`);
         setSeller(sellerRes);
+
+        const reviewsRes = await fetchGet<{ success: boolean; reviews: Review[] }>(
+          `/products/${id}/reviews`
+        );
+        setReviews(reviewsRes.reviews ?? []);
+
+        if (token && user?.role === "polaznik") {
+          try {
+            const eligibilityRes = await fetchGet<{
+              success: boolean;
+              can_review: boolean;
+              already_reviewed: boolean;
+            }>(`/products/${id}/reviews/eligibility`, {
+              Authorization: `Bearer ${token}`,
+            });
+
+            setCanReview(eligibilityRes.can_review);
+            setAlreadyReviewed(eligibilityRes.already_reviewed);
+          } catch (e) {
+            console.error("Failed to fetch review eligibility", e);
+          }
+        }
 
       } catch (err) {
         console.error("Failed to load product or seller", err);
@@ -78,7 +115,36 @@ export default function ProductPage() {
       }
     }
     loadProduct();
-  }, [id]);
+  }, [id, token, user?.role]);
+
+  async function handleSubmitReview(e: React.FormEvent) {
+    e.preventDefault();
+    if (!product || !token || !newRating) return;
+
+    try {
+      const res = await fetchPost<{ success: boolean; review: Review }>(
+        `/products/${product.id}/reviews`,
+        {
+          rating: newRating,
+          text: newText,
+        },
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
+
+      if (res.success && res.review) {
+        setReviews((prev) => [res.review, ...prev]);
+        setCanReview(false);
+        setAlreadyReviewed(true);
+        setNewRating(null);
+        setNewText("");
+      }
+    } catch (err) {
+      console.error("Failed to submit review", err);
+      setError("Greška pri slanju recenzije.");
+    }
+  }
 
 
   if (loading) {
@@ -92,6 +158,7 @@ export default function ProductPage() {
   }
 
   return (
+    <PayPalScriptProvider options={{ clientId: "ARXyr_WfSF1KmFDFtp6FUNOJvCXnalaf9yBXHyouQFozXdmUHolBhU0iTIyf_N565XP08BX8G58aSOwF", currency: "EUR" }}>
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
       <div className="flex flex-col md:flex-row gap-8 items-start">
         
@@ -155,7 +222,6 @@ export default function ProductPage() {
                     </p>
                   </div>
                 ) : (
-                  <PayPalScriptProvider options={{ clientId: "AVVlqKLPC4luvZ69cQTY3CD2AhNdY4DiycWRE75pry8u-X9oZFF0sF19JDvJ4pWqr-Cuni-0F0TWPbOE", currency: "EUR" }}>
                     <PayPalButtons
                       createOrder={async () => {
                         if (!product) throw new Error("No product");
@@ -167,10 +233,20 @@ export default function ProductPage() {
                       onApprove={async (data) => {
                         try {
                           if (!product) return;
-                          const res = await fetchPost<{ success: boolean }>("/api/paypal/capture-order", {
-                            orderID: (data as any).orderID,
-                            productId: product.id,
-                          });
+                          if (!token) {
+                            setError("Niste prijavljeni ili je istekla sesija.");
+                            return;
+                          }
+                          const res = await fetchPost<{ success: boolean }>(
+                            "/api/paypal/capture-order",
+                            {
+                              orderID: data.orderID,
+                              productId: product.id,
+                            },
+                            {
+                              Authorization: `Bearer ${token}`,
+                            }
+                          );
                           if (res.success) {
                             setPaymentSuccess(true);
                             setProduct((prev) => (prev ? { ...prev, sold: true } : prev));
@@ -187,7 +263,6 @@ export default function ProductPage() {
                         setError("Plaćanje nije uspjelo. Pokušajte ponovno.");
                       }}
                     />
-                  </PayPalScriptProvider>
                 )}
                 {paymentSuccess && (
                   <p className="mt-3 text-green-600 font-medium text-sm">Plaćanje uspješno! Proizvod je označen kao prodan.</p>
@@ -303,6 +378,105 @@ export default function ProductPage() {
           </Card>
         </div>
       )}
+
+      {/* ---------- Reviews Section ---------- */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 border-l-4 border-primary pl-4">
+          <h2 className="text-2xl font-bold text-foreground">Recenzije proizvoda</h2>
+        </div>
+
+        {reviews.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            Još nema recenzija za ovaj proizvod.
+          </p>
+        )}
+
+        {reviews.length > 0 && (
+          <div className="space-y-3">
+            {reviews.map((review) => (
+              <div
+                key={review.id}
+                className="border border-border rounded-lg p-3 flex flex-col gap-1 bg-card"
+              >
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-semibold">
+                    {review.reviewer_name || "Kupac"}
+                  </span>
+                  <span className="text-amber-500 font-semibold">
+                    {"★".repeat(review.rating)}
+                    {"☆".repeat(5 - review.rating)}
+                  </span>
+                </div>
+                {review.text && (
+                  <p className="text-sm text-foreground/80 mt-1">{review.text}</p>
+                )}
+                <span className="text-[10px] text-muted-foreground mt-1">
+                  {new Date(review.created_at).toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {user?.role === "polaznik" && canReview && (
+          <form
+            onSubmit={handleSubmitReview}
+            className="mt-4 border border-dashed border-border rounded-lg p-4 space-y-3 bg-muted/40"
+          >
+            <h3 className="text-base font-semibold">Ostavi svoju recenziju</h3>
+            <div className="flex items-center gap-3 text-sm">
+              <label className="text-muted-foreground">Ocjena</label>
+              <select
+                value={newRating ?? ""}
+                onChange={(e) =>
+                  setNewRating(e.target.value ? Number(e.target.value) : null)
+                }
+                className="rounded-md border border-input bg-background px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                required
+              >
+                <option value="">Odaberi (1-5)</option>
+                <option value={5}>5 - Odlično</option>
+                <option value={4}>4</option>
+                <option value={3}>3</option>
+                <option value={2}>2</option>
+                <option value={1}>1 - Loše</option>
+              </select>
+            </div>
+            <div className="space-y-1 text-sm">
+              <label className="text-muted-foreground">Komentar (opcionalno)</label>
+              <textarea
+                value={newText}
+                onChange={(e) => setNewText(e.target.value)}
+                rows={3}
+                className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y"
+                placeholder="Podijeli svoje iskustvo s ovim proizvodom..."
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                className="px-4 py-1 text-sm"
+                disabled={!newRating}
+              >
+                Pošalji recenziju
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {user?.role === "polaznik" && alreadyReviewed && (
+          <p className="text-xs text-muted-foreground">
+            Već ste ostavili recenziju za ovaj proizvod.
+          </p>
+        )}
+
+        {user && user.role !== "polaznik" && (
+          <p className="text-xs text-muted-foreground">
+            Samo polaznici koji su kupili ovaj proizvod mogu ostaviti recenziju.
+          </p>
+        )}
+      </div>
     </div>
+  </PayPalScriptProvider>
   );
 }
