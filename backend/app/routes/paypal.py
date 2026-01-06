@@ -110,6 +110,41 @@ def create_order():
     )
     return jsonify(res.json())
 
+@paypal_bp.route("/api/paypal/create-order/membership", methods=["POST"])
+def create_membership_order():
+    data = request.json
+    plan_id = data.get("membershipPlanId")
+
+    try:
+        membership_plan = supabase.table("membership_plans").select("*").eq("id", plan_id).single().execute()
+    except:
+        return jsonify({"success": False, "error": f"Membership plan with id {plan_id} does not exist."}), 404
+    
+    membership_plan = membership_plan.data
+    price = membership_plan["price"]
+    name = membership_plan["name"]
+
+    token = get_paypal_token()
+    order = requests.post(
+        f"{PAYPAL_API}/v2/checkout/orders",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}"
+        },
+        json={
+            "intent": "CAPTURE",
+            "purchase_units": [
+                {
+                    "amount": {"currency_code": "EUR", "value": str(price)},
+                    "description": f"Membership purchase: {name}",
+                }
+            ]
+        }
+    )
+
+    print(order.json())
+
+    return jsonify(order.json()), 200
 
 # --- ENDPOINT 2: Capture Order & Save to Supabase ---
 @paypal_bp.route("/api/paypal/capture-order", methods=["POST"])
@@ -160,11 +195,15 @@ def capture_order():
 
     # 2. Check if payment was actually successful
     if capture_data.get("status") == "COMPLETED":
+<<<<<<< Updated upstream
         # 3. Save payment to transactions
         amount_value = capture_data["purchase_units"][0]["payments"]["captures"][0][
             "amount"
         ]["value"]
 
+=======
+        # 3. Save registration to Supabase
+>>>>>>> Stashed changes
         transactions_res = (
             supabase.table("transactions")
             .insert(
@@ -226,3 +265,79 @@ def capture_order():
         return jsonify({"success": True})
 
     return jsonify({"success": False, "error": "Payment not completed"}), 400
+
+
+@paypal_bp.route("/api/paypal/capture-order/membership", methods=["POST"])
+def capture_membership_order():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    valid, payload = verify_token(token)
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Token missing user ID"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+    user_id = user_resp.data["id"]
+    data = request.json
+    order_id = data.get("orderId")
+    plan_id = data.get("membershipPlanId")
+
+    try:
+        organizer_resp = supabase.table("organizers").select("*").eq("user_id", user_id).single().execute()
+    except:
+        return jsonify({"success": False, "error": "Only organizers can purchase paid memberships."}), 403
+    
+    organizer_resp = organizer_resp.data
+    organizer_id = organizer_resp["id"]
+
+    token = get_paypal_token()
+
+    capture = requests.post(
+        f"{PAYPAL_API}/v2/checkout/orders/{order_id}/capture",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}"
+        }
+    )
+
+    capture_data = capture.json()
+    payment_source = capture_data.get("payment_source", {})
+    method = "card" if "card" in payment_source else "paypal"
+
+    if capture_data.get("status") == "COMPLETED":
+        transaction_res = (
+            supabase.table("transactions")
+            .insert(
+                {
+                    "paypal_order_id": order_id,
+                    "amount": capture_data["purchase_units"][0]["payments"]["captures"][0]["amount"]["value"],
+                    "method": method,
+                    "date_time": str(datetime.now()),
+                }
+            )
+            .execute()
+        )
+
+        supabase.table("membership_transactions").insert(
+                {
+                    "organizer_id": organizer_id,
+                    "transaction_id": transaction_res.data[0]["id"],
+                    "membership_plan_id": plan_id,
+                }
+            ).execute()
+
+        return jsonify({"success": True}), 200
+
+    return jsonify({"success": False, "error": "Unknown payment error"}), 500

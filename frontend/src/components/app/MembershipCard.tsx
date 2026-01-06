@@ -7,11 +7,12 @@ type MembershipCardProps = React.ComponentProps<"div"> & {
   title: string;
   description: string;
   price: number;
-  numberOfMonths: number
+  numberOfMonths: number;
+  callback?: () => void;
 }
 
 export default function MembershipCard({
-  title, description, price, numberOfMonths, ...rest
+  title, description, price, numberOfMonths, callback, ...rest
 }: MembershipCardProps) {
 
   return (
@@ -39,7 +40,12 @@ export default function MembershipCard({
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full text-center">Odaberi</Button>
+        <Button
+          onClick={callback}
+          className="w-full text-center"
+        >
+          Odaberi
+        </Button>
       </CardFooter>
     </Card>
   );
