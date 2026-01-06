@@ -3,6 +3,7 @@ import ProductCard from "@/components/shop/ProductCard";
 import { fetchGet } from "@/utils/fetchUtils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { Box, Coffee, CookingPot, Squircle } from "lucide-react";
 
 type Product = {
@@ -27,6 +28,7 @@ export default function Products() {
     const [minPrice, setMinPrice] = useState<number | null>(null);
     const [maxPrice, setMaxPrice] = useState<number | null>(null);
     const [showSoldOnly, setShowSoldOnly] = useState<boolean>(false);
+    const [sortOrder, setSortOrder] = useState<"price-asc" | "price-desc" | "">("");
 
     useEffect(() => {
         async function loadProducts() {
@@ -67,6 +69,16 @@ export default function Products() {
         }
 
         return true;
+    });
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        if (sortOrder === "price-asc") {
+            return a.price - b.price;
+        }
+        if (sortOrder === "price-desc") {
+            return b.price - a.price;
+        }
+        return 0;
     });
 
     return (
@@ -148,8 +160,26 @@ export default function Products() {
                         >
                             Reset cijene
                         </button>
+                        <Separator orientation="vertical" className="h-6" />
 
-                        <div className="flex items-center gap-2 pl-4 border-l border-border text-xs">
+                        <div className="flex items-center gap-2 text-xs">
+                            <span className="text-muted-foreground">Sortiraj</span>
+                            <select
+                                value={sortOrder}
+                                onChange={(e) =>
+                                    setSortOrder(e.target.value as "price-asc" | "price-desc" | "")
+                                }
+                                className="rounded-md border border-input bg-background px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            >
+                                <option value="">Bez sortiranja</option>
+                                <option value="price-asc">Cijena: najmanja prvo</option>
+                                <option value="price-desc">Cijena: najveća prvo</option>
+                            </select>
+                        </div>
+
+                        <Separator orientation="vertical" className="h-6" />
+
+                        <div className="flex items-center gap-2 text-xs">
                             <span className="text-muted-foreground">prodano</span>
                             <Switch
                                 checked={showSoldOnly}
@@ -173,7 +203,7 @@ export default function Products() {
                 </div>
             ) : (
                 <div className="flex flex-wrap gap-4 pt-4">
-                    {filteredProducts.map((product) => (
+                    {sortedProducts.map((product) => (
                         <a key={product.id} href={`/products/${product.id}`}>
                             <ProductCard
                                 product={{
