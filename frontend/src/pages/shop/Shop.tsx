@@ -50,7 +50,7 @@ export default function Products() {
     }, []);
 
     const filteredProducts = products.filter((product) => {
-        const cat = (product.category || product.product_category || "").toLowerCase();
+        const cat = (product.category || "").toLowerCase();
 
         if (categoryFilter.length > 0 && !categoryFilter.includes(cat)) {
             return false;
@@ -64,8 +64,16 @@ export default function Products() {
             return false;
         }
 
-        if (showSoldOnly && product.sold !== true) {
-            return false;
+        // Po defaultu prikazujemo samo NEPRODANE proizvode (sold !== true).
+        // Ako je switch "prodano" uključen, prikazujemo samo prodane (sold === true).
+        if (showSoldOnly) {
+            if (product.sold !== true) {
+                return false;
+            }
+        } else {
+            if (product.sold === true) {
+                return false;
+            }
         }
 
         return true;
@@ -204,7 +212,7 @@ export default function Products() {
             ) : (
                 <div className="flex flex-wrap gap-4 pt-4">
                     {sortedProducts.map((product) => (
-                        <a key={product.id} href={`/products/${product.id}`}>
+                        <a key={product.id} href={`/products/${product.id}`} >
                             <ProductCard
                                 product={{
                                     id: product.id,
