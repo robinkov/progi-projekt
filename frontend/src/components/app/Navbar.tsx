@@ -192,6 +192,17 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                 </Button>
               </li>
             )}
+            {auth.user?.role === "organizator" && (
+              <li>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => navigate("/add-product")}
+                >
+                  Dodaj produkt
+                </Button>
+              </li>
+            )}
             {auth.user?.role === "admin" && (
               <li>
                 <Button

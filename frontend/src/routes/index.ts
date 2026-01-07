@@ -17,6 +17,7 @@ import createEventRoutes from "@/routes/createEventRoutes";
 import forumRoutes from "@/routes/forumRoutes"
 import adminRoutes from "@/routes/adminRoutes"
 import membershipRoutes from "@/routes/membershipRoutes"
+import addProduct from "@/routes/addProduct"
 
 const routes: RouteObject = {
   path: "/",
@@ -37,7 +38,8 @@ const routes: RouteObject = {
     createEventRoutes,
     forumRoutes,
     adminRoutes,
-    membershipRoutes
+    membershipRoutes,
+    addProduct
   ],
   errorElement: ErrorPage({ code: 404, message: "Page Not Found" }),
 };

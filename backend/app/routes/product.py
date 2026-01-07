@@ -452,3 +452,89 @@ def create_product_review(product_id: int):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+
+@product_bp.route("/add-product", methods=["POST"])
+def add_product():
+    # 1. Autorizacija
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Nedostaje token"}), 401
+
+    token = auth_header.split(" ")[1]
+    is_valid, result = verify_token(token)
+    if not is_valid:
+        return jsonify(result), 401
+
+    user_payload = result # Dekodirani JWT (vjerojatno Supabase Auth ID pod 'sub')
+
+    try:
+        data = request.get_json()
+        user_auth_id = user_payload.get("sub")
+        
+        # 2. Pronalaženje Organizatora (preko tablice users -> organizers)
+        # Prvo idemo u 'users' da dobijemo unutarnji integer ID
+        user_resp = supabase.table("users").select("id").eq("auth_id", user_auth_id).execute()
+        if not user_resp.data:
+            return jsonify({"error": "Korisnik nije pronađen u bazi"}), 404
+        
+        internal_user_id = user_resp.data[0].get("id")
+        
+        # Zatim dohvaćamo podatke o organizatoru (id i profile_name)
+        org_resp = (
+            supabase.table("organizers")
+            .select("id, profile_name")
+            .eq("user_id", internal_user_id)
+            .execute()
+        )
+        
+        if not org_resp.data:
+            return jsonify({"error": "Profil organizatora nije pronađen"}), 404
+            
+        organizer_id = org_resp.data[0].get("id")
+        organizer_name = org_resp.data[0].get("profile_name") or "Nepoznati umjetnik"
+
+        # 3. Validacija i priprema podataka za produkt
+        name = data.get("name")
+        description = data.get("description", "")
+        category = data.get("category", "").lower() # Mora biti malim slovima za tvoj Enum
+        
+        try:
+            price = float(data.get("price"))
+            quantity = int(data.get("quantity_left"))
+        except (TypeError, ValueError):
+            return jsonify({"error": "Cijena ili količina nisu ispravnog formata"}), 400
+
+        # 4. INSERT u tablicu 'products'
+        product_resp = supabase.table("products").insert({
+            "name": name,
+            "description": description,
+            "price": price,
+            "quantity_left": quantity,
+            "category": category,
+            "seller_id": organizer_id,
+            "sold_at_least_once": False,
+        }).execute()
+
+        if not product_resp.data:
+            return jsonify({"error": "Greška pri upisu proizvoda"}), 500
+
+        # 5. INSERT u tablicu 'notifications'
+        # Prema tvojoj shemi: id, body, type, title, subtitle, subject, created_at
+        supabase.table("notifications").insert({
+            "title": f"Organizator {organizer_name} je upravo dodao novi artikl",
+            "subtitle": f"Novi rad u ponudi: {name}",
+            "body": "Opis artikla", # Ograničavamo duljinu
+            "type": "product",
+            "subject": f"Kategorija: {category.capitalize()}",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }).execute()
+
+        return jsonify({
+            "success": True, 
+            "message": "Proizvod uspješno dodan i obavijest kreirana",
+            "product": product_resp.data[0]
+        }), 201
+
+    except Exception as e:
+        print(f"Server Error: {str(e)}")
+        return jsonify({"error": f"Greška na serveru: {str(e)}"}), 500
