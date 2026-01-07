@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, request
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
 from datetime import datetime, timedelta, timezone
+from app.auth.membership import has_membership
+
 
 organizers_bp = Blueprint("organizers_bp", __name__)
 
@@ -128,7 +130,11 @@ def check_if_allowed():
         .execute()
     )
 
-    if organizers_resp.data and len(organizers_resp.data) == 1:
+    if (
+        organizers_resp.data
+        and len(organizers_resp.data) == 1
+        and has_membership(organizers_resp.data[0]["id"])
+    ):
         return jsonify({"success": True, "allowed": True}), 200
     else:
         return jsonify({"success": True, "allowed": False}), 200

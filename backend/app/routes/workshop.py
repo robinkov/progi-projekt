@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, Blueprint
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
 from datetime import datetime, timedelta, timezone
+from app.auth.membership import has_membership
 
 workshop_bp = Blueprint("workshop_bp", __name__)
 
@@ -68,7 +69,9 @@ def create_workshop():
 
     organizer = organizer_resp.data
     organizer_id = organizer_resp.data.get("id")
-    if not organizer_resp.data["approved_by_admin"] == True:
+    if not organizer_resp.data["approved_by_admin"] == True or not has_membership(
+        organizer_id
+    ):
         return jsonify({"success": False, "error": "Account not valid"}), 401
 
     # Insert workshop
