@@ -670,11 +670,6 @@ def get_my_exhibitions():
 
     organizer_id = organizer_resp.data["id"]
 
-    if not organizer_resp.data["approved_by_admin"] == True or not has_membership(
-        organizer_id
-    ):
-        return jsonify({"success": False, "error": "Account not valid"}), 401
-
     exhibition_resp = (
         supabase.table("exhibitions")
         .select("*")
