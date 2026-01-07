@@ -2,6 +2,7 @@ from flask import jsonify, Blueprint, request
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
 from datetime import datetime, timedelta, timezone
+from app.auth.membership import has_membership
 
 
 exhibition_bp = Blueprint("exhibition_bp", __name__)
@@ -57,10 +58,13 @@ def create_exhibition():
 
     if not organizer_resp.data:
         return jsonify({"success": False, "error": "Organizer not found"}), 404
-    if not organizer_resp.data["approved_by_admin"] == True:
-        return jsonify({"success": False, "error": "Account not valid"}), 401
 
     organizer_id = organizer_resp.data["id"]
+
+    if not organizer_resp.data["approved_by_admin"] == True or not has_membership(
+        organizer_id
+    ):
+        return jsonify({"success": False, "error": "Account not valid"}), 401
 
     # insert exhibition
     result = (
