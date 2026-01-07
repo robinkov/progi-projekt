@@ -13,6 +13,14 @@ import {
 import { fetchPost, fetchDelete } from "@/utils/fetchUtils";
 import { supabase } from "@/config/supabase";
 import ConfirmCard from "@/components/ui/cardConfirm";
+import { useNavigate } from "react-router-dom";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/components/ui/empty";
 
 type Workshop = {
   id: number;
@@ -28,6 +36,7 @@ export default function MyWorkshops() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [confirmWorkshop, setConfirmWorkshop] = useState<Workshop | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadWorkshops() {
@@ -87,6 +96,20 @@ export default function MyWorkshops() {
 
         {loading ? (
           <p>Učitavanje...</p>
+        ) : workshops.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>Nema organiziranih radionica</EmptyTitle>
+              <EmptyDescription>
+                Trenutno nema radionica koje ste organizirali.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="link" onClick={() => navigate("/create-event/workshop")}>
+                Kreiraj radionicu
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <Table>
             <TableCaption>Popis mojih radionica</TableCaption>

@@ -195,15 +195,11 @@ def capture_order():
 
     # 2. Check if payment was actually successful
     if capture_data.get("status") == "COMPLETED":
-<<<<<<< Updated upstream
         # 3. Save payment to transactions
         amount_value = capture_data["purchase_units"][0]["payments"]["captures"][0][
             "amount"
         ]["value"]
 
-=======
-        # 3. Save registration to Supabase
->>>>>>> Stashed changes
         transactions_res = (
             supabase.table("transactions")
             .insert(

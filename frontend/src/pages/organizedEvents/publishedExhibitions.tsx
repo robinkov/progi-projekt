@@ -11,8 +11,16 @@ import {
 } from "@/components/ui/table";
 import { useEffect } from "react";
 import { useState } from "react";
-import { supabase } from '@/config/supabase';
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/config/supabase";
 import { fetchGet } from "@/utils/fetchUtils";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/components/ui/empty";
 
 type Exhibition = {
   id: number;
@@ -25,6 +33,7 @@ type Exhibition = {
 export default function PublishedExhibitions() {
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
 
@@ -60,6 +69,20 @@ export default function PublishedExhibitions() {
         <h1 className="text-2xl font-semibold mb-6">Objavljene izložbe</h1>
         {loading ? (
           <p>Učitavanje...</p>
+        ) : exhibitions.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>Nema objavljenih izložbi</EmptyTitle>
+              <EmptyDescription>
+                Trenutno nema objavljenih izložbi za prikaz.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="link" onClick={() => navigate("/create-event/exhibition")}>
+                Kreiraj izložbu
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <Table>
             <TableCaption>Popis objavljenih izložbi</TableCaption>
