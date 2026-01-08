@@ -137,8 +137,6 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                 Izložbe
               </Button>
             </li>
-            <li>
-              <Button
             
             <li>
               <Button
