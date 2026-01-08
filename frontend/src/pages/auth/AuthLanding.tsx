@@ -13,7 +13,7 @@ export default function AuthLanding() {
       <div className="absolute overflow-hidden inset-0 -z-10">
         <BackgroundImageLarge className="absolute min-w-[800px] w-full left-1/2 -translate-x-1/2 bottom-0" />
       </div>
-      <h1 className="text-xl font-semibold text-center">Choose your authentication method:</h1>
+      <h1 className="text-xl font-semibold text-center">Odaberi svoju metodu prijave:</h1>
       <div className="flex flex-col w-[200px] gap-4">
         <Button variant="outline" onClick={() => navigate("login")} className="font-semibold cursor-pointer">
           Login

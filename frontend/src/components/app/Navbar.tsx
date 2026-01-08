@@ -80,7 +80,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
         {/* Sidebar */}
         <aside
           className={cn(
-            "relative w-64 bg-card h-full p-4 shadow-lg transform transition-transform duration-300 ease-in-out border-r",
+            "relative w-64 bg-card h-full p-4 shadow-lg transform transition-transform duration-300 ease-in-out border-r overflow-y-auto horizontal-scroll",
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
