@@ -42,8 +42,9 @@ def get_home():
     )
 
     needsApproval = False
-    needsMembership = not has_membership(organizer_id=organizer_resp.data[0]["id"])
+    needsMembership = False
     if organizer_resp.data and len(organizer_resp.data) == 1:
+        needsMembership = not has_membership(organizer_id=organizer_resp.data[0]["id"])
         organizer = organizer_resp.data[0]
         needsApproval = True
         if organizer["approved_by_admin"] == True:
