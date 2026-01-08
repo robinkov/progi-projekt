@@ -2,6 +2,7 @@ from flask import jsonify, Blueprint, request
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
 from datetime import datetime, timedelta, timezone
+from app.auth.membership import has_membership
 
 
 home_bp = Blueprint("home_bp", __name__)
@@ -41,18 +42,12 @@ def get_home():
     )
 
     needsApproval = False
-    needsMembership = False
+    needsMembership = not has_membership(organizer_id=organizer_resp.data[0]["id"])
     if organizer_resp.data and len(organizer_resp.data) == 1:
         organizer = organizer_resp.data[0]
         needsApproval = True
-        needsMembership = True
         if organizer["approved_by_admin"] == True:
             needsApproval = False
-        if (
-            organizer["membership_expiry_date"]
-            and organizer["membership_expiry_date"] > datetime.now()
-        ):
-            needsMembership = False
 
     subs_resp = (
         supabase.table("notification_subscriptions")
