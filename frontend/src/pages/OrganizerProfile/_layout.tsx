@@ -25,16 +25,13 @@ export default function OrganizerProfileLayout() {
 
   useEffect(() => {
     async function guard() {
-      const { data: sessionData } = await supabase.auth.getSession();
 
-      if (!sessionData.session) {
-        navigate("/auth", { replace: true });
-        return;
+      if (auth.status === "unauthenticated") {
+        navigate("/auth")
       }
-
-      const token = sessionData.session.access_token;
-
       try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
         const res = await fetchPost<{ user_role: string }>(
           "/user",
           {},
@@ -47,7 +44,6 @@ export default function OrganizerProfileLayout() {
         }
       } catch (err) {
         console.error(err);
-        AuthController.logoutUser();
       } finally {
         setLoading(false); // <-- stop spinner once done
       }

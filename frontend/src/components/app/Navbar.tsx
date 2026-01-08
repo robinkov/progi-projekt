@@ -24,7 +24,6 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
       await AuthController.logoutUser();
       navigate("/auth", { replace: true });
     } catch (error: any) {
-      navigate("/auth", { replace: true });
       alert(error?.message || "Logout failed");
     } finally {
       setLogoutLoading(false);
@@ -137,7 +136,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                 Izložbe
               </Button>
             </li>
-            
+
             <li>
               <Button
                 variant="ghost"
@@ -173,8 +172,8 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                 </Button>
               </li>
             )}
-              
-            
+
+
             {auth.user?.role === "organizator" && (
               <li>
                 <Button
