@@ -130,10 +130,11 @@ export default function BanUser() {
                             <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
                                 <div className="flex items-center gap-4">
                                     <Avatar className="h-14 w-14 border border-border">
-                                        {u.profile_photo_url ? (<AvatarImage src={u.profile_photo_url} />) : (<div></div>)}
-                                        <AvatarFallback className="bg-primary/5 text-primary font-bold">
+                                        {u.profile_photo_url ? (<AvatarImage src={u.profile_photo_url} />) : (
+                                            <AvatarFallback className="bg-primary/5 text-primary font-bold">
                                             {u.first_name[0]}{u.last_name[0]}
-                                        </AvatarFallback>
+                                        </AvatarFallback>)}
+                                        
                                     </Avatar>
                                     <div>
                                         <h3 className="text-lg font-bold flex items-center gap-2">

@@ -166,7 +166,6 @@ export default function ProductPage() {
   }
 
   return (
-    <PayPalScriptProvider options={{ clientId: "ARXyr_WfSF1KmFDFtp6FUNOJvCXnalaf9yBXHyouQFozXdmUHolBhU0iTIyf_N565XP08BX8G58aSOwF", currency: "EUR" }}>
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
       <div className="flex flex-col md:flex-row gap-8 items-start">
         
@@ -496,6 +495,5 @@ export default function ProductPage() {
         )}
       </div>
     </div>
-  </PayPalScriptProvider>
   );
 }

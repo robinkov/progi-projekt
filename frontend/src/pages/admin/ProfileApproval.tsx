@@ -133,10 +133,15 @@ export default function ProfileApproval() {
                                     {/* Identity Section */}
                                     <div className="flex flex-col items-center md:items-start -mt-20 relative z-10">
                                         <Avatar className="h-28 w-28 border-4 border-background shadow-xl">
-                                            <AvatarImage src={profile.logo_photo_url} className="object-cover" />
-                                            <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
-                                                {profile.profile_name?.[0]}
+                                            {profile.logo_photo_url? (<AvatarImage src={profile.logo_photo_url} className="object-cover" />) : (
+                                                <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
+                                                {(profile.profile_name?.[0])}
                                             </AvatarFallback>
+                                            )}
+                                            
+
+
+                                            
                                         </Avatar>
                                         <div className="mt-4 text-center md:text-left">
                                             <h2 className="text-2xl font-bold text-foreground">{profile.profile_name}</h2>

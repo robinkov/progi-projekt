@@ -11,6 +11,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Package, Plus, CheckCircle2, AlertCircle, ImageIcon, X } from "lucide-react";
 import { fetchGet, fetchPost } from "@/utils/fetchUtils";
 import { supabase } from "@/config/supabase";
+import { Loader2 } from "lucide-react";
 
 export default function AddProductForm() {
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ export default function AddProductForm() {
 
   useEffect(() => {
     async function checkAccess() {
+      setLoading(true)
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
       try {
@@ -33,6 +35,10 @@ export default function AddProductForm() {
         if (res.success) setAllowed(res.allowed);
       } catch (err) {
         console.error("Check failed", err);
+      }
+      finally{
+      setLoading(false)
+
       }
     }
     checkAccess();
@@ -114,6 +120,15 @@ export default function AddProductForm() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-muted-foreground font-medium animate-pulse">Provjeravanje smijete li postaviti proizvod...</p>
+      </div>
+    )
+  }
 
   if (!allowed) {
     return (

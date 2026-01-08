@@ -229,7 +229,7 @@ export default function ForumPage() {
                             <div className="flex items-center gap-3 bg-card p-3 rounded-2xl border border-primary">
                                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                     <AvatarImage src={organizer.logo_url || ""} />
-                                    <AvatarFallback>{organizer.profile_name?.[0]}</AvatarFallback>
+                                    {organizer.logo_url? (<div></div>) : (<AvatarFallback>{organizer.profile_name?.[0]}</AvatarFallback>)}
                                 </Avatar>
                                 <div>
                                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold leading-none">Organizirao</p>
@@ -333,8 +333,8 @@ export default function ForumPage() {
                     comments.map((comment) => (
                         <div key={comment.id} className="flex gap-4 group animate-in fade-in slide-in-from-bottom-3 duration-500">
                             <Avatar className="h-11 w-11 border-2 border-background shadow-sm">
-                                {comment.user_profile_photo_url ? (<AvatarImage src={comment.user_profile_photo_url} className="object-cover" />) : (<div></div>)}
-                                <AvatarFallback className="bg-muted font-bold">{!comment.user_profile_photo_url ? (comment.user_username ? comment.user_username[0] : "A") : ""}</AvatarFallback>
+                                {comment.user_profile_photo_url ? (<AvatarImage src={comment.user_profile_photo_url} className="object-cover" />) : (<AvatarFallback className="bg-muted font-bold">{!comment.user_profile_photo_url ? (comment.user_username ? comment.user_username[0] : "A") : ""}</AvatarFallback>)}
+                                
                             </Avatar>
 
                             <div className="flex-1 space-y-1.5">

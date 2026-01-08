@@ -499,7 +499,6 @@ def get_registrations():
 
 @exhibition_bp.route("/forum", methods=["GET"])
 def forum():
-
     auth_header = request.headers.get("Authorization")
 
     if not auth_header or not auth_header.startswith("Bearer "):
@@ -572,8 +571,12 @@ def forum():
         supabase.table("organizers").select("id").eq("user_id", user_id).execute()
     )
 
-    if participant_resp.data and len(participant_resp.data) == 1:
+    if len(organizer_resp.data) > 0:
+        organizer_resp.data = organizer_resp.data[0]  # nije mi se dalo sve prepravljat
+    else:
+        organizer_resp.data = None
 
+    if participant_resp.data and len(participant_resp.data) == 1:
         participant_id = participant_resp.data[0]["id"]
 
         registrations_resp = (
@@ -603,8 +606,7 @@ def forum():
                 e["filter_out"] = True
 
         return jsonify({"success": True, "exhibitions": exhibitions}), 200
-    elif admins_resp.data and len(admins_resp.data) != 1:
-        organizer_resp.data = organizer_resp.data[0]  # nije mi se dalo sve prepravljat
+    elif organizer_resp.data:
         organizer_id = organizer_resp.data["id"]
         for e in exhibitions:
             user_id = organizer_map.get(e.get("organizer_id"))
@@ -619,7 +621,6 @@ def forum():
 
         return jsonify({"success": True, "exhibitions": exhibitions}), 200
     else:
-        organizer_id = organizer_resp.data["id"]
         for e in exhibitions:
             user_id = organizer_map.get(e.get("organizer_id"))
             e["organizer_name"] = user_map.get(user_id, "Organizator")
@@ -629,7 +630,7 @@ def forum():
             e["date"] = start_dt.strftime("%d.%m")
             e["timeFrom"] = start_dt.strftime("%H:%M")
             e["timeTo"] = None
-            e["filter_out"] = organizer_id != e["organizer_id"]
+            e["filter_out"] = False
         return jsonify({"success": True, "exhibitions": exhibitions}), 200
 
 
