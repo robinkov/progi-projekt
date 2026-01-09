@@ -58,10 +58,9 @@ const WorkshopPage = () => {
   const [workshop, setWorkshop] = useState<Workshop | null>(null);
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -196,11 +195,22 @@ const WorkshopPage = () => {
                           Authorization: `Bearer ${dbdata.session.access_token}`
                         });
                         if (res.success) {
+                          setPaymentSuccess(true);
                           setIsRegistered(true);
                           setRegistering(false)
                         }
+                        else {
+                          setRegistering(false)
+                          setPaymentSuccess(false)
+                        }
                       }}
                     />
+                    {paymentSuccess == true && (
+                      <p className="mt-3 text-green-600 font-medium text-sm">Plaćanje uspješno! Radionia je rezervirana.</p>
+                    )}
+                    {paymentSuccess == false && (
+                      <p className="mt-3 text-red-600 font-medium text-sm">Plaćanje neuspješno, probajte ponovno</p>
+                    )}
                   </div>
                 )}
 

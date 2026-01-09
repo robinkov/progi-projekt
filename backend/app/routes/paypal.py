@@ -54,13 +54,17 @@ def _get_product_order_item(product_id: int):
     """
     product_resp = (
         supabase.table("products")
-        .select("price, name")
+        .select("price, name,quantity_left")
         .eq("id", product_id)
         .maybe_single()
         .execute()
     )
 
-    if not product_resp or not product_resp.data:
+    if (
+        not product_resp
+        or not product_resp.data
+        or product_resp.data["quantity_left"] <= 0
+    ):
         return None, None, (jsonify({"error": "Product not found"}), 404)
 
     price = product_resp.data["price"]
@@ -110,16 +114,31 @@ def create_order():
     )
     return jsonify(res.json())
 
+
 @paypal_bp.route("/api/paypal/create-order/membership", methods=["POST"])
 def create_membership_order():
     data = request.json
     plan_id = data.get("membershipPlanId")
 
     try:
-        membership_plan = supabase.table("membership_plans").select("*").eq("id", plan_id).single().execute()
+        membership_plan = (
+            supabase.table("membership_plans")
+            .select("*")
+            .eq("id", plan_id)
+            .single()
+            .execute()
+        )
     except:
-        return jsonify({"success": False, "error": f"Membership plan with id {plan_id} does not exist."}), 404
-    
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": f"Membership plan with id {plan_id} does not exist.",
+                }
+            ),
+            404,
+        )
+
     membership_plan = membership_plan.data
     price = membership_plan["price"]
     name = membership_plan["name"]
@@ -129,7 +148,7 @@ def create_membership_order():
         f"{PAYPAL_API}/v2/checkout/orders",
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}"
+            "Authorization": f"Bearer {token}",
         },
         json={
             "intent": "CAPTURE",
@@ -138,13 +157,14 @@ def create_membership_order():
                     "amount": {"currency_code": "EUR", "value": str(price)},
                     "description": f"Membership purchase: {name}",
                 }
-            ]
-        }
+            ],
+        },
     )
 
     print(order.json())
 
     return jsonify(order.json()), 200
+
 
 # --- ENDPOINT 2: Capture Order & Save to Supabase ---
 @paypal_bp.route("/api/paypal/capture-order", methods=["POST"])
@@ -249,14 +269,18 @@ def capture_order():
                 }
             ).execute()
 
-            # Optionally mark product as sold
-            try:
-                supabase.table("products").update({"sold": True}).eq(
-                    "id", product_id
-                ).execute()
-            except Exception:
-                # If "sold" column does not exist, ignore
-                pass
+            resp = (
+                supabase.table("products")
+                .select("quantity_left")
+                .eq("id", product_id)
+                .single()
+                .execute()
+            )
+
+            quantity_left = resp.data["quantity_left"]
+            supabase.table("products").update(
+                {"sold_at_least_once": True, "quantity_left": quantity_left - 1}
+            ).eq("id", product_id).execute()
 
         return jsonify({"success": True})
 
@@ -291,10 +315,24 @@ def capture_membership_order():
     plan_id = data.get("membershipPlanId")
 
     try:
-        organizer_resp = supabase.table("organizers").select("*").eq("user_id", user_id).single().execute()
+        organizer_resp = (
+            supabase.table("organizers")
+            .select("*")
+            .eq("user_id", user_id)
+            .single()
+            .execute()
+        )
     except:
-        return jsonify({"success": False, "error": "Only organizers can purchase paid memberships."}), 403
-    
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Only organizers can purchase paid memberships.",
+                }
+            ),
+            403,
+        )
+
     organizer_resp = organizer_resp.data
     organizer_id = organizer_resp["id"]
 
@@ -304,8 +342,8 @@ def capture_membership_order():
         f"{PAYPAL_API}/v2/checkout/orders/{order_id}/capture",
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}"
-        }
+            "Authorization": f"Bearer {token}",
+        },
     )
 
     capture_data = capture.json()
@@ -318,7 +356,9 @@ def capture_membership_order():
             .insert(
                 {
                     "paypal_order_id": order_id,
-                    "amount": capture_data["purchase_units"][0]["payments"]["captures"][0]["amount"]["value"],
+                    "amount": capture_data["purchase_units"][0]["payments"]["captures"][
+                        0
+                    ]["amount"]["value"],
                     "method": method,
                     "date_time": str(datetime.now()),
                 }
@@ -327,12 +367,12 @@ def capture_membership_order():
         )
 
         supabase.table("membership_transactions").insert(
-                {
-                    "organizer_id": organizer_id,
-                    "transaction_id": transaction_res.data[0]["id"],
-                    "membership_plan_id": plan_id,
-                }
-            ).execute()
+            {
+                "organizer_id": organizer_id,
+                "transaction_id": transaction_res.data[0]["id"],
+                "membership_plan_id": plan_id,
+            }
+        ).execute()
 
         return jsonify({"success": True}), 200
 
