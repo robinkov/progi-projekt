@@ -15,13 +15,37 @@ CALENDAR_ID = 'a924cdd99b3045ce38c0fa6691f92b2ed1d321262f3110d5d8c6c92521d37a3b@
 
 # Učitavanje vjerodajnica iz datoteke
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Prilagodi putanju ako ti je file u drugom folderu
-CREDENTIALS_PATH = os.path.join(BASE_DIR, 'google-cred.json')
+CALENDAR_ID = 'a924cdd99b3045ce38c0fa6691f92b2ed1d321262f3110d5d8c6c92521d37a3b@group.calendar.google.com'
 
 def get_google_service():
+    # 1. Definiramo moguće lokacije datoteke
+    # Putanja na Renderu (Secret Files idu u /etc/secrets/)
+    render_secrets_path = '/etc/secrets/google-cred.json'
+    
+    # Putanja koju si ti imao (backend/google-cred.json)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    backend_path = os.path.join(base_dir, 'google-cred.json')
+    
+    # Putanja u istom folderu gdje je i workshop.py
+    app_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'google-cred.json')
+
+    # 2. Odabir prve postojeće putanje
+    if os.path.exists(render_secrets_path):
+        final_path = render_secrets_path
+    elif os.path.exists(backend_path):
+        final_path = backend_path
+    elif os.path.exists(app_path):
+        final_path = app_path
+    else:
+        print("ERROR: Google Credentials datoteka nije pronađena ni na jednoj lokaciji!")
+        return None
+
+    print(f"DEBUG: Učitavam Google ključ sa: {final_path}")
+
     try:
+        # 3. Učitavanje vjerodajnica
         creds = service_account.Credentials.from_service_account_file(
-            CREDENTIALS_PATH, 
+            final_path, 
             scopes=['https://www.googleapis.com/auth/calendar']
         )
         return build('calendar', 'v3', credentials=creds)
