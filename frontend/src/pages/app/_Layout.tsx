@@ -2,7 +2,6 @@ import PageLayout from "@/components/layout/PageLayout";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/config/supabase";
-import AuthController from "@/controllers/authController";
 import { fetchPost } from "@/utils/fetchUtils";
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router";

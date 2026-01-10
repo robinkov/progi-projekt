@@ -5,7 +5,7 @@ import AuthController from "@/controllers/authController";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Menu, ShoppingCart, X, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router";
-import { supabase } from "@/config/supabase";
+
 
 type NavbarProps = React.ComponentPropsWithRef<"nav">;
 
@@ -150,17 +150,6 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
             <li>
               <hr className="my-4 border-t border-muted-foreground" />
             </li>
-            {(auth.user?.role === "organizator") && (
-              <li>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => navigate("/organizerprofile/my-account")}
-                >
-                  Moj račun
-                </Button>
-              </li>
-            )}
             {(auth.user?.role === "organizator") && (
               <li>
                 <Button
