@@ -16,7 +16,7 @@ CALENDAR_ID = 'a924cdd99b3045ce38c0fa6691f92b2ed1d321262f3110d5d8c6c92521d37a3b@
 # Učitavanje vjerodajnica iz datoteke
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Prilagodi putanju ako ti je file u drugom folderu
-CREDENTIALS_PATH = os.path.join(BASE_DIR, 'google-key.json')
+CREDENTIALS_PATH = os.path.join(BASE_DIR, 'google-cred.json')
 
 def get_google_service():
     try:
