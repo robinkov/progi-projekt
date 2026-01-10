@@ -24,12 +24,12 @@ def create_exhibition():
 
     auth_id = payload["sub"]
     data = request.json
+    product_ids = data["product_ids"]
 
     required_fields = [
         "title",
         "date_time",
         "location",
-        "price",
         "description",
     ]
 
@@ -80,6 +80,15 @@ def create_exhibition():
         )
         .execute()
     )
+
+    exhibition_id = result.data[0]["id"]
+
+    rows = []
+
+    for p in product_ids:
+        rows.append({"exhibition_id": exhibition_id, "product_id": p})
+
+    res = supabase.table("exhibition_products").insert(rows).execute()
 
     if not result.data:
         return jsonify({"success": False}), 500
@@ -252,6 +261,33 @@ def get_exhibition(exhibition_id):
         ),
         200,
     )
+
+
+@exhibition_bp.route("/exhibitions/<int:exhibition_id>/products")
+def get_exhibition_products(exhibition_id):
+    res = (
+        supabase.table("exhibition_products")
+        .select("*")
+        .eq("exhibition_id", exhibition_id)
+        .execute()
+    )
+    product_ids = [p["product_id"] for p in res.data if p.get("product_id") is not None]
+    products_resp = (
+        supabase.table("products").select("*").in_("id", product_ids).execute()
+    )
+
+    products = products_resp.data
+
+    photo_ids = list({e["photo_id"] for e in products if e.get("photo_id")})
+
+    photos_resp = supabase.table("photos").select("*").in_("id", photo_ids).execute()
+
+    photo_map = {o["id"]: o["url"] for o in photos_resp.data or []}
+
+    for p in products:
+        p["photo_url"] = photo_map.get(p.get("photo_id"))
+
+    return jsonify({"success": True, "products": products}), 200
 
 
 @exhibition_bp.route(

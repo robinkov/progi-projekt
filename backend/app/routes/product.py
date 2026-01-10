@@ -16,11 +16,7 @@ def list_products():
     """
     try:
         # By default show all products (regardless of sold status)
-        products_resp = (
-            supabase.table("products")
-            .select("*")
-            .execute()
-        )
+        products_resp = supabase.table("products").select("*").execute()
 
         products = products_resp.data or []
 
@@ -58,7 +54,9 @@ def list_products():
             )
 
             review_counts = Counter(
-                r["product_id"] for r in (reviews_resp.data or []) if r.get("product_id") is not None
+                r["product_id"]
+                for r in (reviews_resp.data or [])
+                if r.get("product_id") is not None
             )
 
         for p in products:
@@ -78,9 +76,7 @@ def list_products():
                 .execute()
             )
 
-            photo_map = {
-                ph["id"]: ph.get("url") for ph in (photos_resp.data or [])
-            }
+            photo_map = {ph["id"]: ph.get("url") for ph in (photos_resp.data or [])}
 
             for p in products:
                 pid = p.get("photo_id")
@@ -100,10 +96,7 @@ def list_products_for_seller(seller_id: int):
     """
     try:
         products_resp = (
-            supabase.table("products")
-            .select("*")
-            .eq("seller_id", seller_id)
-            .execute()
+            supabase.table("products").select("*").eq("seller_id", seller_id).execute()
         )
 
         products = products_resp.data or []
@@ -154,7 +147,9 @@ def list_products_for_seller(seller_id: int):
             )
 
             review_counts = Counter(
-                r["product_id"] for r in (reviews_resp.data or []) if r.get("product_id") is not None
+                r["product_id"]
+                for r in (reviews_resp.data or [])
+                if r.get("product_id") is not None
             )
 
         for p in products:
@@ -222,7 +217,9 @@ def list_product_reviews(product_id: int):
             return jsonify({"success": True, "reviews": []}), 200
 
         # Attach reviewer name via participants -> users
-        participant_ids = list({r["participant_id"] for r in reviews if r.get("participant_id")})
+        participant_ids = list(
+            {r["participant_id"] for r in reviews if r.get("participant_id")}
+        )
 
         participants_resp = (
             supabase.table("participants")
@@ -231,7 +228,9 @@ def list_product_reviews(product_id: int):
             .execute()
         )
 
-        participant_map = {p["id"]: p.get("user_id") for p in (participants_resp.data or [])}
+        participant_map = {
+            p["id"]: p.get("user_id") for p in (participants_resp.data or [])
+        }
 
         user_ids = list({uid for uid in participant_map.values() if uid})
 
@@ -245,10 +244,7 @@ def list_product_reviews(product_id: int):
         user_map = {}
         for u in users_resp.data or []:
             full_name = " ".join(
-                [
-                    part
-                    for part in [u.get("first_name"), u.get("last_name")] if part
-                ]
+                [part for part in [u.get("first_name"), u.get("last_name")] if part]
             )
             user_map[u["id"]] = full_name or None
 
@@ -279,7 +275,8 @@ def _get_authenticated_participant_id():
     auth_id = payload.get("sub")
     if not auth_id:
         return None, (
-            jsonify({"success": False, "error": "Token missing user ID"}), 401
+            jsonify({"success": False, "error": "Token missing user ID"}),
+            401,
         )
 
     user_resp = (
@@ -305,7 +302,8 @@ def _get_authenticated_participant_id():
 
     if not participant_resp or not participant_resp.data:
         return None, (
-            jsonify({"success": False, "error": "Participant not found"}), 403
+            jsonify({"success": False, "error": "Participant not found"}),
+            403,
         )
 
     return participant_resp.data["id"], None
@@ -470,70 +468,152 @@ def add_product():
     try:
         data = request.get_json()
         user_auth_id = user_payload.get("sub")
-        
+
         # 2. Pronalaženje Organizatora (Tvoj postojeći kod)
-        user_resp = supabase.table("users").select("id").eq("auth_id", user_auth_id).execute()
+        user_resp = (
+            supabase.table("users").select("id").eq("auth_id", user_auth_id).execute()
+        )
         if not user_resp.data:
             return jsonify({"error": "Korisnik nije pronađen"}), 404
-        
+
         internal_user_id = user_resp.data[0].get("id")
-        org_resp = supabase.table("organizers").select("id, profile_name").eq("user_id", internal_user_id).execute()
-        
+        org_resp = (
+            supabase.table("organizers")
+            .select("id, profile_name")
+            .eq("user_id", internal_user_id)
+            .execute()
+        )
+
         if not org_resp.data:
             return jsonify({"error": "Profil organizatora nije pronađen"}), 404
-            
+
         organizer_id = org_resp.data[0].get("id")
         organizer_name = org_resp.data[0].get("profile_name") or "Nepoznati umjetnik"
 
         # 3. Priprema podataka
         name = data.get("name")
-        image_url = data.get("image_url") # URL koji je front već poslao u Supabase
-        
+        image_url = data.get("image_url")  # URL koji je front već poslao u Supabase
+
         # --- KORAK A: Upis u tablicu 'photos' ---
         photo_id = None
         if image_url:
-            photo_resp = supabase.table("photos").insert({
-                "url": image_url,
-                "description": f"Slika za proizvod: {name}"
-            }).execute()
-            
+            photo_resp = (
+                supabase.table("photos")
+                .insert({"url": image_url, "description": f"Slika za proizvod: {name}"})
+                .execute()
+            )
+
             if not photo_resp.data:
-                return jsonify({"error": "Greška pri spremanju slike u tablicu photos"}), 500
-            
+                return (
+                    jsonify({"error": "Greška pri spremanju slike u tablicu photos"}),
+                    500,
+                )
+
             # Uzimamo generirani ID iz tablice photos
             photo_id = photo_resp.data[0].get("id")
 
         # --- KORAK B: Upis u tablicu 'products' s photo_id-om ---
-        product_resp = supabase.table("products").insert({
-            "name": name,
-            "description": data.get("description", ""),
-            "price": float(data.get("price")),
-            "quantity_left": int(data.get("quantity_left")),
-            "category": data.get("category", "").lower(),
-            "seller_id": organizer_id,
-            "photo_id": photo_id, # Poveznica na tablicu photos
-            "sold_at_least_once": False,
-        }).execute()
+        product_resp = (
+            supabase.table("products")
+            .insert(
+                {
+                    "name": name,
+                    "description": data.get("description", ""),
+                    "price": float(data.get("price")),
+                    "quantity_left": int(data.get("quantity_left")),
+                    "category": data.get("category", "").lower(),
+                    "seller_id": organizer_id,
+                    "photo_id": photo_id,  # Poveznica na tablicu photos
+                    "sold_at_least_once": False,
+                }
+            )
+            .execute()
+        )
 
         if not product_resp.data:
             return jsonify({"error": "Greška pri upisu proizvoda"}), 500
 
         # 4. Notifikacija (Tvoj postojeći kod)
-        supabase.table("notifications").insert({
-            "title": f"Organizator {organizer_name} je dodao novi artikl",
-            "subtitle": f"Novi rad: {name}",
-            "body": data.get("description", "")[:100],
-            "type": "product",
-            "subject": f"Kategorija: {data.get('category', '').capitalize()}",
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }).execute()
+        supabase.table("notifications").insert(
+            {
+                "title": f"Organizator {organizer_name} je dodao novi artikl",
+                "subtitle": f"Novi rad: {name}",
+                "body": data.get("description", "")[:100],
+                "type": "product",
+                "subject": f"Kategorija: {data.get('category', '').capitalize()}",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+        ).execute()
 
-        return jsonify({
-            "success": True, 
-            "message": "Proizvod i slika uspješno povezani",
-            "product": product_resp.data[0]
-        }), 201
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Proizvod i slika uspješno povezani",
+                    "product": product_resp.data[0],
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
         print(f"Server Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@product_bp.route("/products/my", methods=["GET"])
+def get_my_products():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None, (jsonify({"success": False, "error": "Missing token"}), 401)
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+    if not valid:
+        return None, (jsonify({"success": False, "error": "Invalid token"}), 401)
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return None, (
+            jsonify({"success": False, "error": "Token missing user ID"}),
+            401,
+        )
+
+    user_resp = (
+        supabase.table("users")
+        .select("id")
+        .eq("auth_id", auth_id)
+        .maybe_single()
+        .execute()
+    )
+
+    if not user_resp or not user_resp.data:
+        return None, (jsonify({"success": False, "error": "User not found"}), 404)
+
+    user_id = user_resp.data["id"]
+
+    organizer_resp = (
+        supabase.table("organizers")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+    seller_id = organizer_resp.data["id"]
+
+    products_resp = (
+        supabase.table("products").select("*").eq("seller_id", seller_id).execute()
+    )
+
+    products = products_resp.data
+
+    photo_ids = list({e["photo_id"] for e in products if e.get("photo_id")})
+
+    photos_resp = supabase.table("photos").select("*").in_("id", photo_ids).execute()
+
+    photo_map = {o["id"]: o["url"] for o in photos_resp.data or []}
+
+    for p in products:
+        p["photo_url"] = photo_map.get(p.get("photo_id"))
+
+    return jsonify({"success": True, "products": products}), 200

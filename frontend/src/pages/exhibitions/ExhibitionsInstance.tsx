@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/config/supabase';
 import { useAuth } from "@/components/context/AuthProvider";
-import { ShieldAlert, Clock } from "lucide-react";
+import { ShieldAlert, Clock, Package } from "lucide-react";
 
 import {
   Mail,
@@ -45,12 +45,19 @@ type Organizer = {
   phone: string;
   address: string;
 };
+type Product = {
+  id: number;
+  name: string;
+  description: string;
+  photo_url: string;
+};
 
 const ExhibitionPage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [exhibition, setExhibition] = useState<Exhibition | null>(null);
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true);
 
   const [isRegistered, setIsRegistered] = useState(false);
@@ -69,12 +76,16 @@ const ExhibitionPage = () => {
           const organizerRes = await fetchGet<Organizer>(`/organizers/${exhibitionRes.exhibition.organizer_id}`);
           setOrganizer(organizerRes);
 
+          const productsRes = await fetchGet<{ products: Product[] }>(`/exhibitions/${id}/products`)
+          setProducts(productsRes.products)
+
           if (user) {
             const regCheck = await fetchGet<{ registered: boolean }>(`/exhibitions/${id}/check-registration`, {
               Authorization: `Bearer ${data.session.access_token}`,
             });
             setIsRegistered(regCheck.registered);
           }
+
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -197,6 +208,46 @@ const ExhibitionPage = () => {
         </CardContent>
       </Card>
 
+      {/* --- Featured Products Section --- */}
+      {products.length > 0 && (
+        <div className="mt-12 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-primary" />
+              <h3 className="text-2xl font-bold text-foreground tracking-tight">
+                Izloženi proizvodi
+              </h3>
+            </div>
+            <Badge variant="secondary" className="rounded-full px-3">
+              {products.length} artikala
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <Card key={product.id} className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 bg-card">
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <img
+                    src={product.photo_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <p className="text-white text-xs leading-relaxed line-clamp-2">
+                      {product.description}
+                    </p>
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <h4 className="font-bold text-lg truncate group-hover:text-primary transition-colors">
+                    {product.name}
+                  </h4>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
       {/* --- Organizer Info Section --- */}
       {organizer && (
         <div className="space-y-8">
