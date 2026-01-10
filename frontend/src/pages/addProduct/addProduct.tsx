@@ -10,7 +10,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ImageIcon, X } from "lucide-react";
 import { fetchGet, fetchPost } from "@/utils/fetchUtils";
 import { supabase } from "@/config/supabase";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react"
 
 export default function AddProductForm() {
   const [loading, setLoading] = useState(false);
