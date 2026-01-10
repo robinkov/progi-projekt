@@ -1,7 +1,8 @@
-
+'use client'
 import { useEffect, useState } from "react";
 import BriefCard from "@/components/app/BriefCard";
 import { fetchGet } from "@/utils/fetchUtils";
+import WorkshopCalendar from "@/components/ui/workshopCalendar";
 
 type Workshop = {
   id: number;
@@ -41,27 +42,61 @@ export default function Workshops() {
   }, []);
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-6">Radionice</h1>
-
-      {loading ? (
-        <div>Učitavanje radionica...</div>
-      ) : (
-        <div className="flex flex-wrap gap-4 pt-4">
-          {workshops.map((workshop) => (
-            <a key={workshop.id} href={`/workshops/${workshop.id}`}>
-              <BriefCard
-                title={workshop.title}
-                name={workshop.organizer_name}
-                place={workshop.location}
-                date={workshop.date}
-                timeFrom={workshop.timeFrom}
-                timeTo={workshop.timeTo}
-              />
-            </a>
-          ))}
+    <div className="max-w-7xl mx-auto py-12 px-6 space-y-16">
+      
+      {/* SEKCIJA 1: GOOGLE KALENDAR (Pregled svih termina) */}
+      <section className="space-y-6">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-serif font-bold text-foreground italic">Raspored radionica</h2>
+          <p className="text-muted-foreground text-sm font-medium">Pogledajte slobodne termine izravno u našem kalendaru.</p>
         </div>
-      )}
+        <div className="bg-card border border-border rounded-[2.5rem] p-4 shadow-sm">
+          <WorkshopCalendar />
+        </div>
+      </section>
+
+      {/* SEKCIJA 2: GRID RADIONICA (Kartice za odabir i plaćanje) */}
+      <section className="space-y-8">
+        <h2 className="text-2xl font-serif font-bold text-foreground">Dostupni programi</h2>
+        
+        {loading ? (
+          <div className="text-muted-foreground font-medium animate-pulse">Učitavanje radionica...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {workshops.map((workshop) => (
+              <a 
+                key={workshop.id} 
+                href={`/workshops/${workshop.id}`}
+                className="block transition-all duration-300 hover:-translate-y-2"
+              >
+                <div className="bg-card text-card-foreground border border-border rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-shadow">
+                  <BriefCard
+                    title={workshop.title}
+                    name={workshop.organizer_name}
+                    place={workshop.location}
+                    date={workshop.date}
+                    timeFrom={workshop.timeFrom}
+                    timeTo={workshop.timeTo}
+                  />
+                  <div className="mt-6 flex justify-between items-center border-t border-border pt-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                      Odaberi i rezerviraj →
+                    </span>
+                    <span className="text-[10px] font-bold text-muted-foreground">ID: {workshop.id}</span>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* Prikaz ako nema rezultata */}
+        {!loading && workshops.length === 0 && (
+          <div className="p-12 text-center bg-card rounded-[2rem] border border-dashed border-border text-muted-foreground italic font-serif text-lg">
+            Trenutno nema dostupnih radionica u sustavu.
+          </div>
+        )}
+      </section>
     </div>
   );
 }

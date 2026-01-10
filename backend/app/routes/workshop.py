@@ -1,15 +1,37 @@
+import os
+import json
 from flask import Flask, request, jsonify, Blueprint
 from ..supabase_client import supabase
 from app.auth.auth import verify_token
 from datetime import datetime, timedelta, timezone
 from app.auth.membership import has_membership
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 workshop_bp = Blueprint("workshop_bp", __name__)
 
+# --- KONSTANTE ZA GOOGLE CALENDAR ---
+CALENDAR_ID = 'a924cdd99b3045ce38c0fa6691f92b2ed1d321262f3110d5d8c6c92521d37a3b@group.calendar.google.com'
+
+# Učitavanje vjerodajnica iz datoteke
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Prilagodi putanju ako ti je file u drugom folderu
+CREDENTIALS_PATH = os.path.join(BASE_DIR, 'google-cred.json')
+
+def get_google_service():
+    try:
+        creds = service_account.Credentials.from_service_account_file(
+            CREDENTIALS_PATH, 
+            scopes=['https://www.googleapis.com/auth/calendar']
+        )
+        return build('calendar', 'v3', credentials=creds)
+    except Exception as e:
+        print(f"FAILED TO LOAD GOOGLE CREDS: {e}")
+        return None
 
 @workshop_bp.route("/workshops", methods=["POST"])
 def create_workshop():
-
+    # 1. Autentifikacija
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({"success": False, "error": "Missing token"}), 401
@@ -22,95 +44,65 @@ def create_workshop():
     auth_id = payload["sub"]
     data = request.json
 
-    required_fields = [
-        "title",
-        "duration",
-        "date_time",
-        "location",
-        "capacity",
-        "price",
-        "description",
-    ]
-
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"success": False, "error": f"Missing field: {field}"}), 400
-
-    # Validate date_time
+    # 2. Dohvat organizatora i provjera dozvola
     try:
-        workshop_datetime = datetime.fromisoformat(data["date_time"])
-    except ValueError:
-        return jsonify({"success": False, "error": "Invalid date_time format"}), 400
+        user_resp = supabase.table("users").select("id").eq("auth_id", auth_id).single().execute()
+        user_id = user_resp.data.get("id")
 
-    if workshop_datetime < datetime.now():
-        return (
-            jsonify(
-                {
-                    "success": False,
-                    "error": "Workshop date and time cannot be in the past",
+        org_resp = supabase.table("organizers").select("*").eq("user_id", user_id).single().execute()
+        organizer = org_resp.data
+        
+        if not organizer:
+            return jsonify({"success": False, "error": "Organizer not found"}), 404
+
+        org_id = organizer["id"]
+        if not organizer.get("approved_by_admin") or not has_membership(org_id):
+            return jsonify({"success": False, "error": "Access denied"}), 401
+
+        # 3. Insert radionice u bazu
+        workshop_result = supabase.table("workshops").insert({
+            "organizer_id": org_id,
+            "title": data["title"],
+            "duration": data["duration"],
+            "date_time": data["date_time"],
+            "location": data["location"],
+            "capacity": data["capacity"],
+            "price": data["price"],
+            "description": data["description"],
+        }).execute()
+
+        # 4. Sinkronizacija s Google Kalendarom
+        service = get_google_service()
+        if service:
+            try:
+                # Parsiranje datuma
+                start_dt = datetime.fromisoformat(data["date_time"].replace('Z', '+00:00'))
+                
+                # Izračun trajanja
+                parts = data["duration"].split(":")
+                h, m = int(parts[0]), int(parts[1])
+                s = int(parts[2]) if len(parts) > 2 else 0
+                end_dt = start_dt + timedelta(hours=h, minutes=m, seconds=s)
+
+                event = {
+                    'summary': data["title"],
+                    'location': data["location"],
+                    'description': f"Organizator: {organizer['profile_name']}\n\n{data['description']}",
+                    'start': {'dateTime': start_dt.isoformat(), 'timeZone': 'Europe/Belgrade'},
+                    'end': {'dateTime': end_dt.isoformat(), 'timeZone': 'Europe/Belgrade'},
+                    'visibility': 'public'
                 }
-            ),
-            400,
-        )
+                service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
+                print("Google Calendar: Success")
+            except Exception as g_err:
+                print(f"Google Calendar Sync Error: {g_err}")
 
-    # Get user and organizer
-    user_resp = (
-        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
-    )
-    user_id = user_resp.data.get("id")
+        return jsonify({"success": True, "workshop": workshop_result.data[0]}), 201
 
-    organizer_resp = (
-        supabase.table("organizers")
-        .select("*")
-        .eq("user_id", user_id)
-        .single()
-        .execute()
-    )
-
-    organizer = organizer_resp.data
-    organizer_id = organizer_resp.data.get("id")
-    if not organizer_resp.data["approved_by_admin"] == True or not has_membership(
-        organizer_id
-    ):
-        return jsonify({"success": False, "error": "Account not valid"}), 401
-
-    # Insert workshop
-    result = (
-        supabase.table("workshops")
-        .insert(
-            {
-                "organizer_id": organizer_id,
-                "title": data["title"],
-                "duration": data["duration"],
-                "date_time": data["date_time"],
-                "location": data["location"],
-                "capacity": data["capacity"],
-                "price": data["price"],
-                "description": data["description"],
-            }
-        )
-        .execute()
-    )
-    res = (
-        supabase.table("notifications")
-        .insert(
-            {
-                "type": "workshop",
-                "title": f"Organizator {organizer["profile_name"]} objavio novu radionicu!",
-                "subtitle": data["title"],
-                "body": data["description"],
-                "created_at": str(datetime.now()),
-            }
-        )
-        .execute()
-    )
-
-    if not result.data:
-        return jsonify({"success": False}), 500
-
-    return jsonify({"success": True, "workshop": result.data[0]}), 201
-
-
+    except Exception as e:
+        print(f"Server Error: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+    
 @workshop_bp.route("/workshops/my", methods=["POST"])
 def get_my_workshops():
 
