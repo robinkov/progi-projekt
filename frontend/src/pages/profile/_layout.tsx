@@ -2,7 +2,7 @@ import Navbar from "@/components/app/Navbar";
 import { useAuth } from "@/components/context/AuthProvider";
 import { supabase } from "@/config/supabase";
 import { fetchPost } from "@/utils/fetchUtils";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 
 export default function ProfileLayout() {

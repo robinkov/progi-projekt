@@ -1,6 +1,6 @@
 import AuthLayout from "@/pages/auth/_layout"
 import AuthLanding from "@/pages/auth/AuthLanding";
-import Login from "@/pages/auth/Login";
+import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/Register";
 import { type RouteObject } from "react-router";
 

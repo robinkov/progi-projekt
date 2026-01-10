@@ -64,10 +64,9 @@ function PurchasePlanWidget({
   membershipPlan, needs_membership
 }: PurchasePlanWidgetProps) {
   const { token } = useAuth();
-  const { id, name, price, durationMonths, description } = membershipPlan;
+  const { id, name, price, durationMonths } = membershipPlan;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
   const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
 
 

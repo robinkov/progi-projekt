@@ -7,7 +7,6 @@ import { supabase } from "@/config/supabase";
 import { fetchPost } from "@/utils/fetchUtils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/context/AuthProvider";
-import { Spinner } from "@/components/ui/spinner";
 
 
 
@@ -76,7 +75,7 @@ export default function Profile() {
         const fileExt = file.name.split(".").pop();
         const filePath = `${userId}_${timestamp}.${fileExt}`; // unique file path
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
             .from("photos")
             .upload(filePath, file, { upsert: false }); // don’t overwrite old images
 
@@ -87,15 +86,10 @@ export default function Profile() {
         }
 
         // Get public URL
-        const { data: urlData, error: urlError } = supabase.storage
+        const { data: urlData } = await supabase.storage
             .from("photos")
             .getPublicUrl(filePath);
-
-        if (urlError) {
-            console.error("Failed to get public URL:", urlError);
-            setUploading(false);
-            return;
-        }
+        
 
         // Update form state instantly
         setForm((f) => ({ ...f, avatar_url: urlData.publicUrl }));

@@ -4,7 +4,6 @@ import ProfileApproval from "@/pages/admin/ProfileApproval";
 import HomeLayout from "@/pages/app/_Layout";
 import OrganizerPreview from "@/pages/admin/OrganizerPreview";
 import BanUser from "@/pages/admin/BanUser";
-import { Ban } from "lucide-react";
 
 const profileRoutes: RouteObject = {
     path: "admin",

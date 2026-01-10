@@ -50,12 +50,6 @@ type Workshop = {
   location?: string;
 };
 
-const mockReserved: Workshop[] = [
-  { id: 1, date: "17.12.25", time: "10:00 – 12:30", title: "Lonci", organizer: "Mihael Ivanković", location: "Brezevica" },
-  { id: 2, date: "04.01.26", time: "20:30 – 21:30", title: "Vaze", organizer: "Katerina B.", location: "Zagreb, Zapad" },
-  { id: 3, date: "10.01.26", time: "17:00 – 19:00", title: "Skulptura", organizer: "Ana Perić", location: "Online" },
-];
-
 type GetReservationsResponse = {
   success: boolean
   workshops: Workshop[]
