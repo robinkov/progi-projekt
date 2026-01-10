@@ -1,9 +1,9 @@
 import { useAuth } from "@/components/context/AuthProvider";
-import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
 import { fetchPost } from "@/utils/fetchUtils";
 import { supabase } from "@/config/supabase";
-import RoleChoose from "@/pages/roleChoose/roleChoose";
+import RoleChoose from "@/pages/roleChoose/RoleChoose";
 
 
 export default function RoleChooseLayout() {
@@ -16,7 +16,7 @@ export default function RoleChooseLayout() {
     } 
   }, [auth.status]);
 
-  const handleSelect = async (role: UserRole) => {
+  const handleSelect = async (role: any) => {
         try {
             const { data: sessionData } = await supabase.auth.getSession();
             if (!sessionData?.session) return;

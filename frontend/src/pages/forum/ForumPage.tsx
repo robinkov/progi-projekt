@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { ImagePlus, X, Send, Loader2, MapPin, Calendar, MessageSquarePlus, Info } from "lucide-react";
 import { RefreshCw } from "lucide-react";
 import { useAuth } from "@/components/context/AuthProvider";
-import { Spinner } from "@/components/ui/spinner";
 type Comment = {
     id: number;
     user_username?: string;

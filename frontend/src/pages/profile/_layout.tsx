@@ -1,8 +1,6 @@
 import Navbar from "@/components/app/Navbar";
 import { useAuth } from "@/components/context/AuthProvider";
-import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/config/supabase";
-import AuthController from "@/controllers/authController";
 import { fetchPost } from "@/utils/fetchUtils";
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router";
@@ -10,7 +8,6 @@ import { Outlet, useNavigate } from "react-router";
 export default function ProfileLayout() {
   const navigate = useNavigate();
   const auth = useAuth();
-  const [loading, setLoading] = useState(true); // <-- local loading state
 
   useEffect(() => {
 
@@ -44,8 +41,6 @@ export default function ProfileLayout() {
         }
       } catch (err) {
         console.error(err);
-      } finally {
-        setLoading(false); // <-- stop spinner once done
       }
     }
 

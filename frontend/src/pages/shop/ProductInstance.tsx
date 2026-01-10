@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Mail, Phone, MapPin, ShieldAlert, Box, Coffee, CookingPot, Squircle, Star } from "lucide-react";
 import { fetchGet, fetchPost } from "@/utils/fetchUtils";
 import { useEffect, useState } from "react";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import {PayPalButtons } from "@paypal/react-paypal-js";
 import { useAuth } from "@/components/context/AuthProvider";
 
 const categoryMeta: Record<string, { Icon: React.ComponentType<any>; badgeClass: string; textClass?: string }> = {
@@ -305,7 +305,7 @@ export default function ProductPage() {
         </div>
 
         {/* ---------- Right Column: Product Image ---------- */}
-        <div className="w-full md:w-[420px] md:flex-shrink-0">
+        <div className="w-full md:w-[420px] md:shrink-0">
           <div className="w-full rounded-2xl overflow-hidden border border-border bg-muted flex items-center justify-center text-muted-foreground text-sm">
             {product.photo ? (
               <img

@@ -3,14 +3,11 @@ import { supabase } from "@/config/supabase";
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 import { fetchPost } from "@/utils/fetchUtils";
-import AuthController from "@/controllers/authController";
 import { useAuth } from "@/components/context/AuthProvider";
-import { useState } from "react";
 
 export default function OrganizerProfileLayout() {
   const navigate = useNavigate();
   const auth = useAuth();
-  const [loading, setLoading] = useState(true); // <-- local loading state
 
   useEffect(() => {
 
@@ -44,8 +41,6 @@ export default function OrganizerProfileLayout() {
         }
       } catch (err) {
         console.error(err);
-      } finally {
-        setLoading(false); // <-- stop spinner once done
       }
     }
 

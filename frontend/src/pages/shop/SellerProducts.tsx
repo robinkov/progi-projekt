@@ -249,7 +249,7 @@ export default function SellerProducts() {
           </div>
 
           {seller && (
-            <div className="w-full lg:w-64 lg:flex-shrink-0">
+            <div className="w-full lg:w-64 lg:shrink-0">
               <Card className="bg-card border border-border shadow-sm flex items-center justify-center">
                 <CardContent className="flex flex-col gap-6">
                   <div className="flex items-center gap-3">

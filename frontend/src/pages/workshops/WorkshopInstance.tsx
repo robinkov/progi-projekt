@@ -8,7 +8,7 @@ import { Logo, LogoImage, LogoFallback } from "@/components/ui/logo";
 import { Banner, BannerImage, BannerFallback } from "@/components/ui/banner";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/components/context/AuthProvider";
-import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { PayPalButtons} from "@paypal/react-paypal-js";
 import {
   Mail,
   Phone,
