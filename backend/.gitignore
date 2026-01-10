@@ -11,7 +11,7 @@ env/
 ENV/
 
 # Environment / secret files
-google-key.json
+backend/app/google-key.json
 .env
 .env.*
 *.key
