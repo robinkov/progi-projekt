@@ -168,16 +168,16 @@ export default function ProductPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
       <div className="flex flex-col md:flex-row gap-8 items-start">
-        
+
         {/* ---------- Left Column: Product Detail ---------- */}
         <div className="flex-1 flex flex-col gap-4">
-          
+
           {/* Product Detail Card */}
           <Card className="border-none shadow-xl overflow-hidden bg-card">
             <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  { /* Category Badge */ }
+                  { /* Category Badge */}
                   {(() => {
                     const { Icon, badgeClass, textClass } = getMeta(product.category);
                     return (
@@ -187,7 +187,7 @@ export default function ProductPage() {
                       </Badge>
                     );
                   })()}
-                  { /* Sold / Available Badge */ }
+                  { /* Sold / Available Badge */}
                   {product.quantity_left <= 0 ? (
                     <Badge variant="destructive" className="font-semibold">
                       Prodano
@@ -231,59 +231,59 @@ export default function ProductPage() {
                     </p>
                   </div>
                 ) : (
-                    <PayPalButtons
-                      createOrder={async () => {
-                        if (!product) throw new Error("No product");
-                        const res = await fetchPost<{ id: string }>("/api/paypal/create-order", {
-                          productId: product.id,
-                        });
-                        return res.id;
-                      }}
-                      onApprove={async (data) => {
-                        try {
-                          if (!product) return;
-                          if (!token) {
-                            setError("Niste prijavljeni ili je istekla sesija.");
-                            return;
-                          }
-                          const res = await fetchPost<{ success: boolean }>(
-                            "/api/paypal/capture-order",
-                            {
-                              orderID: data.orderID,
-                              productId: product.id,
-                            },
-                            {
-                              Authorization: `Bearer ${token}`,
-                            }
-                          );
-                          if (res.success) {
-                            setPaymentSuccess(true);
-                            // Lokalan update: smanji quantity_left za 1 (ne pada ispod 0)
-                            setProduct((prev) => (
-                              prev
-                                ? {
-                                    ...prev,
-                                    quantity_left: Math.max(prev.quantity_left - 1, 0),
-                                    sold_at_least_once: true,
-                                  }
-                                : prev
-                            ));
-                          } else {
-                            setError("Plaćanje nije završeno.");
-                          }
-                        } catch (e) {
-                          console.error(e);
-                          setError("Greška pri potvrdi plaćanja.");
+                  <PayPalButtons
+                    createOrder={async () => {
+                      if (!product) throw new Error("No product");
+                      const res = await fetchPost<{ id: string }>("/api/paypal/create-order", {
+                        productId: product.id,
+                      });
+                      return res.id;
+                    }}
+                    onApprove={async (data) => {
+                      try {
+                        if (!product) return;
+                        if (!token) {
+                          setError("Niste prijavljeni ili je istekla sesija.");
+                          return;
                         }
-                      }}
-                      onError={(err) => {
-                        console.error(err);
-                        setError("Plaćanje nije uspjelo. Pokušajte ponovno.");
-                      }}
-                    />
+                        const res = await fetchPost<{ success: boolean }>(
+                          "/api/paypal/capture-order",
+                          {
+                            orderID: data.orderID,
+                            productId: product.id,
+                          },
+                          {
+                            Authorization: `Bearer ${token}`,
+                          }
+                        );
+                        if (res.success) {
+                          setPaymentSuccess(true);
+                          // Lokalan update: smanji quantity_left za 1 (ne pada ispod 0)
+                          setProduct((prev) => (
+                            prev
+                              ? {
+                                ...prev,
+                                quantity_left: Math.max(prev.quantity_left - 1, 0),
+                                sold_at_least_once: true,
+                              }
+                              : prev
+                          ));
+                        } else {
+                          setError("Plaćanje nije završeno.");
+                        }
+                      } catch (e) {
+                        console.error(e);
+                        setError("Greška pri potvrdi plaćanja.");
+                      }
+                    }}
+                    onError={(err) => {
+                      console.error(err);
+                      setError("Plaćanje nije uspjelo. Pokušajte ponovno.");
+                    }}
+                  />
                 )}
                 {paymentSuccess && (
-                  <p className="mt-3 text-green-600 font-medium text-sm">Plaćanje uspješno! Proizvod je označen kao prodan.</p>
+                  <p className="mt-3 text-green-600 font-medium text-sm">Plaćanje uspješno! Prodavač će Vam se javiti putem maila kako bi dogovorili dostavu.</p>
                 )}
                 {error && (
                   <p className="mt-3 text-red-600 font-medium text-sm">{error}</p>

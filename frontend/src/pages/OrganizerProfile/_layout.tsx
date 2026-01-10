@@ -26,7 +26,7 @@ export default function OrganizerProfileLayout() {
   useEffect(() => {
     async function guard() {
 
-      if (auth.status === "unauthenticated") {
+      if (auth.status === "unauthenticated" || !auth.user) {
         navigate("/auth")
       }
       try {

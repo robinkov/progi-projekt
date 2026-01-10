@@ -377,3 +377,200 @@ def capture_membership_order():
         return jsonify({"success": True}), 200
 
     return jsonify({"success": False, "error": "Unknown payment error"}), 500
+
+
+@paypal_bp.route("/organizer/transactions/products", methods=["GET"])
+def get_product_transactions():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    valid, payload = verify_token(token)
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Token missing user ID"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+    user_id = user_resp.data["id"]
+
+    seller_id = (
+        supabase.table("organizers")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+        .data["id"]
+    )
+
+    products = (
+        supabase.table("products").select("*").eq("seller_id", seller_id).execute().data
+    )
+    name_map = {o["id"]: o["name"] for o in products or []}
+
+    product_ids = list({w["id"] for w in products if w.get("id")})
+
+    product_orders = (
+        supabase.table("products_orders")
+        .select("order_id")
+        .in_("product_id", product_ids)
+        .execute()
+        .data
+    )
+    product_map = {o["order_id"]: o["product_id"] for o in product_orders or []}
+
+    order_ids = list({w["order_id"] for w in product_orders if w.get("order_id")})
+
+    orders = supabase.table("orders").select("*").in_("id", order_ids).execute().data
+
+    order_map = {o["transaction_id"]: o["id"] for o in product_orders or []}
+
+    transaction_ids = list(
+        {w["transaction_id"] for w in orders if w.get("transaction_id")}
+    )
+    participant_ids = list(
+        {w["participant_id"] for w in orders if w.get("participant_id")}
+    )
+    participant_map = {o["id"]: o["participant_id"] for o in orders or []}
+
+    transactions = (
+        supabase.table("transactions")
+        .select("*")
+        .in_("id", transaction_ids)
+        .execute()
+        .data
+    )
+
+    participants = (
+        supabase.table("participants")
+        .select("*")
+        .in_("id", participant_ids)
+        .execute()
+        .data
+    )
+    user_map = {o["id"]: o["user_id"] for o in participants or []}
+    user_ids = list({w["user_id"] for w in participants if w.get("user_id")})
+
+    users = supabase.table("users").select("*").in_("id", user_ids).execute().data
+
+    mail_map = {o["id"]: o["mail"] for o in users or []}
+
+    for t in transactions:
+        order_id = order_map.get(t["id"])
+
+        product_id = product_map.get(order_id)
+        t["product_name"] = name_map.get(product_id)
+
+        participant_id = participant_map.get(order_id)
+        user_id = user_map.get(participant_id)
+        t["participant_mail"] = mail_map.get(user_id)
+
+    return jsonify({"success": True, "transactions": transactions}), 200
+
+
+@paypal_bp.route("/organizer/transactions/workshops", methods=["GET"])
+def get_product_workshops():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    valid, payload = verify_token(token)
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Token missing user ID"}), 401
+
+    # Get user
+    user_resp = (
+        supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+    )
+    if not user_resp.data:
+        return jsonify({"success": False, "error": "User not found"}), 404
+    user_id = user_resp.data["id"]
+
+    organizer_id = (
+        supabase.table("organizers")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+        .data["id"]
+    )
+
+    workshops = (
+        supabase.table("workshops")
+        .select("*")
+        .eq("organizer_id", organizer_id)
+        .execute()
+        .data
+    )
+
+    title_map = {o["id"]: o["title"] for o in workshops or []}
+    workshop_ids = list({w["id"] for w in workshops if w.get("id")})
+
+    reservations = (
+        supabase.table("workshop_reservations")
+        .select("*")
+        .in_("workshop_id", workshop_ids)
+        .execute()
+        .data
+    )
+
+    transaction_ids = list(
+        {w["transaction_id"] for w in reservations if w.get("transaction_id")}
+    )
+
+    transactions = (
+        supabase.table("transactions")
+        .select("*")
+        .in_("id", transaction_ids)
+        .execute()
+        .data
+    )
+
+    workshop_map = {o["transaction_id"]: o["workshop_id"] for o in reservations or []}
+
+    participant_ids = list(
+        {w["participant_id"] for w in reservations if w.get("participant_id")}
+    )
+    participant_map = {
+        o["transaction_id"]: o["participant_id"] for o in reservations or []
+    }
+
+    participants = (
+        supabase.table("participants")
+        .select("*")
+        .in_("id", participant_ids)
+        .execute()
+        .data
+    )
+
+    user_map = {o["id"]: o["user_id"] for o in participants or []}
+    user_ids = list({w["user_id"] for w in participants if w.get("user_id")})
+
+    users = supabase.table("users").select("*").in_("id", user_ids).execute().data
+
+    mail_map = {o["id"]: o["mail"] for o in users or []}
+
+    for t in transactions:
+        participant_id = participant_map.get(t["id"])
+        user_id = user_map.get(participant_id)
+        t["participant_mail"] = mail_map.get(user_id)
+
+        workshop_id = workshop_map.get(t["id"])
+        t["workshop_title"] = title_map.get(workshop_id)
+
+    return jsonify({"success": True, "transactions": transactions}), 200

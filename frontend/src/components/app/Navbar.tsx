@@ -155,6 +155,17 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
+                  onClick={() => navigate("/organizerprofile/my-account")}
+                >
+                  Moj račun
+                </Button>
+              </li>
+            )}
+            {(auth.user?.role === "organizator") && (
+              <li>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
                   onClick={() => navigate("/membership")}
                 >
                   Članstvo

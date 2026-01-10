@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { LoadingButton } from "@/components/ui/button";
 import { supabase } from "@/config/supabase";
 import { fetchPost, fetchGet } from "@/utils/fetchUtils";
-import { Loader2, Package, CheckCircle2, Search, Info } from "lucide-react";
+import { Loader2, Package, CheckCircle2, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -260,7 +260,7 @@ export default function CreateExhibition() {
               </div>
 
               {error && <p className="text-xs text-destructive font-medium">{error}</p>}
-              {success && <p className="text-xs text-green-600 font-medium font-bold">Izložba uspješno kreirana!</p>}
+              {success && <p className="text-xs text-green-600 font-medium">Izložba uspješno kreirana!</p>}
 
               <LoadingButton
                 loading={saving}

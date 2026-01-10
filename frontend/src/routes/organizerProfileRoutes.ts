@@ -3,6 +3,7 @@ import OrganizerProfile from "@/pages/OrganizerProfile/OrganizerProfile";
 import { Spinner } from "@/components/ui/spinner";
 import OrganizerProfileLayout from "@/pages/OrganizerProfile/_layout";
 import Pending from "@/pages/OrganizerProfile/Pending";
+import MyAccount from "@/pages/OrganizerProfile/MyAccount";
 const profileRoutes: RouteObject = {
   path: "organizerprofile",
 
@@ -16,6 +17,10 @@ const profileRoutes: RouteObject = {
     {
       path: "pending",
       Component: Pending
+    },
+    {
+      path: "my-account",
+      Component: MyAccount
     }
   ]
 };
