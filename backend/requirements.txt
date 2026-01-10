@@ -11,3 +11,5 @@ gotrue
 CORS
 gunicorn
 python-dateutil
+google-api-python-client
+google-auth

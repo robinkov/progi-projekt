@@ -156,14 +156,10 @@ export default function Profile() {
             <div className="flex items-center gap-6">
                 <Avatar className="h-20 w-20">
                     <AvatarImage src={form.avatar_url ?? undefined} />
-
-                    {form.avatar_url?(<div></div>):(
-                      <AvatarFallback>
+                    <AvatarFallback>
                     {form.first_name?.[0]}
                     {form.last_name?.[0]}
                     </AvatarFallback>
-                    )}
-                    
                 </Avatar>
 
                 <input
