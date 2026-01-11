@@ -181,7 +181,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                   className="w-full justify-start"
                   onClick={() => navigate("/organizerprofile")}
                 >
-                  Profil Organizacije
+                  Profil organizatora
                 </Button>
               </li>
             )}
@@ -203,7 +203,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                   className="w-full justify-start"
                   onClick={() => navigate("/add-product")}
                 >
-                  Dodaj produkt
+                  Dodaj proizvod
                 </Button>
               </li>
             )}

@@ -91,7 +91,7 @@ export default function Pending() {
 
             {registrations.length === 0 ? (
                 <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed border-border">
-                    <Users className="mx-auto h-12 w-12 text-muted/50" />
+                    <Users className="mx-auto h-12 w-12 stroke-muted-foreground/50" />
                     <h3 className="mt-4 text-lg font-semibold text-foreground">Nema prijava</h3>
                     <p className="text-muted-foreground">U toku ste! Nove prijave će se pojaviti ovdje.</p>
                 </div>

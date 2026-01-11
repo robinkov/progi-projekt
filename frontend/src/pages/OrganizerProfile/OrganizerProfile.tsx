@@ -296,8 +296,8 @@ export default function OrganizerProfile() {
       <Card className="border-border bg-card shadow-lg overflow-hidden">
         {/* ... (Existing Banner and Logo code) ... */}
 
-        <CardContent className="p-8 space-y-6">
-          <CardContent className="p-6 space-y-8">
+        <CardContent className="p-4 space-y-6">
+          <CardContent className="space-y-8">
             <h1 className="text-2xl font-semibold">Organizer Profile</h1>
 
             {/* Approval status */}
@@ -419,15 +419,15 @@ export default function OrganizerProfile() {
                 />
               </div>
             </div>
+            <LoadingButton loading={saving} onClick={handleSave} className="w-full">
+              Save Profile Changes
+            </LoadingButton>
           </CardContent>
-          <LoadingButton loading={saving} onClick={handleSave} className="w-full">
-            Save Profile Changes
-          </LoadingButton>
         </CardContent>
       </Card>
 
       {/* --- Previous Work Gallery --- */}
-      <Card className="border-border bg-card shadow-lg">
+      <Card className="border-border bg-card shadow-lg p-4 py-8">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
           <div className="space-y-1">
             <CardTitle className="text-2xl flex items-center gap-2">

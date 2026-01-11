@@ -8,16 +8,16 @@ export default function WorkshopCalendar() {
   const calendarSrc = "https://calendar.google.com/calendar/embed?src=a924cdd99b3045ce38c0fa6691f92b2ed1d321262f3110d5d8c6c92521d37a3b%40group.calendar.google.com&ctz=Europe%2FBelgrade"
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 p-2">
       {/* Header kalendara */}
-      <div className="flex items-center justify-between px-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-            <CalendarDays className="size-5" />
+          <div className="p-2 bg-accent/50 rounded-lg">
+            <CalendarDays className="size-5 stroke-accent-foreground" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900 leading-tight">Raspored termina</h3>
-            <p className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Provjerite dostupnost radionica</p>
+            <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Provjerite dostupnost radionica</p>
           </div>
         </div>
         
@@ -27,7 +27,7 @@ export default function WorkshopCalendar() {
       </div>
       
       {/* Iframe Kontejner */}
-      <div className="relative w-full overflow-hidden rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 bg-white">
+      <div className="relative w-full overflow-hidden rounded-2xl border border-slate-100 shadow-2xl shadow-slate-200/50 bg-white">
         <div className="aspect-4/3 md:aspect-video w-full">
           <iframe
             src={calendarSrc}
@@ -40,7 +40,7 @@ export default function WorkshopCalendar() {
       </div>
 
       {/* Napomena ispod kalendara */}
-      <div className="flex items-start gap-2 px-4 py-3 bg-slate-50 rounded-2xl border border-slate-100/50">
+      <div className="flex items-start gap-2 px-4 py-3 bg-slate-50 rounded-xl border border-slate-100/50">
         <span className="text-blue-500 text-sm">ℹ</span>
         <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
           Kliknite na pojedini termin u kalendaru za više detalja. Nakon odabira slobodnog termina, nastavite na plaćanje.
