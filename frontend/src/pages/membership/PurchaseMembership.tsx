@@ -7,30 +7,38 @@ import { fetchGet, fetchPost } from "@/utils/fetchUtils";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import type { OnApproveData } from "@paypal/paypal-js"
 import { useEffect, useState } from "react";
-import { useParams } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import { cn } from "@/utils/styleUtils";
+import { Check, X } from "lucide-react";
 
 export default function PurchaseMembership() {
   const { planId } = useParams();
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [data, setData] = useState<MembershipPlan | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [needs_membership, setNeedsMembership] = useState(true)
+  const [needsMembership, setNeedsMembership] = useState<boolean>(true);
 
   useEffect(() => {
     setIsLoading(true);
     fetchGet(`/memberships/${planId}`, { "Authorization": `Bearer ${token}` })
       .then((res: any) => {
         setData(membershipPlanToModel(res.data));
-        setNeedsMembership(res.needs_membership)
+        setNeedsMembership(res["needs_membership"])
       })
       .catch((err) => {
         setError(err.message);
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!needsMembership) {
+      navigate("/membership", { replace: true });
+    }
+  }, [needsMembership]);
 
   return (
     <div className="flex flex-col lg:flex-row flex-1 justify-center items-center gap-4 lg:gap-10">
@@ -48,7 +56,7 @@ export default function PurchaseMembership() {
       {
         !isLoading && !error && data &&
         <div className="flex w-full justify-center">
-          <PurchasePlanWidget membershipPlan={data} needs_membership={needs_membership} />
+          <PurchasePlanWidget membershipPlan={data} needsMembership={needsMembership} />
         </div>
       }
     </div>
@@ -57,23 +65,23 @@ export default function PurchaseMembership() {
 
 type PurchasePlanWidgetProps = {
   membershipPlan: MembershipPlan,
-  needs_membership: boolean
+  needsMembership: boolean
 }
 
 function PurchasePlanWidget({
-  membershipPlan, needs_membership
+  membershipPlan, needsMembership
 }: PurchasePlanWidgetProps) {
   const { token } = useAuth();
-  const { id, name, price, durationMonths } = membershipPlan;
+  const { id, name, price, durationMonths, description } = membershipPlan;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
-
 
   const startDate = new Date();
   const endDate = new Date(startDate);
   endDate.setMonth(endDate.getMonth() + durationMonths);
-  console.log(needs_membership)
+
   async function handleCreateOrder() {
     setIsLoading(true);
     let order;
@@ -127,8 +135,8 @@ function PurchasePlanWidget({
             isLoading &&
             <Spinner className="size-6 stroke-muted-foreground" />
           }
-          <div className={cn(isLoading && "hidden")}>
-            {(paymentSuccess != true && needs_membership) && (
+          <div className={cn("flex flex-1", isLoading && "hidden")}>
+            {(paymentSuccess != true && needsMembership) && (
               <PayPalButtons
                 createOrder={handleCreateOrder}
                 onApprove={handleApproveOrder}
@@ -136,13 +144,22 @@ function PurchasePlanWidget({
             )}
 
             {paymentSuccess == true && (
-              <p className="mt-3 text-green-600 font-medium text-sm pt-7">Plaćanje uspješno! Vaše članstvo je aktivno.</p>
+              <div className="flex flex-col items-center flex-1 justify-center gap-2">
+                <Check className="size-8 stroke-green-600" />
+                <p className="text-green-600 font-medium text-sm text-center">Plaćanje uspješno! Vaše članstvo je aktivno.</p>
+              </div>
             )}
             {paymentSuccess == false && (
-              <p className="mt-3 text-red-600 font-medium text-sm pt-7">Plaćanje neuspješno, probajte ponovno</p>
+              <div className="flex flex-col items-center flex-1 justify-center gap-2">
+                <X className="size-8 stroke-destructive" />
+                <p className="text-destructive font-medium text-sm text-center">Plaćanje neuspješno! Probajte ponovno.</p>
+              </div>
             )}
-            {needs_membership == false && (
-              <p className="mt-3 text-red-600 font-medium text-sm pt-7">Već imate aktivnu članarinu</p>
+            {needsMembership == false && (
+              <div className="flex flex-col items-center flex-1 justify-center gap-2">
+                <X className="size-8 stroke-destructive" />
+                <p className="text-destructive font-medium text-sm text-center">Već imate aktivnu članarinu!</p>
+              </div>
             )}
           </div>
         </div>
