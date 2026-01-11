@@ -11,6 +11,7 @@ export const membershipPlanModel = z.object({
 export type MembershipPlan = z.infer<typeof membershipPlanModel>;
 
 export function membershipPlanToModel(plan: any): MembershipPlan {
+  console.log(plan);
   const mapping = {
     id: plan?.["id"],
     name: plan?.["name"],

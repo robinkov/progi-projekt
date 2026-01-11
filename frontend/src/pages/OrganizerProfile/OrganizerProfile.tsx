@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button, LoadingButton } from "@/components/ui/button";
 import { supabase } from "@/config/supabase";
-import { fetchPost, fetchGet, fetchDelete } from "@/utils/fetchUtils";
+import { fetchPost, fetchGet, fetchDelete, type ApiFetchResponse } from "@/utils/fetchUtils";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Banner, BannerImage, BannerFallback } from "@/components/ui/banner";
 import { Logo, LogoImage, LogoFallback } from "@/components/ui/logo";
 import { ImagePlus, X, Grid, Loader2 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { membershipPlanToModel, type MembershipPlan } from "@/models/membershipModel";
 
 
 /* ---------------- Types ---------------- */
@@ -20,7 +21,7 @@ type OrganizerProfileForm = {
   description: string | null;
   logo_url: string | null;
   banner_url: string | null;
-  membership_plan_id: number | null;
+  membership_plan_name: string | null;
   membership_expiry_date: string | null;
   approved_by_admin: boolean | null;
 
@@ -34,7 +35,7 @@ type Photo = {
 /* ---------------- Component ---------------- */
 
 export default function OrganizerProfile() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [idBeingRemoved, setIdBeingRemoved] = useState<number | null>(null)
   const [form, setForm] = useState<OrganizerProfileForm>({
@@ -42,7 +43,7 @@ export default function OrganizerProfile() {
     description: "",
     logo_url: null,
     banner_url: null,
-    membership_plan_id: null,
+    membership_plan_name: null,
     membership_expiry_date: null,
     approved_by_admin: null,
   });
@@ -72,14 +73,30 @@ export default function OrganizerProfile() {
           }
         );
 
+        const activeMembershipResp = await fetchGet<ApiFetchResponse<any>>(
+          "/memberships/active", { "Authorization": `Bearer ${token}` }
+        );
+
+        let activeMembership: MembershipPlan | null = null;
+        let expiryDate: Date | null = null;
+        if (activeMembershipResp.data) {
+          activeMembership = membershipPlanToModel(activeMembershipResp.data);
+          if (activeMembershipResp.data?.["transaction_date"]) {
+            const durationMonthsMillis = activeMembership.durationMonths * 30 * 86400 * 1000;
+            expiryDate = new Date(
+              new Date(activeMembershipResp.data["transaction_date"]).getTime() + durationMonthsMillis
+            );
+          }
+        }
+
         // Make sure null strings become empty strings
         setForm({
           profile_name: res.profile_name ?? "",
           description: res.description ?? "",
           logo_url: res.logo_url,
           banner_url: res.banner_url,
-          membership_plan_id: res.membership_plan_id,
-          membership_expiry_date: res.membership_expiry_date,
+          membership_plan_name: activeMembership?.name ?? null,
+          membership_expiry_date: expiryDate ? new Intl.DateTimeFormat("hr-HR").format(expiryDate) : null,
           approved_by_admin: res.approved_by_admin,
         });
       } catch (err) {
@@ -389,7 +406,7 @@ export default function OrganizerProfile() {
               <div>
                 <Label>Membership plan</Label>
                 <Input
-                  value={form.membership_plan_id ?? "—"}
+                  value={form.membership_plan_name ?? "—"}
                   disabled
                 />
               </div>

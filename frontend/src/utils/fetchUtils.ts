@@ -1,5 +1,11 @@
 const backend_url = import.meta.env.VITE_BACKEND_URL
 
+export type ApiFetchResponse<T> = {
+  "success": boolean;
+  "error": string | null;
+  "data": T
+}
+
 export async function fetchGet<T>(
   url: string,
   headers: Record<string, string> = {}): Promise<T> {
