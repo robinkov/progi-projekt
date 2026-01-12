@@ -8,8 +8,8 @@ export type ApiFetchResponse<T> = {
 
 export async function fetchGet<T>(
   url: string,
-  headers: Record<string, string> = {}): Promise<T> {
-
+  headers: Record<string, string> = {}
+): Promise<T> {
   const response = await fetch(backend_url + url, {
     method: "GET",
     headers: {
