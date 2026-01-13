@@ -26,3 +26,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+/test-results/
+/tests/e2e/test-results/
+e2e/test-results/
