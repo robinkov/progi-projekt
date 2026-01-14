@@ -1,12 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test('registracija i prijava', async ({ page }) => {
-test('registracija i prijava', async ({ page }) => {
 
   const randomSuffix = Math.floor(10 + Math.random() * 90); // 10-99
-  const firstName = `register${randomSuffix}`;
-  const lastName = `register${randomSuffix}`;
-  const email = `register${randomSuffix}@test.com`;
   const firstName = `register${randomSuffix}`;
   const lastName = `register${randomSuffix}`;
   const email = `register${randomSuffix}@test.com`;
