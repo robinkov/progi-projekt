@@ -1,14 +1,18 @@
 import { test, expect } from '@playwright/test';
 
 test('registracija i prijava', async ({ page }) => {
+test('registracija i prijava', async ({ page }) => {
 
   const randomSuffix = Math.floor(10 + Math.random() * 90); // 10-99
   const firstName = `register${randomSuffix}`;
   const lastName = `register${randomSuffix}`;
   const email = `register${randomSuffix}@test.com`;
+  const firstName = `register${randomSuffix}`;
+  const lastName = `register${randomSuffix}`;
+  const email = `register${randomSuffix}@test.com`;
   const password = 'TestPassword123';
 
-  // Registracija novog korisnika
+  // registracija novog korisnika
   await page.goto('http://localhost:5173/auth/register');
   await expect(page).toHaveURL(/\/auth\/register/);
 
@@ -36,10 +40,10 @@ test('registracija i prijava', async ({ page }) => {
 
   await registerButton.click();
 
-  // Provjera redirecta nakon registracije na odabir uloge
+  // cekaj redirect na /rolechoose
   await expect(page).toHaveURL(/\/rolechoose/);
 
-  // Odabir uloge (npr. Polaznik) i nastavak
+  // odabir uloge i nastavak
   const polaznikCard = page.getByRole('heading', { name: 'Polaznik' });
   await polaznikCard.waitFor({ state: 'visible' });
   await polaznikCard.click();
@@ -49,20 +53,21 @@ test('registracija i prijava', async ({ page }) => {
   await expect(continueButton).toBeEnabled();
   await continueButton.click();
 
-  // Nakon odabira uloge, redirect na početnu stranicu
+  // cekaj redirect na /
   await expect(page).toHaveURL(/\//);
 
-  // Provjera da je korisnik prijavljen – Navbar prikazuje Logout gumb
+  // provjeri logout gumb u navbaru
   const logoutButton = page.getByRole('button', { name: 'Logout' });
   await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
+  await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
 
-  // Odjava
+  // odjava
   await logoutButton.click();
 
-  // Pričekaj da se odjava/redirect dovrši
+  // pricekaj da se odjava/redirect dovrsi
   await page.waitForURL(/localhost:5173\/auth/, { timeout: 10000 });
 
-  // Login istog korisnika
+  // login istog korisnika
   await page.goto('http://localhost:5173/auth/login');
   await expect(page).toHaveURL(/\/auth\/login/);
 
@@ -78,9 +83,7 @@ test('registracija i prijava', async ({ page }) => {
 
   await loginButton.click();
 
-  // Provjera da je korisnik prijavljen
+  // provjeri login i ime korisnika
   await expect(logoutButton).toBeVisible();
-
-  // dodatna provjera: provjera imena korisnika
   await expect(page.getByText(`${firstName} ${lastName}`)).toBeVisible();
 });

@@ -7,7 +7,7 @@ test('odabir uloge', async ({ page }) => {
 	const email = `role${randomSuffix}@test.com`;
 	const password = 'TestPassword123';
 
-	// 1) Registracija novog korisnika
+	// 1 registracija
 	await page.goto('http://localhost:5173/auth/register');
 	await expect(page).toHaveURL(/\/auth\/register/);
 
@@ -21,7 +21,7 @@ test('odabir uloge', async ({ page }) => {
 	await expect(registerButton).toBeEnabled();
 	await registerButton.click();
 
-	// 2) Redirect na /rolechoose i odabir uloge "Organizator"
+	// 2 cekaj redirect /rolechoose i odaberi organizator
 	await expect(page).toHaveURL(/\/rolechoose/);
 
 	const organizatorCard = page.getByRole('heading', { name: 'Organizator' });
@@ -33,10 +33,10 @@ test('odabir uloge', async ({ page }) => {
 	await expect(continueButton).toBeEnabled();
 	await continueButton.click();
 
-	// 3) Nakon odabira uloge korisnik je preusmjeren na početnu stranicu
+	// 3 cekaj redirect /
 	await expect(page).toHaveURL('http://localhost:5173/');
 
-	// 4) Provjera da korisnik stvarno ima ulogu "organizator"
+	// 4 provjeri ulogu organizator u navbaru
 	const menuButton = page.getByRole('button').first();
 	await menuButton.click();
 
