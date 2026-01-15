@@ -104,7 +104,7 @@ const WorkshopPage = () => {
 
       {/* --- Workshop Detail Card --- */}
       <Card className="border-none shadow-xl overflow-hidden bg-card">
-        <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="bg-primary/5 p-8 border-b border-border/50 flex flex-col md:flex-row justify-between items-start gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Badge className="bg-primary/10 text-primary border-primary/20">Radionica</Badge>
@@ -135,9 +135,9 @@ const WorkshopPage = () => {
                   minute: '2-digit'
                 })}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Euro className="w-4 h-4 text-primary" />
-                {workshop.price}€
+                {workshop.price}
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary" />
