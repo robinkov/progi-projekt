@@ -1,79 +1,83 @@
-# Programsko inženjerstvo
+# ClayPlay
 
-> Ime projekta u naslovu ima cilj opisati namjenu projekta te pomoći u podizanju početnog interesa za projekt prezentirajući osnovnu svrhu projekta.
-> Isključivo ovisi o Vama!
-> 
-> Naravno, nijedan predložak nije idealan za sve projekte jer su potrebe i ciljevi različiti. Ne bojte se naglasiti Vaš cilj u ovoj početnoj stranici projekta, podržat ćemo ga bez obzira usredotočili se Vi više na tenologiju ili marketing.
-> 
-> Zašto ovaj dokument? Samo manji dio timova je do sada propoznao potrebu (a i meni je lakše pratiti Vaš rad).  
+## 🧑‍💼 Administrator
+Administrator ima ovlasti nad upravljanjem korisnicima i instruktorima unutar sustava ClayPlay.
+Njegova uloga uključuje odobravanje novih instruktora prije nego što mogu objavljivati radionice ili izložbe te praćenje i održavanje pravilnog rada sustava. Administrator može pregledavati i nadzirati transakcije, članarine instruktora te slati obavijesti korisnicima.
+Uloga administratora ključna je za održavanje sigurnosti, pouzdanosti i urednosti sustava.
 
-# Opis projekta
-Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Programsko inženjerstvo](https://www.fer.unizg.hr/predmet/proinz) na Fakultetu elektrotehnike i računarstva Sveučilišta u Zagrebu. 
+## 👤 Obični korisnik
+Obični korisnici aplikacije ClayPlay predstavljaju polaznike koji žele sudjelovati u keramičkim radionicama ili kupiti gotove proizvode. Oni imaju mogućnost pregleda i pretraživanja radionica prema lokaciji, terminu i instruktoru, te jednostavnog rezerviranja željenog termina.
+Osim sudjelovanja u radionicama, korisnici mogu pregledavati i naručivati keramičke proizvode izrađene od strane instruktora, ostavljati recenzije te pratiti vlastitu povijest rezervacija i kupnji.
 
-Kratko opisati cilj Vašeg projekta. Vaša motivacija?  (Napomena: odgovor nije »Zato što je to bio zadatak i nismo imali ideje za drugo.«). Koji problem rješavate?
-> Obzirom da je ovo zadani projekt navedite i što želite/jeste novo  naučili.
+## 🧑‍🏫 Organizatori
+Organizatori su voditelji keramičkih radionica koji putem aplikacije imaju mogućnost promovirati svoje radionice i proizvode.
+Mogu izrađivati nove objave radionica s opisima, terminima i cijenama, pratiti prijave sudionika, profil na kojem mogu prikazati vlastite radove te nuditi gotove proizvode na prodaju. Aplikacija im omogućuje digitalnu prisutnost i jednostavno upravljanje svojim kreativnim sadržajem.
 
-> Dobro izrađen opis omogućuje vam da pokažete svoj rad drugim programerima, kao i potencijalnim poslodavcima. Ne samo da prvi dojam na stranici opisa često razlikuje dobar projekt od lošeg projekta već i predstavlja dobru praksu koju morate savladati.
+## 📃Opis projekta
+ClayPlay je mobilna i web aplikacija namijenjena svima koji se žele baviti keramikom – bilo kao instruktori koji organiziraju radionice ili kao korisnici koji žele učiti, stvarati i kupovati jedinstvene keramičke proizvode. Aplikacija omogućuje pregled dostupnih radionica, jednostavnu rezervaciju termina i izravnu komunikaciju između polaznika i instruktora. Instruktori mogu upravljati svojim radionicama, objavljivati nove događaje i prodavati vlastite radove.
+Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetnosti keramike kroz pristupačno i intuitivno korisničko iskustvo. ClayPlay spaja funkcionalnost, estetiku i zajednicu – stvarajući prostor u kojem ljubitelji keramike mogu učiti, surađivati i inspirirati jedni druge.
 
-# Funkcijski zahtjevi
-> Navedite ključne zahtjeve Vašeg projekta.
+## ⚡Funkcijski zahtjevi
+Sustav omogućuje registraciju i prijavu korisnika kao polaznika ili organizatora.<br />
+Sustav omogućuje prijavu korisnika putem vanjskih servisa za autentifikaciju.<br />
+Sustav omogućuje uređivanje javnog profila organizatora.<br />
+Sustav omogućuje organizatoru dodavanje novih radionica s pripadajućim detaljima.<br />
+Sustav omogućuje polaznicima pregled i rezervaciju termina radionica.<br />
+Sustav omogućuje prikaz termina radionica putem integriranog kalendara.<br />
+Sustav omogućuje korisnicima plaćanje termina radionica putem integriranih servisa.<br />
+Sustav omogućuje organizatorima plaćanje članarine prema odabranom planu.<br />
+Sustav omogućuje korisnicima otkazivanje rezervacija najkasnije 48 sati prije početka radionice.<br />
+Sustav sadrži internetsku trgovinu keramičkih radova.<br />
+Sustav omogućuje kupcima pregled, filtriranje i kupovinu proizvoda.<br />
+Sustav omogućuje korisnicima ostavljanje recenzija i ocjena proizvoda nakon kupnje.<br />
+Sustav omogućuje organizaciju i promociju izložbi keramičkih radova polaznika.<br />
+Sustav omogućuje polaznicima prijavu za sudjelovanje na izložbi.<br />
+Sustav omogućuje sudionicima objavu komentara i fotografija nakon održane izložbe.<br />
+Sustav omogućuje korisnicima pretplatu na obavijesti o novim radionicama i proizvodima.<br />
+Sustav omogućuje administratorima upravljanje korisnicima i odobravanje profila.<br />
+Sustav omogućuje administratorima definiranje i ažuriranje cijena članarina.<br />
+Sustav mora primjenjivati kontrolu pristupa prema korisničkim ulogama (polaznik, organizator, administrator) i ograničiti pristup nedozvoljenim funkcijama.<br />
+
+## ⚙️ Nefunkcijski zahtjevi
+
+Sustav mora biti responzivan i prilagođen prikazu na uređajima različitih veličina ekrana (računala, tableti, mobilni uređaji).<br />
+Sustav mora imati intuitivno korisničko sučelje koje omogućuje korisniku izvršavanje glavnih funkcija unutar najviše tri koraka.<br />
+Vrijeme učitavanja svake stranice ne smije prelaziti 3 sekunde pri prosječnoj brzini internetske veze od 10 Mbps.<br />
+Sustav mora podržavati istovremeni rad najmanje 100 aktivnih korisnika bez značajnog pada performansi (manje od 10% usporenja).<br />
+Sustav mora sinkronizirati vanjske kalendare i servise unutar 10 sekundi od promjene podataka.<br />
+Sustav mora osigurati sigurnu autentifikaciju korisnika korištenjem protokola koji podržavaju dvofaktorsku provjeru identiteta.<br />
+Sustav mora pohranjivati i obrađivati osobne podatke korisnika u skladu s važećom GDPR regulativom.<br />
+Sav mrežni promet između klijenta i poslužitelja mora biti šifriran korištenjem sigurnosnog protokola s certifikatom.<br />
+Sustav mora biti izrađen na način koji omogućuje jednostavnu izmjenu i proširenje funkcionalnosti u roku kraćem od 2 dana po izmjeni.<br />
+Sustav mora sadržavati tehničku dokumentaciju koja uključuje opis arhitekture, modula i API-ja, priručnik za korištenje s opisom osnovnih funkcionalnosti i postupaka rada te plan implementacije koji omogućuje postavljanje sustava u novo okruženje u roku od najviše 4 sata.<br />
 
 
-# Tehnologije
+## 🛠️Tehnologije
+| Sloj                    | Tehnologija                   |
+| ----------------------- | ----------------------------- |
+| **Frontend**            | React Native                  |
+| **Dizajn**              | Figma                         |
+| **Backend**             | Flask (Python)                |
+| **Deployment**          | Render                        |
+| **Baza podataka**       | PostgreSQL                    |
 
-#Instalcija
-# Članovi tima 
-> Popis članova tima/linkovi/ glavni doprinos
->
+## 👥Članovi tima
 
-# Kontribucije
->Pravila ovise o organizaciji tima i su često izdvojena u CONTRIBUTING.md
+| Ime i prezime | Email | Mobitel | Glavno zaduženje | Predložena tehnologija |
+| --- | --- | --- | --- | --- |
+| **Robin Kovačić** | **robin.kovacic@fer.hr** | **+385993297142** | **Frontend** | **React** |
+| Lucija Kozić | Lucija.Kozic@fer.hr | +385955102106 | UI/UX dizajn | Figma |
+| Leon Krivski | leon.krivski@fer.hr | +385914042021 | Testiranje | Jest |
+| Marin Mikulčić | marin.mikulcic@fer.hr | +385919503666 | Dokumentacija | Markdown |
+| Roko Matek | roko.matek@fer.hr | +385995150871 | Backend | Flask |
+| Lovre Jurjević | lovre.jurjevic@fer.hr | +385955093574 | Baze podataka | PostgreSQL |
+| Josip Bušelić | josip.buselic@fer.hr | +385913661466 | Backend | Flask |
 
+## 🏅Kontribucije
 
+## 📝Licenca
 
-# 📝 Kodeks ponašanja [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
-Kao studenti sigurno ste upoznati s minimumom prihvatljivog ponašanja definiran u [KODEKS PONAŠANJA STUDENATA FAKULTETA ELEKTROTEHNIKE I RAČUNARSTVA SVEUČILIŠTA U ZAGREBU](https://www.fer.hr/_download/repository/Kodeks_ponasanja_studenata_FER-a_procisceni_tekst_2016%5B1%5D.pdf), te dodatnim naputcima za timski rad na predmetu [Programsko inženjerstvo](https://wwww.fer.hr).
-Očekujemo da ćete poštovati [etički kodeks IEEE-a](https://www.ieee.org/about/corporate/governance/p7-8.html) koji ima važnu obrazovnu funkciju sa svrhom postavljanja najviših standarda integriteta, odgovornog ponašanja i etičkog ponašanja u profesionalnim aktivnosti. Time profesionalna zajednica programskih inženjera definira opća načela koja definiranju  moralni karakter, donošenje važnih poslovnih odluka i uspostavljanje jasnih moralnih očekivanja za sve pripadnike zajenice.
+Važeća (1)
 
-Kodeks ponašanja skup je provedivih pravila koja služe za jasnu komunikaciju očekivanja i zahtjeva za rad zajednice/tima. Njime se jasno definiraju obaveze, prava, neprihvatljiva ponašanja te  odgovarajuće posljedice (za razliku od etičkog kodeksa). U ovom repozitoriju dan je jedan od široko prihvačenih kodeks ponašanja za rad u zajednici otvorenog koda.
->### Poboljšajte funkcioniranje tima:
->* definirajte načina na koji će rad biti podijeljen među članovima grupe
->* dogovorite kako će grupa međusobno komunicirati.
->* ne gubite vrijeme na dogovore na koji će grupa rješavati sporove primjenite standarde!
->* implicitno podrazmijevamo da će svi članovi grupe slijediti kodeks ponašanja.
- 
->###  Prijava problema
->Najgore što se može dogoditi je da netko šuti kad postoje problemi. Postoji nekoliko stvari koje možete učiniti kako biste najbolje riješili sukobe i probleme:
->* Obratite mi se izravno [e-pošta](mailto:vlado.sruk@fer.hr) i  učinit ćemo sve što je u našoj moći da u punom povjerenju saznamo koje korake trebamo poduzeti kako bismo riješili problem.
->* Razgovarajte s vašim asistentom jer ima najbolji uvid u dinamiku tima. Zajedno ćete saznati kako riješiti sukob i kako izbjeći daljnje utjecanje u vašem radu.
->* Ako se osjećate ugodno neposredno razgovarajte o problemu. Manje incidente trebalo bi rješavati izravno. Odvojite vrijeme i privatno razgovarajte s pogođenim članom tima te vjerujte u iskrenost.
-
-# 📝 Licenca
-Važeča (1)
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
-
-Ovaj repozitorij sadrži otvoreni obrazovni sadržaji (eng. Open Educational Resources)  i licenciran je prema pravilima Creative Commons licencije koja omogućava da preuzmete djelo, podijelite ga s drugima uz 
-uvjet da navođenja autora, ne upotrebljavate ga u komercijalne svrhe te dijelite pod istim uvjetima [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License HR][cc-by-nc-sa].
->
-> ### Napomena:
->
-> Svi paketi distribuiraju se pod vlastitim licencama.
-> Svi upotrijebleni materijali  (slike, modeli, animacije, ...) distribuiraju se pod vlastitim licencama.
-
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
-
-[cc-by-nc-sa]: https://creativecommons.org/licenses/by-nc/4.0/deed.hr 
-[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
-
-Orginal [![cc0-1.0][cc0-1.0-shield]][cc0-1.0]
->
->COPYING: All the content within this repository is dedicated to the public domain under the CC0 1.0 Universal (CC0 1.0) Public Domain Dedication.
->
-[![CC0-1.0][cc0-1.0-image]][cc0-1.0]
-
-[cc0-1.0]: https://creativecommons.org/licenses/by/1.0/deed.en
-[cc0-1.0-image]: https://licensebuttons.net/l/by/1.0/88x31.png
-[cc0-1.0-shield]: https://img.shields.io/badge/License-CC0--1.0-lightgrey.svg
-
-### Reference na licenciranje repozitorija
+#### [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License HR](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.hr)
+> Ovaj repozitorij sadrži otvoreni obrazovni sadržaji (eng. Open Educational Resources) i licenciran je prema pravilima Creative Commons licencije koja omogućava da preuzmete djelo, podijelite ga s drugima uz uvjet da navođenja autora, ne upotrebljavate ga u komercijalne svrhe te dijelite pod istim uvjetima.
