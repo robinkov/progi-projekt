@@ -1,5 +1,32 @@
 # ClayPlay
 
+## Opis projekta
+ClayPlay je mobilna i web aplikacija namijenjena svima koji se žele baviti keramikom – bilo kao instruktori koji organiziraju radionice ili kao korisnici koji žele učiti, stvarati i kupovati jedinstvene keramičke proizvode. Aplikacija omogućuje pregled dostupnih radionica, jednostavnu rezervaciju termina i izravnu komunikaciju između polaznika i instruktora. Instruktori mogu upravljati svojim radionicama, objavljivati nove događaje i prodavati vlastite radove.
+Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetnosti keramike kroz pristupačno i intuitivno korisničko iskustvo. ClayPlay spaja funkcionalnost, estetiku i zajednicu – stvarajući prostor u kojem ljubitelji keramike mogu učiti, surađivati i inspirirati jedni druge.
+
+### Motivacija
+Cilj projekta ClayPlay je razvoj jedinstvene digitalne platforme koja povezuje ljubitelje keramike, instruktore i organizatore radionica na jednom mjestu, omogućujući jednostavno upravljanje radionicama, rezervacijama i prodajom keramičkih proizvoda. Sustav je osmišljen kao centralizirano rješenje koje smanjuje administrativno opterećenje instruktora te korisnicima pruža pregledno i intuitivno iskustvo sudjelovanja u kreativnim aktivnostima.
+
+Motivacija za razvoj projekta proizlazi iz uočenog nedostatka specijaliziranih digitalnih alata za organizaciju i promociju keramičkih radionica. Trenutno se većina takvih aktivnosti odvija putem društvenih mreža i neformalnih komunikacijskih kanala, što otežava upravljanje terminima, prijavama i plaćanjima. ClayPlay rješava navedene probleme digitalizacijom cjelokupnog procesa – od promocije i rezervacije radionica do komunikacije i kupnje proizvoda – te istovremeno potiče razvoj kreativne zajednice i vidljivost umjetnosti keramike u digitalnom okruženju.
+
+## Ishodi projekta
+Tijekom izrade projekta ClayPlay tim je stekao niz znanja i vještina koje su ključne za razvoj složenih softverskih sustava u stvarnom okruženju.
+
+
+Kroz timski rad na projektu razvijene su organizacijske kompetencije vezane uz planiranje, koordinaciju i upravljanje razvojem softvera. Poseban naglasak stavljen je na podjelu uloga i odgovornosti unutar tima, čime se osigurala jasna struktura rada i učinkovitije izvršavanje zadataka.
+
+Članovi tima upoznali su se s važnosti komunikacije u razvoju softvera, uključujući redovite sastanke, razmjenu informacija te rješavanje problema u ranim fazama razvoja. Korištenjem alata za verzioniranje omogućeno je paralelno razvijanje funkcionalnosti, praćenje promjena i rješavanje konflikata u kodu.
+
+Projekt je također omogućio razumijevanje važnosti dokumentacije, planiranja rokova i prilagodbe zahtjevima koji se mogu mijenjati tijekom razvoja. Time su studenti stekli iskustvo rada u uvjetima sličnima profesionalnim softverskim projektima.
+
+S tehnološkog aspekta, projekt ClayPlay omogućio je praktičnu primjenu suvremenih tehnologija i arhitekturnih principa. Razvijanjem web aplikacije studenti su stekli iskustvo u izgradnji sustava temeljenog na klijent–poslužitelj arhitekturi i REST API komunikaciji.
+
+Tijekom projekta korišteni su moderni frontend alati i radni okviri, čime je razvijeno razumijevanje izrade responzivnih i korisnički orijentiranih sučelja. Na backend strani stečeno je znanje o razvoju aplikacijske logike, radu s bazama podataka, upravljanju korisnicima te integraciji vanjskih servisa za autentikaciju i online plaćanje.
+
+Poseban naglasak stavljen je na sigurnosne aspekte sustava, uključujući kontrolu pristupa, autentikaciju korisnika i zaštitu osjetljivih podataka. Projekt je također omogućio razumijevanje cjelokupnog životnog ciklusa softvera – od analize zahtjeva i dizajna sustava, preko implementacije i testiranja, do pripreme dokumentacije i završne prezentacije.
+
+
+
 ## 🧑‍💼 Administrator
 Administrator ima ovlasti nad upravljanjem korisnicima i instruktorima unutar sustava ClayPlay.
 Njegova uloga uključuje odobravanje novih instruktora prije nego što mogu objavljivati radionice ili izložbe te praćenje i održavanje pravilnog rada sustava. Administrator može pregledavati i nadzirati transakcije, članarine instruktora te slati obavijesti korisnicima.
@@ -12,10 +39,6 @@ Osim sudjelovanja u radionicama, korisnici mogu pregledavati i naručivati keram
 ## 🧑‍🏫 Organizatori
 Organizatori su voditelji keramičkih radionica koji putem aplikacije imaju mogućnost promovirati svoje radionice i proizvode.
 Mogu izrađivati nove objave radionica s opisima, terminima i cijenama, pratiti prijave sudionika, profil na kojem mogu prikazati vlastite radove te nuditi gotove proizvode na prodaju. Aplikacija im omogućuje digitalnu prisutnost i jednostavno upravljanje svojim kreativnim sadržajem.
-
-## 📃Opis projekta
-ClayPlay je mobilna i web aplikacija namijenjena svima koji se žele baviti keramikom – bilo kao instruktori koji organiziraju radionice ili kao korisnici koji žele učiti, stvarati i kupovati jedinstvene keramičke proizvode. Aplikacija omogućuje pregled dostupnih radionica, jednostavnu rezervaciju termina i izravnu komunikaciju između polaznika i instruktora. Instruktori mogu upravljati svojim radionicama, objavljivati nove događaje i prodavati vlastite radove.
-Sustav je razvijen s ciljem digitalizacije kreativnog procesa i promocije umjetnosti keramike kroz pristupačno i intuitivno korisničko iskustvo. ClayPlay spaja funkcionalnost, estetiku i zajednicu – stvarajući prostor u kojem ljubitelji keramike mogu učiti, surađivati i inspirirati jedni druge.
 
 ## ⚡Funkcijski zahtjevi
 Sustav omogućuje registraciju i prijavu korisnika kao polaznika ili organizatora.<br />
