@@ -63,7 +63,7 @@ export default function Forum() {
                                     htmlFor="my_exhibitions"
                                     className="cursor-pointer text-sm font-medium leading-none text-foreground"
                                 >
-                                    Prikaži samo izložbe na kojima sam bio/la)
+                                    Prikaži samo izložbe na kojima sam bio/la
                                 </label>
                                 <span className="mt-1 text-xs text-muted-foreground">
                                     Filtriraj prikaz izložbi prema vlastitim posjetima
