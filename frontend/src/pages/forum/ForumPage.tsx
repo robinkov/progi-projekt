@@ -190,7 +190,7 @@ export default function ForumPage() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto py-10 px-4 space-y-8">
+        <div className="max-w-3xl w-full mx-auto py-10 px-4 space-y-8">
 
             {/* --- Exhibition & Organizer Info Header (Using Accent/Primary) --- */}
             {exhibition ? (
@@ -252,7 +252,7 @@ export default function ForumPage() {
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             disabled={posting}
-                            className="min-h-20 border-none focus-visible:ring-2 focus-visible:ring-ring text-lg resize-none p-0 mb-4 placeholder:text-muted-foreground/50"
+                            className="min-h-20 border-none focus-visible:ring-2 focus-visible:ring-ring text-lg resize-none p-2 mb-4 placeholder:text-muted-foreground/50"
                         />
 
                         {previewUrl && (
@@ -336,7 +336,7 @@ export default function ForumPage() {
                                 
                             </Avatar>
 
-                            <div className="flex-1 space-y-1.5">
+                            <div className="flex-1 space-y-1.5 max-w-lg">
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-sm text-foreground">{comment.user_username || "Anonymous"}</span>
                                     {comment.is_organizer ? (<Badge className="bg-primary text-primary-foreground hover:bg-primary/90">Organizator</Badge>) : (null)}
@@ -350,7 +350,7 @@ export default function ForumPage() {
                                     {comment.content}
                                     {comment.photo_url && (
                                         <div className="mt-3 rounded-xl overflow-hidden border border-border/50">
-                                            <img src={comment.photo_url} alt="Post content" className="max-h-[450px] w-full object-cover" />
+                                            <img src={comment.photo_url} alt="Post content" className="max-h-[350px] w-full object-cover" />
                                         </div>
                                     )}
                                 </div>

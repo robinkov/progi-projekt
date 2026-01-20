@@ -163,13 +163,25 @@ def get_exhibition(exhibition_id):
 
     # Get user
     user_resp = (
-        supabase.table("users").select("mail").eq("auth_id", auth_id).single().execute()
+        supabase.table("users").select("id,mail").eq("auth_id", auth_id).single().execute()
     )
 
     if not user_resp.data:
         return jsonify({"success": False, "error": "User not found"}), 404
 
     user_mail = user_resp.data["mail"]
+
+    admin_resp = None
+    try:
+        admin_resp = (
+            supabase.table("admins")
+            .select("*")
+            .eq("user_id", user_resp.data["id"])
+            .single()
+            .execute()
+        ).data
+    except:
+        pass
 
     exhibition_resp = (
         supabase.table("exhibitions")
@@ -202,13 +214,13 @@ def get_exhibition(exhibition_id):
         .execute()
     )
 
+
     user = user_resp.data
 
     organizer["full_name"] = f"{user['first_name']} {user['last_name']}"
 
     can_comment = False
-    if user["mail"] == user_mail:
-
+    if user["mail"] == user_mail or admin_resp != None:
         can_comment = True
     else:
         resp = (

@@ -225,7 +225,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
                   className="w-full justify-start"
                   onClick={() => navigate("/admin/ban-user")}
                 >
-                  Brisanje korisnika
+                  Upravljanje korisnicima
                 </Button>
               </li>
             )}

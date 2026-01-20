@@ -122,12 +122,21 @@ def approve_organizer(organizer_id):
 @admin_bp.route("/admin/users/search", methods=["GET"])
 def search():
     mail_substring = request.args.get("q")  # returns None if not present
-    user_resp = (
-        supabase.table("users")
-        .select("id,mail,profile_photo_id,first_name,last_name,username")
-        .like("mail", f"%{mail_substring}%")
-        .execute()
-    )
+
+    if (mail_substring):
+        user_resp = (
+            supabase.table("users")
+            .select("id,mail,profile_photo_id,first_name,last_name,username")
+            .like("mail", f"%{mail_substring}%")
+            .execute()
+        )
+    else:
+        user_resp = (
+            supabase.table("users")
+            .select("id,mail,profile_photo_id,first_name,last_name,username")
+            .execute()
+        )
+
     users = user_resp.data
     photo_ids = list(
         {e["profile_photo_id"] for e in users if e.get("profile_photo_id")}

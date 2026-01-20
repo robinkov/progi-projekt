@@ -1,6 +1,6 @@
 import { supabase } from '@/config/supabase';
 import { fetchDelete, fetchGet } from '@/utils/fetchUtils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // shadcn components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,9 +43,10 @@ export default function BanUser() {
     const [searchQuery, setSearchQuery] = useState("");
     const [banningUser, setBanningUser] = useState<number | null>(null);
 
-    async function handleSearch(e: React.FormEvent) {
-        e.preventDefault();
-        if (!searchQuery.trim()) return;
+    async function handleSearch(e?: React.FormEvent) {
+        if (e) {
+            e.preventDefault();
+        }
 
         setLoading(true);
         const { data } = await supabase.auth.getSession();
@@ -90,8 +91,13 @@ export default function BanUser() {
 
     }
 
+    useEffect(() => {
+        setSearchQuery("");
+        handleSearch();
+    }, []);
+
     return (
-        <div className="max-w-4xl mx-auto py-12 px-4 space-y-8">
+        <div className="max-w-4xl w-full mx-auto py-8 px-4 space-y-8">
             {/* Header */}
             <div className="space-y-2 border-b border-border pb-6">
                 <div className="flex items-center gap-2 text-destructive">
@@ -104,13 +110,13 @@ export default function BanUser() {
 
             {/* Search Bar */}
             <Card className="border-none shadow-md bg-card overflow-hidden">
-                <CardContent className="p-6">
+                <CardContent className="px-6">
                     <form onSubmit={handleSearch} className="flex gap-3">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Unesite e-mail korisnika (npr. marko@mail.com)..."
-                                className="pl-10 h-12 bg-muted/30 border-none focus-visible:ring-primary/30"
+                                className="pl-10 h-12 border-none focus-visible:ring-primary/30"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -177,7 +183,7 @@ export default function BanUser() {
                                             <AlertDialogCancel className="rounded-xl border-none bg-muted hover:bg-muted/80">Odustani</AlertDialogCancel>
                                             <AlertDialogAction
                                                 onClick={() => handleBan(u.id)}
-                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl px-6 font-bold"
+                                                className="bg-destructive hover:bg-destructive/90 rounded-xl px-6 font-bold"
                                             >
                                                 Potvrdi Brisanje
                                             </AlertDialogAction>

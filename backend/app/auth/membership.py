@@ -14,7 +14,6 @@ def has_membership(organizer_id):
         .execute()
     )
     if len(mt.data) == 0:
-        print("nema")
         return (
             False  # organizator nema nijednu transakciju, dakle nema aktivnu clanarinu
         )
