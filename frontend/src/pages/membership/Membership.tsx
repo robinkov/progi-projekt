@@ -1,50 +1,87 @@
-import MembershipCard from "@/components/app/MembershipCard";
+import MembershipCard, { AdminMembershipCard } from "@/components/app/MembershipCard";
 import { useAuth } from "@/components/context/AuthProvider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { membershipPlanToModel, type MembershipPlan } from "@/models/membershipModel";
-import { fetchGet } from "@/utils/fetchUtils";
+import { fetchGet, fetchPost } from "@/utils/fetchUtils";
+import { cn } from "@/utils/styleUtils";
 import { formatMillisToRemainingTime } from "@/utils/timeUtils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 export default function Membership() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [membershipPlans, setMembershipPlans] = useState<MembershipPlan[]>();
   const [currentPlan, setCurrentPlan] = useState<MembershipPlan | null>(null);
   const [planPurchaseDate, setPlanPurchaseDate] = useState<Date | null>(null);
+  const [membershipPrices, setMembershipPrices] = useState<number[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
 
-    fetchGet("/memberships/active", { "Authorization": `Bearer ${token}` })
-      .then((res: any) => {
-        let data = res["data"] as any;
-        if (data) {
-          setCurrentPlan(membershipPlanToModel(data));
-          setPlanPurchaseDate(new Date(data["transaction_date"]))
-          return Promise.reject(); // skip to finally
-        }
-        return fetchGet("/memberships", { "Authorization": `Bearer ${token}` });
-      })
-      .then((res: any) => {
-        let data = res["data"] as any[];
-        let membershipPlans = data.map((plan) => membershipPlanToModel(plan)) as MembershipPlan[];
-        setMembershipPlans(membershipPlans);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-
+    if (user?.role === "organizer") {
+      fetchGet("/memberships/active", { "Authorization": `Bearer ${token}` })
+        .then((res: any) => {
+          let data = res["data"] as any;
+          if (data) {
+            setCurrentPlan(membershipPlanToModel(data));
+            setPlanPurchaseDate(new Date(data["transaction_date"]))
+            return Promise.reject(); // skip to finally
+          }
+          return fetchGet("/memberships", { "Authorization": `Bearer ${token}` });
+        })
+        .then((res: any) => {
+          let data = res["data"] as any[];
+          let membershipPlans = data.map((plan) => membershipPlanToModel(plan)) as MembershipPlan[];
+          setMembershipPlans(membershipPlans);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      fetchGet("/memberships", { "Authorization": `Bearer ${token}` })
+        .then((res: any) => {
+          let data = res["data"] as any[];
+          let membershipPlans = data.map((plan) => membershipPlanToModel(plan)) as MembershipPlan[];
+          setMembershipPlans(membershipPlans);
+          setMembershipPrices(membershipPlans.sort((planA, planB) => planA.id - planB.id).map((plan) => plan.price));
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
   }, []);
 
+  useEffect(() => {
+    console.log(membershipPrices)
+  }, [membershipPrices]);
+
+  function goToMembership(planId: number) {
+    navigate(`/membership/${planId}`);
+  }
+
+  function savePriceChange(planId: number, price: number) {
+    setIsLoading(true);
+    fetchPost("/memberships/update",
+      { planId: planId, price: price },
+      { "Authorization": `Bearer ${token}` }
+    )
+    .then(() => location.reload())
+    .catch((err) => alert(err))
+    .finally(() => setIsLoading(false));
+  }
+
   return (
-    <div className="flex flex-col lg:flex-row flex-1 justify-center items-center gap-4 lg:gap-10">
+    <div className={cn(
+      "flex flex-col lg:flex-row flex-1 justify-center items-center gap-4",
+      user?.role !== "admin" && "lg:gap-10"
+      )}
+    >
       { isLoading &&
         <div className="flex flex-col items-center gap-2">
           <Spinner className="size-10 stroke-primary" />
@@ -55,17 +92,29 @@ export default function Membership() {
         !isLoading && currentPlan && planPurchaseDate &&
         <CurrentActivePlanWidget membership={currentPlan} planPurchaseDate={planPurchaseDate} />
       }
-      { !isLoading && membershipPlans?.map((plan) => (
-        <MembershipCard
-          key={plan.id}
-          title={plan.name}
-          description={plan.description}
-          numberOfMonths={plan.durationMonths}
-          price={plan.price}
-          className={plan.id === 2 ? "lg:scale-110" : ""}
-          callback={() => navigate(`/membership/${plan.id}`)}
-        />
-      )) }
+      { !isLoading && membershipPlans?.sort((planA, planB) => planA.id - planB.id).map((plan) => {
+          const MemCard = user?.role === "admin" ? AdminMembershipCard : MembershipCard;
+          const cardCallback = () => user?.role === "admin" ?
+            savePriceChange(plan.id, membershipPrices[plan.id - 1]) :
+            goToMembership(plan.id);
+          return (
+            <MemCard
+              key={plan.id}
+              title={plan.name}
+              description={plan.description}
+              numberOfMonths={plan.durationMonths}
+              price={membershipPrices[plan.id - 1]}
+              priceSetter={(price) => {
+                const newPrices = [...membershipPrices];
+                newPrices[plan.id - 1] = price;
+                setMembershipPrices(newPrices);
+              }}
+              className={plan.id === 2 && user?.role !== "admin" ? "lg:scale-110" : ""}
+              callback={cardCallback}
+            />
+          )
+        })
+      }
     </div>
   );
 }

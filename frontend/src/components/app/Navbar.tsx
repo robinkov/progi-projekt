@@ -150,7 +150,7 @@ export default function Navbar({ className, ref, ...rest }: NavbarProps) {
             <li>
               <hr className="my-4 border-t border-muted-foreground" />
             </li>
-            {(auth.user?.role === "organizator") && (
+            {(auth.user?.role === "organizator" || auth.user?.role === "admin") && (
               <li>
                 <Button
                   variant="ghost"

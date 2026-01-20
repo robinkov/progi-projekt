@@ -2,17 +2,19 @@ import { Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { cn } from "@/utils/styleUtils";
+import { Input } from "../ui/input";
 
 type MembershipCardProps = React.ComponentProps<"div"> & {
   title: string;
   description: string;
   price: number;
   numberOfMonths: number;
+  priceSetter: (price: number) => void;
   callback?: () => void;
 }
 
 export default function MembershipCard({
-  title, description, price, numberOfMonths, callback, ...rest
+  title, description, price, priceSetter, numberOfMonths, callback, ...rest
 }: MembershipCardProps) {
 
   return (
@@ -45,6 +47,40 @@ export default function MembershipCard({
           className="w-full text-center"
         >
           Odaberi
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+export function AdminMembershipCard({
+  title, description, price, priceSetter, numberOfMonths, callback, ...rest
+}: MembershipCardProps) {
+  return (
+    <Card className={cn("flex flex-col w-[300px]", rest.className)}>
+      <CardHeader>
+        <CardTitle className="text-2xl">{ title }</CardTitle>
+        <CardDescription className="h-16">{ description }</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Input className="w-20 font-semibold " value={price} onChange={(e) => priceSetter(e.target.value ? parseInt(e.target.value) : 0)} />
+              <h1 className="font-semibold text-base">
+                EUR
+              </h1>
+            </div>
+            <p className="text-xs text-muted-foreground/80">Naplaćuje se €{ (price / numberOfMonths).toFixed(2) }/mjesečno</p>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button
+          onClick={callback}
+          className="w-full text-center"
+        >
+          Spremi
         </Button>
       </CardFooter>
     </Card>

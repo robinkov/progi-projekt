@@ -85,10 +85,8 @@ def get_membership_plan_by_id(plan_id):
         200,
     )
 
-
 @membership_bp.route("/memberships/active", methods=["GET"])
-def get_active_memberships():
-    
+def get_active_memberships():    
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({"success": False, "error": "Missing token"}), 401
@@ -148,3 +146,65 @@ def get_active_memberships():
         return jsonify({"success": True, "data": None}), 200
 
     return jsonify({"success": True, "data": {**membership_plan_resp, "transaction_date": transaction_date}}), 200
+
+@membership_bp.route("/memberships/update", methods=["POST"])
+def change_price_of_membership():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"success": False, "error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+    valid, payload = verify_token(token)
+
+    if not valid:
+        return jsonify({"success": False, "error": "Invalid token"}), 401
+
+    auth_id = payload.get("sub")
+    if not auth_id:
+        return jsonify({"success": False, "error": "Token missing user ID"}), 401
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "Missing request body"}), 400
+
+    try:
+        user_resp = (
+            supabase.table("users").select("*").eq("auth_id", auth_id).single().execute()
+        ).data
+    except:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    user_id = user_resp["id"]
+    
+    try:
+        admin_resp = (
+            supabase.table("admins").select("*").eq("user_id", user_id).single().execute()
+        ).data
+    except:
+        return jsonify({"success": False, "error": "Admin not found"}), 404
+
+    if (admin_resp["can_change_prices"] == False):
+        return jsonify({"success": False, "error": "Missing permission to change prices"}), 401
+    
+    try:
+        plan_id = int(data.get("planId"))
+        price = int(data.get("price"))
+    except:
+        return jsonify({"success": False, "error": "Invalid parameters"}), 401
+    
+    # Update membership plan
+    response = (
+        supabase
+        .table("membership_plans")
+        .update({"price": float(price)})
+        .eq("id", plan_id)
+        .execute()
+    )
+
+    if not response.data:
+        return jsonify({
+            "success": False,
+            "error": "Membership plan not found"
+        }), 404
+    
+    return jsonify({"success": True, "data": None}), 200
