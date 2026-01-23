@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+actor Organizator
+rectangle "ClayPlay" {
+
+(UC1: Prijava putem OAuth 2.0 servisa)
+(UC2: Registracija novog korisnika)
+(UC3: Uređivanje profila korisnika)
+(UC4: Kreiranje i uređivanje radionice)
+(UC7: Odabir i plaćanje članarine)
+(UC8: Kupovina proizvoda u online trgovini)
+
+}
+together{
+actor "OAuth 2.0 servis" as OAuth
+actor "PayPal/Kartični servis" as Pay
+}
+(UC2: Registracija novog korisnika) <.. (UC1: Prijava putem OAuth 2.0 servisa) : <<extend>>
+Organizator --> (UC2: Registracija novog korisnika)
+Organizator --> (UC8: Kupovina proizvoda u online trgovini)
+(UC1: Prijava putem OAuth 2.0 servisa) -- OAuth
+
+(UC8: Kupovina proizvoda u online trgovini) -- Pay
+Organizator --> (UC4: Kreiranje i uređivanje radionice)
+Organizator --> (UC7: Odabir i plaćanje članarine)
+Organizator  --> (UC3: Uređivanje profila korisnika)
+(UC7: Odabir i plaćanje članarine) -- Pay
+@enduml

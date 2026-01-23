@@ -1,0 +1,45 @@
+@startuml
+left to right direction
+actor Polaznik
+actor Organizator
+actor Administrator
+together{
+actor "OAuth 2.0 servis" as OAuth
+actor "PayPal/Kartični servis" as Pay
+actor "Google Kalendar" as GCal
+}
+rectangle "ClayPlay" {
+
+(UC1: Prijava putem OAuth 2.0 servisa)
+(UC2: Registracija novog korisnika)
+(UC4: Kreiranje i uređivanje radionice)
+(UC5: Pregled radionica)
+(UC5: Rezervacija radionica)
+(UC6: Plaćanje termina radionice)
+(UC8: Kupovina proizvoda u online trgovini)
+(UC9: Prijava na izložbu)
+(UC10: Upravljanje korisnicima i članarinama)
+
+}
+
+(UC2: Registracija novog korisnika) <.. (UC1: Prijava putem OAuth 2.0 servisa) : <<extend>>
+
+(UC1: Prijava putem OAuth 2.0 servisa) -- OAuth
+
+(UC8: Kupovina proizvoda u online trgovini) -- Pay
+Polaznik --> (UC5: Pregled radionica)
+(UC5: Rezervacija radionica) ..> (UC6: Plaćanje termina radionice) : <<include>>
+(UC5: Pregled radionica) <.. (UC5: Rezervacija radionica) : <<extend>>
+Polaznik --> (UC9: Prijava na izložbu)
+(UC6: Plaćanje termina radionice) -- Pay
+(UC5: Pregled radionica) -- GCal
+Organizator --> (UC4: Kreiranje i uređivanje radionice)
+
+Polaznik --> (UC8: Kupovina proizvoda u online trgovini)
+Organizator --> (UC8: Kupovina proizvoda u online trgovini)
+Polaznik --> (UC2: Registracija novog korisnika)
+Organizator --> (UC2: Registracija novog korisnika)
+
+
+Administrator --> (UC10: Upravljanje korisnicima i članarinama)
+@enduml

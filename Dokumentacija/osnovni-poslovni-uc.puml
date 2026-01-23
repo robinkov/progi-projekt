@@ -1,0 +1,25 @@
+4. @startuml
+left to right direction
+
+actor Polaznik
+actor Organizator
+rectangle "ClayPlay"{
+(UC5: Pregled radionica)
+(UC5: Rezervacija radionica)
+(UC6: Plaćanje termina radionice)
+(UC4: Kreiranje i uređivanje radionice)
+}
+together{
+actor "PayPal/Kartični servis" as Pay
+actor "Google Kalendar" as GCal
+}
+
+(UC5: Pregled radionica) -- GCal
+(UC6: Plaćanje termina radionice) -- Pay
+Polaznik --> (UC5: Pregled radionica)
+(UC5: Pregled radionica) <.. (UC5: Rezervacija radionica) : <<extend>>
+(UC5: Rezervacija radionica) ..> (UC6: Plaćanje termina radionice) : <<include>>
+Organizator --> (UC4: Kreiranje i uređivanje radionice)
+
+
+@enduml

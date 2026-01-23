@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+actor Administrator
+rectangle "ClayPlay" {
+
+(UC1: Prijava putem OAuth 2.0 servisa)
+(UC2: Registracija novog korisnika)
+(UC3: Uređivanje profila korisnika)
+(UC10: Upravljanje korisnicima i članarinama)
+
+}
+together{
+actor "OAuth 2.0 servis" as OAuth
+}
+(UC2: Registracija novog korisnika) <.. (UC1: Prijava putem OAuth 2.0 servisa) : <<extend>>
+Administrator --> (UC2: Registracija novog korisnika)
+(UC1: Prijava putem OAuth 2.0 servisa) -- OAuth
+
+Administrator  --> (UC3: Uređivanje profila korisnika)
+
+
+Administrator --> (UC10: Upravljanje korisnicima i članarinama)
+@enduml
